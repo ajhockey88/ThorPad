@@ -8,6 +8,10 @@
 
     <!-- Lets Shizuku offer ThorPad its shell helper, used to create the virtual mouse. -->
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Only for Settings > Check for updates: reads ThorPad's GitHub releases. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:allowBackup="true"
@@ -83,5 +87,9 @@
                 android:name="android.view.im"
                 android:resource="@xml/method" />
         </service>
+
+        <receiver
+            android:name=".InstallReceiver"
+            android:exported="false" />
     </application>
 </manifest>

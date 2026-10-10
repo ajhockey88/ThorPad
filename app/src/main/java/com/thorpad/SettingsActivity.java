@@ -8,7 +8,13 @@ import android.provider.Settings;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 import java.util.List;
 import android.content.SharedPreferences;
@@ -63,6 +69,8 @@ public class SettingsActivity extends Activity {
                 Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
         keyboardChooser();
 
+        hapticsSection();
+
         TextView help = text("\nGestures\n"
                 + "• One finger: move the pointer\n"
                 + "• Tap: click\n"
@@ -73,7 +81,25 @@ public class SettingsActivity extends Activity {
         help.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(help);
 
-        setContentView(scroll);
+        updateSection();
+
+        FrameLayout root = new FrameLayout(this);
+        root.addView(scroll);
+        previewPill = new TextView(this);
+        previewPill.setTextSize(15);
+        previewPill.setTextColor(Color.rgb(0xbf, 0xe6, 0xff));
+        GradientDrawable pillBg = new GradientDrawable();
+        pillBg.setColor(Color.rgb(0x1d, 0x2a, 0x36));
+        pillBg.setCornerRadius(30 * d);
+        previewPill.setBackground(pillBg);
+        previewPill.setPadding((int) (14 * d), (int) (7 * d), (int) (14 * d), (int) (7 * d));
+        previewPill.setVisibility(View.GONE);
+        FrameLayout.LayoutParams plp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+        plp.bottomMargin = (int) (14 * d);
+        root.addView(previewPill, plp);
+        setContentView(root);
     }
 
     @Override
@@ -171,6 +197,130 @@ public class SettingsActivity extends Activity {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
+    }
+
+    // ---- Updates -------------------------------------------------------------------------------
+
+    private void updateSection() {
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception ignored) {
+        }
+        list.addView(text("\nUpdates", 17));
+        final TextView status = text("ThorPad " + version, 14);
+        status.setTextColor(Color.argb(190, 255, 255, 255));
+        list.addView(status);
+        final Button check = new Button(this);
+        check.setText("Check for updates");
+        check.setAllCaps(false);
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                check.setEnabled(false);
+                new Updater(SettingsActivity.this, new Updater.Listener() {
+                    @Override public void onUpdateStatus(String s, boolean done) {
+                        status.setText(s);
+                        if (done) check.setEnabled(true);
+                    }
+                }).checkAndInstall();
+            }
+        });
+        list.addView(check, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        // Room so the preview pill never covers the button.
+        list.addView(new View(this), new LinearLayout.LayoutParams(1, (int) (50 * d)));
+    }
+
+    // ---- Haptics -------------------------------------------------------------------------------
+
+    private TextView previewPill;
+
+    private final Runnable hidePill = new Runnable() {
+        @Override public void run() { previewPill.setVisibility(View.GONE); }
+    };
+
+    private void hapticsSection() {
+        list.addView(text("\nHaptics", 17));
+        TextView hint = text("Pick a feel and strength for each action. Every change plays a preview.", 13);
+        hint.setTextColor(Color.argb(170, 255, 255, 255));
+        list.addView(hint);
+        for (int a = 0; a < Haptics.ACTION_NAMES.length; a++) hapticRow(a);
+    }
+
+    private void hapticRow(final int action) {
+        final SharedPreferences sp = prefs.raw();
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight((int) (46 * d));
+
+        TextView name = new TextView(this);
+        name.setText(Haptics.ACTION_NAMES[action]);
+        name.setTextSize(15);
+        name.setTextColor(Color.WHITE);
+        row.addView(name, new LinearLayout.LayoutParams((int) (150 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        final Spinner feel = new Spinner(this, Spinner.MODE_DROPDOWN);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, Haptics.FEEL_NAMES) {
+            @Override public View getView(int position, View convertView, ViewGroup parent) {
+                TextView t = (TextView) super.getView(position, convertView, parent);
+                t.setTextColor(Color.rgb(0xcf, 0xe9, 0xff));
+                t.setTextSize(15);
+                return t;
+            }
+        };
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feel.setAdapter(adapter);
+        feel.setSelection(Haptics.feel(sp, action), false);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(0x1c, 0x1e, 0x24));
+        bg.setCornerRadius(8 * d);
+        feel.setBackground(bg);
+        row.addView(feel, new LinearLayout.LayoutParams((int) (110 * d), (int) (36 * d)));
+
+        final SeekBar strength = new SeekBar(this);
+        strength.setMax(100);
+        strength.setProgress(Haptics.strength(sp, action));
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, (int) (40 * d), 1f);
+        slp.leftMargin = (int) (12 * d);
+        row.addView(strength, slp);
+
+        final TextView pct = new TextView(this);
+        pct.setTextSize(14);
+        pct.setTextColor(Color.rgb(0xaa, 0xb3, 0xc0));
+        pct.setGravity(Gravity.END);
+        pct.setText(strength.getProgress() + "%");
+        row.addView(pct, new LinearLayout.LayoutParams((int) (48 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        feel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == Haptics.feel(sp, action)) return; // not a change
+                sp.edit().putInt(Haptics.feelKey(action), position).apply();
+                preview(position, strength.getProgress());
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        strength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int p, boolean fromUser) {
+                pct.setText(p + "%");
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                sp.edit().putInt(Haptics.strengthKey(action), sb.getProgress()).apply();
+                preview(feel.getSelectedItemPosition(), sb.getProgress());
+            }
+        });
+        list.addView(row);
+    }
+
+    private void preview(int feel, int strength) {
+        Haptics.play(this, feel, strength);
+        previewPill.setText(feel == Haptics.OFF || strength == 0
+                ? "Off" : "▶ Preview: " + Haptics.FEEL_NAMES[feel] + ", " + strength + "%");
+        previewPill.setVisibility(View.VISIBLE);
+        previewPill.removeCallbacks(hidePill);
+        previewPill.postDelayed(hidePill, 1500);
     }
 
     private TextView text(String s, int sp) {

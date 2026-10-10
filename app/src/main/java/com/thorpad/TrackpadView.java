@@ -8,7 +8,6 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -66,7 +65,7 @@ final class TrackpadView extends View {
                 if (s != null) s.longPress();
                 longPressed = true;
                 state = DONE;
-                buzz(HapticFeedbackConstants.LONG_PRESS);
+                buzz(Haptics.HOLD);
             }
         }
     };
@@ -160,7 +159,7 @@ final class TrackpadView extends View {
                         float notch = 22f * density;
                         if (Math.abs(tickAcc) >= notch) {
                             tickAcc %= notch;
-                            buzz(HapticFeedbackConstants.CLOCK_TICK);
+                            buzz(Haptics.SCROLL);
                         }
                     }
                     return true;
@@ -184,7 +183,7 @@ final class TrackpadView extends View {
                     // A quick tap followed by an immediate swipe is just moving the pointer.
                     if (dragArmed && s != null && now - downAt >= DRAG_SETTLE_MS) {
                         s.dragBegin();
-                        buzz(HapticFeedbackConstants.LONG_PRESS);
+                        buzz(Haptics.DRAG_START);
                         state = DRAGGING;
                     } else {
                         state = MOVING;
@@ -216,10 +215,10 @@ final class TrackpadView extends View {
                 invalidate();
                 if (state == DRAGGING) {
                     if (s != null) s.dragEnd();
-                    buzz(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
+                    buzz(Haptics.DRAG_END);
                 } else if (state == TWO_FINGER && !scrolling && maxPointers == 2 && held < 350) {
                     if (s != null) s.twoFingerTap();
-                    buzz(HapticFeedbackConstants.CONTEXT_CLICK);
+                    buzz(Haptics.RIGHT_CLICK);
                 } else if (maybeTap(s, held, now)) {
                     return true;
                 } else if (state == TWO_FINGER) {
@@ -251,16 +250,16 @@ final class TrackpadView extends View {
         if (maxPointers != 1 || longPressed) return false;
         if (held >= TAP_MAX_MS || maxStray >= tapSlop) return false;
         // A tap, even if the finger rolled a little and nudged the pointer.
-        buzz(HapticFeedbackConstants.VIRTUAL_KEY);
+        buzz(Haptics.CLICK);
         if (s != null) s.click();
         lastTapUpAt = now;
         state = DONE;
         return true;
     }
 
-    /** Haptic feedback for every action, even if the system's touch vibration is off for views. */
-    private void buzz(int type) {
-        performHapticFeedback(type, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+    /** Haptic feedback for every action, as set up in Settings > Haptics. */
+    private void buzz(int action) {
+        Haptics.play(getContext(), action);
     }
 
     private void endScroll(PadOutput s) {

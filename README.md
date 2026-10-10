@@ -17,8 +17,10 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/trackpad.png" width="400" alt="Trackpad screen"> | <img src="docs/screenshots/keyboard.png" width="400" alt="Keyboard with an autocorrect suggestion"> |
 | 🔣 Numbers and symbols | ⚙️ Settings |
 | <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/settings.png" width="400" alt="Settings screen"> |
-| 🚀 First-run setup | |
-| <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> | |
+| 🧹 Hold ⌫ for Clear all | 📳 Haptics settings |
+| <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings"> |
+| ⌨️ Choose keyboard | 🚀 First-run setup |
+| <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> |
 
 ## 👆 Gestures
 
@@ -33,7 +35,9 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 The bar along the top has ⌨️ Keyboard, 🏠 Home, 🗂️ Apps (recents), ⚙️ Settings and ✖️ Close.
 
 📳 **Haptics:** you feel a buzz for every action: taps, right clicks, the start and end of a drag,
-press and hold, each scroll-wheel notch, every keyboard key, and the top-bar buttons.
+press and hold, each scroll-wheel notch, every keyboard key, Clear all, and the top-bar buttons.
+In Settings > Haptics, each action gets its own feel (Off, Tick, Click, Heavy, Double or Buzz) and
+strength, and every change plays a preview.
 
 ## ⌨️ Keyboard
 
@@ -68,6 +72,10 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ✨ **Autocorrect** on or off
 - ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
+- 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
+- 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub, downloads it
+  and installs it. With Shizuku it installs on its own; without it, Android shows its install prompt
+  (the first time, allow ThorPad to install apps).
 
 ## 🔀 Two modes
 
@@ -116,7 +124,8 @@ Touch mode:
 - the trackpad window never takes input focus, so the top-screen app keeps the gamepad
   and keyboard, and Back/Home/Apps act on the top screen.
 
-🔒 ThorPad has no internet permission. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
+🔒 ThorPad only goes online when you tap **Check for updates**, to read its GitHub releases and
+download the new APK. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
 
 ## 🙏 Credits
 

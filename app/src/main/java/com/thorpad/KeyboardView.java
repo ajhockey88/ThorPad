@@ -10,7 +10,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.SparseArray;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -397,8 +396,7 @@ final class KeyboardView extends View {
                 down.put(id, k);
                 if (k == null && suggestion != null && ev.getY(idx) < stripRect.bottom) {
                     rejectSuggestion();
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP,
-                            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                    Haptics.play(getContext(), Haptics.KEY);
                 }
                 if (repeating != null && k != null && k.type == SPACE) {
                     // While backspace is held the space bar reads "Clear all": tapping it
@@ -409,8 +407,7 @@ final class KeyboardView extends View {
                     return true;
                 }
                 if (k != null) {
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP,
-                            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                    Haptics.play(getContext(), Haptics.KEY);
                     flashKey(k);
                     if (k.type == BACKSPACE) {
                         // Delete right away, then keep deleting while held.
@@ -583,8 +580,7 @@ final class KeyboardView extends View {
         fixOriginal = null;
         clearSuggestion();
         if (output != null) output.special(KeyOutput.CLEAR_ALL);
-        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        Haptics.play(getContext(), Haptics.CLEAR_ALL);
     }
 
     private void cancelTouches() {

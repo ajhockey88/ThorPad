@@ -139,8 +139,7 @@ public class TrackpadActivity extends Activity
         b.setBackground(bg);
         b.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY,
-                        android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                Haptics.play(TrackpadActivity.this, Haptics.BAR);
                 listener.onClick(v);
             }
         });
