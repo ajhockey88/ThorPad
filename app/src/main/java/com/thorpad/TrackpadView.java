@@ -24,12 +24,15 @@ final class TrackpadView extends View {
     private static final int TWO_FINGER = 3; // scrolling, or a two-finger tap
     private static final int DONE = 4;      // ignore the rest of this touch
 
-    private static final long TAP_MAX_MS = 220;
+    private static final long TAP_MAX_MS = 350;
     private static final long DRAG_WINDOW_MS = 260;
     private static final long LONG_PRESS_MS = 550;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final float slop;
+    /** A touch that strays less than this and lifts quickly still counts as a tap. */
+    private final float tapSlop;
+    private float maxStray;
     private final float density;
     private final Paint border = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint label = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -68,6 +71,7 @@ final class TrackpadView extends View {
         prefs = new Prefs(context);
         density = context.getResources().getDisplayMetrics().density;
         slop = ViewConfiguration.get(context).getScaledTouchSlop() * 0.6f;
+        tapSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 1.5f;
         border.setStyle(Paint.Style.STROKE);
         border.setStrokeWidth(1.5f * density);
         label.setColor(Color.argb(70, 255, 255, 255));
@@ -107,6 +111,7 @@ final class TrackpadView extends View {
                 downX = lastX = ev.getX();
                 downY = lastY = ev.getY();
                 fingerTravel = 0;
+                maxStray = 0;
                 maxPointers = 1;
                 longPressed = false;
                 scrolling = false;
@@ -153,6 +158,7 @@ final class TrackpadView extends View {
                 lastX = x;
                 lastY = y;
                 fingerTravel += Math.abs(dx) + Math.abs(dy);
+                maxStray = Math.max(maxStray, (float) Math.hypot(x - downX, y - downY));
                 long now = SystemClock.uptimeMillis();
                 long dt = Math.max(1, now - lastMoveAt);
                 lastMoveAt = now;
@@ -195,7 +201,9 @@ final class TrackpadView extends View {
                     if (s != null) s.dragEnd();
                 } else if (state == TWO_FINGER && !scrolling && maxPointers == 2 && held < 350) {
                     if (s != null) s.twoFingerTap();
-                } else if (state == IDLE && maxPointers == 1 && !longPressed && held < TAP_MAX_MS) {
+                } else if ((state == IDLE || (state == MOVING && maxStray < tapSlop))
+                        && maxPointers == 1 && !longPressed && held < TAP_MAX_MS) {
+                    // A tap, even if the finger rolled a little and nudged the pointer.
                     if (s != null && prefs.tapToClick()) s.click();
                     lastTapUpAt = now;
                     state = DONE;

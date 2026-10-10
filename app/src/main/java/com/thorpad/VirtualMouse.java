@@ -9,7 +9,11 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     private static final int REL_X = 0, REL_Y = 1, REL_HWHEEL = 6, REL_WHEEL = 8;
     private static final int BTN_LEFT = 272, BTN_RIGHT = 273, BTN_MIDDLE = 274;
     private static final int KEY_BACK = 158, KEY_HOMEPAGE = 172, KEY_APPSELECT = 580;
-    private static final long CLICK_HOLD_MS = 25;
+    /**
+     * How long a click holds the button. Like a real mouse click (~80-120 ms), it must span
+     * a few frames: games that check the button once per frame miss shorter clicks.
+     */
+    private static final long CLICK_HOLD_MS = 90;
 
     private final float density;
     private float remX, remY;
@@ -44,7 +48,15 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
         send(EV_REL, REL_X, ix, EV_REL, REL_Y, iy);
     }
 
-    @Override public void click() { tap(BTN_LEFT, CLICK_HOLD_MS); }
+    private final Runnable releaseLeft = new Runnable() {
+        @Override public void run() { send(EV_KEY, BTN_LEFT, 0); }
+    };
+
+    @Override public void click() {
+        io.removeCallbacks(releaseLeft);
+        send(EV_KEY, BTN_LEFT, 1);
+        io.postDelayed(releaseLeft, CLICK_HOLD_MS);
+    }
 
     /** Long press on the pad = right click, like a laptop trackpad's secondary click. */
     @Override public void longPress() { tap(BTN_RIGHT, CLICK_HOLD_MS); }
@@ -52,6 +64,11 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     @Override public void twoFingerTap() { tap(BTN_RIGHT, CLICK_HOLD_MS); }
 
     @Override public void dragBegin() {
+        // A tap-then-drag can start while the tap's click is still held: finish that first.
+        if (io.hasCallbacks(releaseLeft)) {
+            io.removeCallbacks(releaseLeft);
+            send(EV_KEY, BTN_LEFT, 0);
+        }
         leftHeld = true;
         send(EV_KEY, BTN_LEFT, 1);
     }

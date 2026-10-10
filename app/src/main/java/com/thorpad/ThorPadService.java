@@ -24,7 +24,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
  */
 public class ThorPadService extends AccessibilityService
         implements DisplayManager.DisplayListener, PadOutput, KeyOutput {
-    private static final long TAP_MS = 40;
+    private static final long TAP_MS = 80;
     private static final long LONG_PRESS_MS = 650;
     /** Keep scroll strokes this far inside the screen edge. */
     private static final float EDGE = 4f;
