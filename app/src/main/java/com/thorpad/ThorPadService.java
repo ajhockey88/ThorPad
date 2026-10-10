@@ -8,12 +8,14 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * Draws the mouse pointer on the top screen and turns trackpad input into taps, drags and
@@ -21,7 +23,7 @@ import android.view.accessibility.AccessibilityEvent;
  * ThorPad needs to be switched on under Settings > Accessibility.
  */
 public class ThorPadService extends AccessibilityService
-        implements DisplayManager.DisplayListener, PadOutput {
+        implements DisplayManager.DisplayListener, PadOutput, KeyOutput {
     private static final long TAP_MS = 40;
     private static final long LONG_PRESS_MS = 650;
     /** Keep scroll strokes this far inside the screen edge. */
@@ -277,6 +279,54 @@ public class ThorPadService extends AccessibilityService
     @Override public void home() { performGlobalAction(GLOBAL_ACTION_HOME); }
 
     @Override public void recents() { performGlobalAction(GLOBAL_ACTION_RECENTS); }
+
+    // ---- Typing, in touch mode -------------------------------------------------------------
+    // Without a virtual keyboard, text is written straight into the selected text box.
+
+    @Override public void typeChar(char c) {
+        editFocusedText(String.valueOf(c), false);
+    }
+
+    @Override public void special(int key) {
+        if (key == BACKSPACE) {
+            editFocusedText(null, true);
+        } else if (key == ENTER) {
+            AccessibilityNodeInfo node = findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+            if (node == null) return;
+            if (!node.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.getId())) {
+                if (node.isMultiLine()) editFocusedText("\n", false);
+            }
+        } else if (key == TAB) {
+            editFocusedText("\t", false);
+        }
+    }
+
+    private void editFocusedText(String insert, boolean deleteOne) {
+        AccessibilityNodeInfo node = findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+        if (node == null || !node.isEditable()) return;
+        CharSequence current = node.isShowingHintText() ? "" : node.getText();
+        String text = current == null ? "" : current.toString();
+        int start = node.getTextSelectionStart();
+        int end = node.getTextSelectionEnd();
+        if (start < 0 || end < 0 || start > text.length() || end > text.length()) {
+            start = end = text.length();
+        }
+        if (start > end) { int t = start; start = end; end = t; }
+        if (deleteOne && start == end) {
+            if (start == 0) return;
+            start = text.offsetByCodePoints(start, -1);
+        }
+        String replacement = insert == null ? "" : insert;
+        String next = text.substring(0, start) + replacement + text.substring(end);
+        Bundle args = new Bundle();
+        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, next);
+        if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return;
+        int caret = start + replacement.length();
+        Bundle sel = new Bundle();
+        sel.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, caret);
+        sel.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, caret);
+        node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, sel);
+    }
 
     private static float clamp(float v, float min, float max) {
         return v < min ? min : (v > max ? max : v);

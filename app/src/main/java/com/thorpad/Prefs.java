@@ -12,6 +12,8 @@ final class Prefs {
     static final String KEY_TAP_TO_CLICK = "tap_to_click";
     static final String KEY_SWAP_SCREENS = "swap_screens";
     static final String KEY_POINTER_SIZE = "pointer_size";
+    static final String KEY_AUTOCORRECT = "autocorrect";
+    static final String KEY_TYPE_ON_RELEASE = "type_on_release";
 
     private final SharedPreferences sp;
 
@@ -33,4 +35,8 @@ final class Prefs {
     /** Use the top screen as the trackpad and put the pointer on the bottom screen. */
     boolean swapScreens() { return sp.getBoolean(KEY_SWAP_SCREENS, false); }
     float pointerSize() { return sp.getFloat(KEY_POINTER_SIZE, 1.0f); }
+    /** Keyboard: fix misspelled words when a word is finished. */
+    boolean autocorrect() { return sp.getBoolean(KEY_AUTOCORRECT, true); }
+    /** Keyboard: type when the finger lifts instead of when it lands. */
+    boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
 }

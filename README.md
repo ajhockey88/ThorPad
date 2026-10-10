@@ -14,7 +14,24 @@ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse poin
 | Two fingers up or down | Mouse wheel (real wheel notches in mouse mode) |
 | Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 
-The bar along the top has Back, Home, Apps (recents), Settings and Close.
+The bar along the top has Keyboard, Home, Apps (recents), Settings and Close.
+
+## Keyboard
+
+**Keyboard** turns the whole bottom screen into a keyboard. The keys touch edge to edge, with
+only a hairline between them, so the whole screen can be tapped. **✕ Close** returns to the trackpad.
+
+- Keys type the moment your finger lands (Settings can switch this to "type when the finger
+  lifts", which lets you slide onto the right key). Each finger is tracked separately, so
+  pressing the next key before lifting the last still counts. Every press flashes and buzzes.
+- **?123** and **=\<** switch to numbers, symbols, Esc, Tab and arrow keys. Tap ⇧ once for one
+  capital letter, or twice quickly for caps lock. Hold ⌫ to keep deleting.
+- In mouse mode, ThorPad plugs in a virtual USB keyboard while the keyboard is open, so keys
+  reach games and apps like a real keyboard. In touch mode, text goes into the selected text box.
+- **Autocorrect** (on by default, switch in Settings) fixes a misspelled word when you finish it
+  with a space or punctuation. While you type, the strip shows "→ correction"; tap the strip to keep
+  your spelling. Pressing backspace right after a correction undoes it. Either way, ThorPad
+  remembers that word and won't correct it again.
 Settings has pointer speed, acceleration, scroll speed, pointer size, tap to click,
 classic (mouse-wheel) scroll direction, and a swap-screens option.
 
@@ -62,6 +79,12 @@ Touch mode:
   and keyboard, and Back/Home/Apps act on the top screen.
 
 ThorPad does not read screen contents and has no internet permission.
+
+## Credits
+
+The autocorrect dictionary (`app/src/main/assets/words.txt`, built by `tools/make_dictionary.py`)
+takes its spellings from SCOWL's American English word list and its word frequencies from
+[wordfreq](https://github.com/rspeer/wordfreq) (data licensed CC BY-SA 4.0).
 
 ## Building
 

@@ -45,6 +45,14 @@ public class SettingsActivity extends Activity {
         toggle("Swap screens (pointer on bottom, trackpad on top). Reopen ThorPad after changing.",
                 Prefs.KEY_SWAP_SCREENS, prefs.swapScreens(), true);
 
+        list.addView(text("\nKeyboard", 17));
+        toggle("Autocorrect (fixes a misspelled word when you finish it; tap the suggestion "
+                + "to keep what you typed, or press backspace right after to undo)",
+                Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
+        toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
+                + "instant you touch, most responsive)",
+                Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
+
         TextView help = text("\nGestures\n"
                 + "• One finger: move the pointer\n"
                 + "• Tap: click\n"

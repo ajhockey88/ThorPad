@@ -27,13 +27,15 @@ import android.widget.TextView;
  * through the accessibility service.
  */
 public class TrackpadActivity extends Activity
-        implements ShizukuClient.Listener, VirtualMouse.StateListener {
+        implements ShizukuClient.Listener, UinputDevice.StateListener, KeyboardView.Listener {
     private TrackpadView pad;
     private View setupPanel;
     private TextView mouseStatus;
     private Button shizukuButton;
     private TextView modeLabel;
     private VirtualMouse mouse;
+    private VirtualKeyboard keyboardDevice;
+    private KeyboardView keyboard;
     private String mouseError;
     private boolean started;
 
@@ -47,7 +49,8 @@ public class TrackpadActivity extends Activity
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
 
         float d = getResources().getDisplayMetrics().density;
-        mouse = new VirtualMouse(new Prefs(this), d, this);
+        mouse = new VirtualMouse(d, this);
+        keyboardDevice = new VirtualKeyboard(this);
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -56,8 +59,8 @@ public class TrackpadActivity extends Activity
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setPadding((int) (6 * d), (int) (6 * d), (int) (6 * d), 0);
-        bar.addView(barButton("Back", new View.OnClickListener() {
-            @Override public void onClick(View v) { PadOutput o = currentOutput(); if (o != null) o.back(); }
+        bar.addView(barButton("Keyboard", new View.OnClickListener() {
+            @Override public void onClick(View v) { openKeyboard(); }
         }), weight());
         bar.addView(barButton("Home", new View.OnClickListener() {
             @Override public void onClick(View v) { PadOutput o = currentOutput(); if (o != null) o.home(); }
@@ -89,7 +92,17 @@ public class TrackpadActivity extends Activity
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        setContentView(root);
+        // The keyboard covers the whole screen, bar included, while it's open.
+        FrameLayout frame = new FrameLayout(this);
+        frame.addView(root, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        keyboard = new KeyboardView(this);
+        keyboard.setListener(this);
+        keyboard.setVisibility(View.GONE);
+        frame.addView(keyboard, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(frame);
         ShizukuClient.addListener(this);
     }
 
@@ -97,6 +110,7 @@ public class TrackpadActivity extends Activity
     protected void onDestroy() {
         ShizukuClient.removeListener(this);
         mouse.quit();
+        keyboardDevice.quit();
         super.onDestroy();
     }
 
@@ -223,6 +237,7 @@ public class TrackpadActivity extends Activity
         started = false;
         // Unplug the virtual mouse and hide the overlay pointer while the trackpad is away.
         mouse.stop();
+        onCloseKeyboard();
         ThorPadService s = ThorPadService.get();
         if (s != null) s.hidePointer();
         pad.setOutput(null);
@@ -236,8 +251,45 @@ public class TrackpadActivity extends Activity
     }
 
     @Override
-    public void onMouseStateChanged(boolean ready, String error) {
-        if (!ready && error != null) mouseError = error;
+    public void onDeviceStateChanged(UinputDevice device, boolean ready, String error) {
+        if (device == mouse) {
+            if (!ready && error != null) mouseError = error;
+            refresh();
+        } else if (device == keyboardDevice && !ready && keyboard.getVisibility() == View.VISIBLE) {
+            // The virtual keyboard failed: type through the accessibility service if it's on.
+            keyboard.setOutput(touchTyping());
+            keyboard.invalidate();
+        }
+    }
+
+    // ---- On-screen keyboard -----------------------------------------------------------------
+
+    private void openKeyboard() {
+        Prefs prefs = new Prefs(this);
+        keyboard.reset();
+        keyboard.setTypeOnRelease(prefs.typeOnRelease());
+        keyboard.setAutocorrect(prefs.autocorrect() ? Autocorrect.get(this) : null);
+        if (mouse.isReady()) {
+            // Mouse mode: plug in a virtual keyboard so keys arrive like a real USB keyboard.
+            keyboardDevice.start();
+            keyboard.setOutput(keyboardDevice);
+        } else {
+            keyboard.setOutput(touchTyping());
+        }
+        pad.setOutput(null);
+        keyboard.setVisibility(View.VISIBLE);
+    }
+
+    private KeyOutput touchTyping() {
+        return isServiceEnabled() ? ThorPadService.get() : null;
+    }
+
+    @Override
+    public void onCloseKeyboard() {
+        if (keyboard.getVisibility() != View.VISIBLE) return;
+        keyboard.setVisibility(View.GONE);
+        keyboard.setOutput(null);
+        keyboardDevice.stop(); // unplug, so the top screen's own touch keyboard works again
         refresh();
     }
 
@@ -271,7 +323,7 @@ public class TrackpadActivity extends Activity
             out = null; // waiting for the virtual mouse, or nothing set up yet
             modeLabel.setText(shizukuReady && mouseError == null ? "Starting mouse…" : "");
         }
-        pad.setOutput(out);
+        pad.setOutput(keyboard.getVisibility() == View.VISIBLE ? null : out);
 
         if (mouseError != null) {
             mouseStatus.setText("The virtual mouse couldn't start: " + mouseError);
