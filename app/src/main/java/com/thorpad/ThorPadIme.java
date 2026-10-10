@@ -14,7 +14,7 @@ import android.view.inputmethod.InputConnection;
  * bottom screen instead (in the trackpad, or on its own when the trackpad is closed), and that
  * keyboard types straight into the text box.
  */
-public class ThorPadIme extends InputMethodService implements KeyOutput {
+public class ThorPadIme extends InputMethodService implements KeyOutput, TextContext {
     /** Told when a text box asks for the keyboard; set while the trackpad is open. */
     interface Listener {
         void onKeyboardWanted();
@@ -113,7 +113,13 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     }
 
     /** Keys from the bottom-screen keyboard: dropped (and the keyboard put away) without a text box. */
-    private final KeyOutput overlayKeys = new KeyOutput() {
+    private final KeyOutput overlayKeys = new OverlayKeys();
+
+    private final class OverlayKeys implements KeyOutput, TextContext {
+        @Override public boolean capitalizeNext() { return active() != null && ThorPadIme.this.capitalizeNext(); }
+        @Override public boolean allowsCorrections() { return ThorPadIme.this.allowsCorrections(); }
+        @Override public CharSequence textBefore(int n) { return active() != null ? ThorPadIme.this.textBefore(n) : null; }
+
         @Override public void typeChar(char c) {
             if (active() == null) { strayKey(); return; }
             ThorPadIme.this.typeChar(c);
@@ -123,7 +129,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
             if (active() == null) { strayKey(); return; }
             ThorPadIme.this.special(key);
         }
-    };
+    }
 
     private void strayKey() {
         KeyboardLog.add("overlay: key with no text box, closing");
@@ -367,6 +373,31 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     }
 
     // ---- Typing ---------------------------------------------------------------------------
+
+    @Override public boolean capitalizeNext() {
+        InputConnection ic = getCurrentInputConnection();
+        EditorInfo info = getCurrentInputEditorInfo();
+        return ic != null && info != null && ic.getCursorCapsMode(info.inputType) != 0;
+    }
+
+    @Override public boolean allowsCorrections() {
+        EditorInfo info = getCurrentInputEditorInfo();
+        if (info == null) return true;
+        int type = info.inputType;
+        if ((type & android.text.InputType.TYPE_MASK_CLASS) != android.text.InputType.TYPE_CLASS_TEXT) return false;
+        int v = type & android.text.InputType.TYPE_MASK_VARIATION;
+        return v != android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                && v != android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                && v != android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
+                && v != android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                && v != android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+                && v != android.text.InputType.TYPE_TEXT_VARIATION_URI;
+    }
+
+    @Override public CharSequence textBefore(int n) {
+        InputConnection ic = getCurrentInputConnection();
+        return ic == null ? null : ic.getTextBeforeCursor(n, 0);
+    }
 
     @Override public void typeChar(char c) {
         lastOwnEdit = android.os.SystemClock.uptimeMillis();

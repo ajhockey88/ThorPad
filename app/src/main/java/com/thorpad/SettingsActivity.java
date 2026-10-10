@@ -66,9 +66,14 @@ public class SettingsActivity extends Activity {
                 Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
 
         list.addView(text("\nKeyboard", 17));
-        toggle("Autocorrect (fixes a misspelled word when you finish it; tap the suggestion "
-                + "to keep what you typed, or press backspace right after to undo)",
+        toggle("Autocorrect (fixes a misspelled word when you finish it, splits words that ran "
+                + "together, adds apostrophes, and uses the word before to pick the right one; tap "
+                + "the suggestion to keep what you typed, or press backspace right after to undo)",
                 Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
+        toggle("Double-space period (two quick spaces type \". \")",
+                Prefs.KEY_DOUBLE_SPACE, prefs.doubleSpacePeriod(), false);
+        toggle("Auto-capitals (capital letter at the start of each sentence, in text boxes that "
+                + "want one)", Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
         toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
                 + "instant you touch, most responsive)",
                 Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);

@@ -14,6 +14,8 @@ final class Prefs {
     static final String KEY_AUTOCORRECT = "autocorrect";
     static final String KEY_TYPE_ON_RELEASE = "type_on_release";
     static final String KEY_DIM_WHEN_IDLE = "dim_when_idle";
+    static final String KEY_DOUBLE_SPACE = "double_space_period";
+    static final String KEY_AUTO_CAPS = "auto_caps";
     static final String KEY_PC_MODE = "pc_mode";
     static final String KEY_PC_APPS = "pc_apps";
     /** PC controls: switch automatically for streaming apps, never, or always. */
@@ -40,6 +42,10 @@ final class Prefs {
     float pointerSize() { return sp.getFloat(KEY_POINTER_SIZE, 1.0f); }
     /** Keyboard: fix misspelled words when a word is finished. */
     boolean autocorrect() { return sp.getBoolean(KEY_AUTOCORRECT, true); }
+    /** Keyboard: two quick spaces type ". ". */
+    boolean doubleSpacePeriod() { return sp.getBoolean(KEY_DOUBLE_SPACE, true); }
+    /** Keyboard: capital letter at the start of each sentence. */
+    boolean autoCaps() { return sp.getBoolean(KEY_AUTO_CAPS, true); }
     /** Keyboard: type when the finger lifts instead of when it lands. */
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
     /** Turn the trackpad screen's brightness right down after a while without a touch. */

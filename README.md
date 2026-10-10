@@ -99,6 +99,17 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   your spelling. Pressing backspace right after a correction undoes it. Either way, ThorPad
   remembers that word and won't correct it again. It knows about 134,000 words, including names,
   slang and the apps and games people type (Gmail, TikTok, Minecraft, RetroArch...).
+  It also:
+  - 🧩 splits words that ran together (`helloworld` → `hello world`), including a letter typed by
+    grazing the space bar (`seebyou` → `see you`)
+  - 🔤 fixes missing, extra, doubled and swapped letters (`definately`, `tommorow`, `becuase`)
+  - 🧠 uses the word before to pick the right word (`more then` → `more than`) and to tell `ill`
+    from `I'll`
+  - ✏️ adds apostrophes and fixes compound words (`dont` → `don't`, `alot` → `a lot`)
+  - 🙅 leaves chat shorthand alone (lol, brb, omw...) and never corrects passwords, emails or web
+    addresses
+- ⏺️ **Double-space period:** two quick spaces type ". ".
+- 🔠 **Auto-capitals:** sentences start with a capital letter, in text boxes that ask for one.
 
 ## ⚙️ Settings
 
@@ -107,7 +118,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
 - 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
-- ✨ **Autocorrect** on or off
+- ✨ **Autocorrect**, **double-space period** and **auto-capitals**, each on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
@@ -184,7 +195,10 @@ download the new APK. Nothing else is sent anywhere. In touch mode it reads only
 
 The autocorrect dictionary (`app/src/main/assets/words.txt`, built by `tools/make_dictionary.py`)
 takes its spellings from SCOWL's "huge" American English word list (about 134,000 words with names, brands and gaming terms) and its word frequencies from
-[wordfreq](https://github.com/rspeer/wordfreq) (data licensed CC BY-SA 4.0).
+[wordfreq](https://github.com/rspeer/wordfreq) (data licensed CC BY-SA 4.0). Which words
+follow which (`app/src/main/assets/pairs.txt`, built by `tools/make_pairs.py`) comes from
+[SymSpell](https://github.com/mammothb/symspellpy)'s bigram list (MIT), drawn from Google Books
+Ngram data (CC BY 3.0).
 
 ## 🏗️ Building
 

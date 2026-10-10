@@ -58,6 +58,7 @@ final class KeyboardOverlay implements KeyboardView.Listener {
             Prefs prefs = new Prefs(context);
             view.reset();
             view.setTypeOnRelease(prefs.typeOnRelease());
+            view.setSentenceHelp(prefs.doubleSpacePeriod(), prefs.autoCaps());
             view.setAutocorrect(prefs.autocorrect() ? Autocorrect.get(context) : null);
             view.setListener(this);
             view.setOutput(output);

@@ -1,13 +1,14 @@
-⌨️ ThorPad 1.7: the keyboard now comes and goes with the text box.
+⌨️ ThorPad 1.8: the keyboard understands what you meant to type.
 
-## ✨ What's new in 1.7
-- 🙈 **Keyboard hides by itself:** when the top screen leaves a text box (you tap elsewhere, or the app hides the keyboard after Search or Send), ThorPad's keyboard closes and the trackpad comes back. A keyboard you opened with the **Keyboard** button stays open until you close it, so games still get it
-- 🪄 **Keyboard shows up every time:** ThorPad's keyboard now opens whenever a text box on the top screen gets focus, and tapping a text box again after you closed the keyboard reopens it. Before, it stopped opening after the first text box in each app
-- 📨 **Closes when you send:** after Send, Search, Go or Done, or when the app empties the text box because your message was sent, the keyboard closes
-- 👆 **Tap outside to close:** with Shizuku on, tapping anywhere on the top screen outside the text box closes the keyboard, even in apps that keep the text box selected. ThorPad only watches for this while the keyboard is open
-- ↩️ **Works even when ThorPad is closed:** if ThorPad isn't on the bottom screen, tapping a text box shows just the keyboard over whatever is there, and it types straight into the top screen. When it closes, the app underneath is right where you left it. ThorPad allows itself to draw over apps through Shizuku the first time
-- ⌨️ **Use ThorPad keyboard:** one button in Settings makes ThorPad Android's keyboard for the whole Thor (Shizuku switches it for you). **Other keyboard** switches back
-- 🖥️ If PC keys are open when a text box asks for the keyboard, the keyboard takes over
+## ✨ What's new in 1.8
+- 🧩 **Splits run-together words:** a missed space (`helloworld` → `hello world`) or a letter typed by grazing the space bar (`seebyou` → `see you`) is split back into words, even across a whole phrase
+- 🔤 **Stronger spelling fixes:** missing, extra, doubled and swapped letters are caught more often (`definately`, `tommorow`, `accomodate`), and a rare word one slip from a common one is fixed (`adn` → `and`)
+- 🧠 **Context-aware spelling:** the word before helps pick the right fix (`more then` → `more than`), and `ill`, `its` and `lets` become `I'll`, `it's` and `let's` where that's what's meant
+- ✏️ **Contractions and compound words:** more apostrophes added (`shouldve`, `theyd`, `heres`) and run-together pairs fixed (`alot`, `infront`, `atleast`, `everytime`)
+- ⏺️ **Double-space period:** two quick spaces type ". " and the next word starts with a capital
+- 🔠 **Auto-capitals:** sentences start with a capital letter, in text boxes that ask for one
+- 🙅 Chat shorthand (lol, brb, omw...) is left alone, and passwords, emails and web addresses are never corrected
+- ⚙️ Double-space period and auto-capitals each have their own switch in Settings
 
 ---
 
@@ -15,13 +16,15 @@
 ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for the top screen.
 - 🖱️ **Real mouse:** with Shizuku, Android and every app see a real USB mouse with a scroll wheel, so GameNative and Winlator games work; touch mode works without it
 - 👆 **Gestures:** tap to click, hold or two-finger tap to right click, tap-and-slide to drag, two fingers to scroll or go back and forward, three fingers for recent apps and closing the top app
-- ⌨️ **Full-screen keyboard:** big edge-to-edge keys, autocorrect with a 134,000-word dictionary, hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard
+- ⌨️ **Full-screen keyboard:** big edge-to-edge keys, hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard, even when ThorPad itself is closed
+- ✨ **Smart typing:** autocorrect with a 134,000-word dictionary that splits run-together words and reads context, double-space period and auto-capitals
 - 🖥️ **PC mode:** PC keys (Esc, F1 to F12, Windows shortcuts, sticky Ctrl / Alt / Shift / Win) and PC gestures that switch on by themselves when Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on top
 - 📳 **Haptics:** pick a feel and strength for every action
 - 🔋 **Easy on the battery:** dims the trackpad when idle and runs nothing in the background
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
+- **1.8:** smarter autocorrect, double-space period and auto-capitals
 - **1.7:** the keyboard opens and closes with text boxes
 - **1.6:** PC mode for Moonlight and other PC streaming, PC keys, mode menu, catch-up release notes
 - **1.5:** autocorrect fixes the text box itself, battery savings, dim when idle, Reinstall button

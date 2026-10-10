@@ -38,6 +38,7 @@ final class KeyboardView extends View {
     private static final long REPEAT_DELAY_MS = 400, REPEAT_EVERY_MS = 55;
     private static final long CAPS_LOCK_DOUBLE_TAP_MS = 350;
     private static final long FLASH_MS = 90;
+    private static final long DOUBLE_SPACE_MS = 1500;
 
     private static final int BG = Color.BLACK;
     private static final int KEY = Color.rgb(0x24, 0x26, 0x2d);
@@ -84,6 +85,10 @@ final class KeyboardView extends View {
     private KeyOutput output;
     private Listener listener;
     private boolean typeOnRelease;
+    private boolean doubleSpacePeriod = true, autoCaps = true;
+    /** Shift is on only because a sentence is starting, not because it was pressed. */
+    private boolean autoShift;
+    private long lastSpaceAt;
     private Key flash;
 
     // Autocorrect state. The suggestion for the word being typed is worked out in the
@@ -136,11 +141,20 @@ final class KeyboardView extends View {
                 bottomRow("ABC", LETTERS)));
     }
 
-    void setOutput(KeyOutput output) { this.output = output; }
+    void setOutput(KeyOutput output) {
+        this.output = output;
+        if (output != null) autoCapitalize();
+    }
 
     void setListener(Listener listener) { this.listener = listener; }
 
     void setTypeOnRelease(boolean value) { typeOnRelease = value; }
+
+    /** Two spaces type ". ", and sentences start with a capital. */
+    void setSentenceHelp(boolean doubleSpace, boolean caps) {
+        doubleSpacePeriod = doubleSpace;
+        autoCaps = caps;
+    }
 
     /** null turns autocorrect off. */
     void setAutocorrect(Autocorrect autocorrect) {
@@ -174,6 +188,8 @@ final class KeyboardView extends View {
         fixOriginal = null;
         page = LETTERS;
         shift = 0;
+        autoShift = false;
+        lastSpaceAt = 0;
         cancelTouches();
         invalidate();
     }
@@ -485,6 +501,63 @@ final class KeyboardView extends View {
         return w;
     }
 
+    /** False in password, email and web address boxes: type exactly what's pressed there. */
+    private boolean correctionsAllowed() {
+        return !(output instanceof TextContext) || ((TextContext) output).allowsCorrections();
+    }
+
+    /**
+     * The word before the one being typed, lowercase, if nothing but spaces sits between them;
+     * null at the start of a sentence or after other punctuation. Reads the text box itself when
+     * the keyboard opened partway through a sentence.
+     */
+    private String previousWord() {
+        String w = previousWord(typed, false);
+        if (w != null) return w.isEmpty() ? null : w;
+        if (output instanceof TextContext) {
+            CharSequence before = ((TextContext) output).textBefore(80);
+            if (before != null) {
+                w = previousWord(before, true);
+                return w == null || w.isEmpty() ? null : w;
+            }
+        }
+        return null;
+    }
+
+    /** "" for "no word before", null for "ran out of text before finding out". */
+    private static String previousWord(CharSequence t, boolean whole) {
+        int i = t.length();
+        while (i > 0 && isWordChar(t.charAt(i - 1))) i--; // the word being typed
+        int spaces = i;
+        while (i > 0 && t.charAt(i - 1) == ' ') i--;
+        if (i == 0) return whole ? "" : null;
+        if (i == spaces && spaces != t.length()) return ""; // no space before the current word
+        int end = i;
+        while (i > 0 && isWordChar(t.charAt(i - 1))) i--;
+        if (end == i) return ""; // punctuation before it
+        if (i == 0 && !whole) return null; // the word may go on before what ThorPad saw
+        return t.subSequence(i, end).toString().toLowerCase(java.util.Locale.US);
+    }
+
+    /**
+     * Turns shift on by itself where a sentence starts (as the text box asks), and back off if
+     * it was only on for that and the sentence start was deleted.
+     */
+    private void autoCapitalize() {
+        if (!autoCaps || page != LETTERS || shift == 2 || !(output instanceof TextContext)) return;
+        int n = typed.length();
+        char last = n > 0 ? typed.charAt(n - 1) : '\n';
+        boolean cap = (last == ' ' || last == '\n') && ((TextContext) output).capitalizeNext();
+        if (cap && shift == 0) {
+            shift = 1;
+            autoShift = true;
+        } else if (!cap && shift == 1 && autoShift) {
+            shift = 0;
+            autoShift = false;
+        }
+        invalidate();
+    }
+
     private void typeText(String s) {
         typed.append(s);
         if (typed.length() > 200) typed.delete(0, typed.length() - 200);
@@ -504,8 +577,8 @@ final class KeyboardView extends View {
     private void autocorrectWord(String boundary) {
         String word = currentWord();
         String fix = null;
-        if (autocorrect != null && !word.isEmpty()) {
-            fix = word.equals(suggestionFor) ? suggestion : autocorrect.correct(word);
+        if (autocorrect != null && !word.isEmpty() && correctionsAllowed()) {
+            fix = word.equals(suggestionFor) ? suggestion : autocorrect.correct(previousWord(), word);
         }
         clearSuggestion();
         if (fix == null || fix.equals(word)) return;
@@ -545,10 +618,11 @@ final class KeyboardView extends View {
     /** Works out, off the main thread, what the word being typed would be corrected to. */
     private void updateSuggestion() {
         final String word = currentWord();
-        if (autocorrect == null || acHandler == null || word.isEmpty()) {
+        if (autocorrect == null || acHandler == null || word.isEmpty() || !correctionsAllowed()) {
             clearSuggestion();
             return;
         }
+        final String prev = previousWord();
         if (suggestion != null && !word.equals(suggestionFor)) {
             suggestion = null;
             suggestionFor = null;
@@ -558,7 +632,7 @@ final class KeyboardView extends View {
         acHandler.removeCallbacksAndMessages(null);
         acHandler.post(new Runnable() {
             @Override public void run() {
-                final String fix = ac.correct(word);
+                final String fix = ac.correct(prev, word);
                 handler.post(new Runnable() {
                     @Override public void run() {
                         if (!word.equals(currentWord())) return;
@@ -595,6 +669,29 @@ final class KeyboardView extends View {
         handler.removeCallbacks(repeat);
     }
 
+    private boolean startsText() {
+        return typed.length() == 0 && autoCaps && output instanceof TextContext;
+    }
+
+    /**
+     * A second quick space right after a word types ". " in place of the first, like phones do,
+     * and the next word starts with a capital.
+     */
+    private boolean doubleSpace() {
+        int n = typed.length();
+        if (!doubleSpacePeriod || n < 2 || typed.charAt(n - 1) != ' ' || !correctionsAllowed()) return false;
+        if (SystemClock.uptimeMillis() - lastSpaceAt > DOUBLE_SPACE_MS) return false;
+        char before = typed.charAt(n - 2);
+        if (!Character.isLetterOrDigit(before) && before != ')' && before != '"' && before != '\'') return false;
+        deleteChars(1);
+        typeText(". ");
+        lastSpaceAt = 0;
+        fixOriginal = null;
+        clearSuggestion();
+        autoCapitalize();
+        return true;
+    }
+
     private void fire(Key k) {
         boolean undoable = fixOriginal != null;
         if (k.type != BACKSPACE) fixOriginal = null; // only an immediate backspace undoes a fix
@@ -606,9 +703,12 @@ final class KeyboardView extends View {
             case PAGE:
                 page = k.value;
                 shift = 0;
+                autoShift = false;
                 cancelTouches();
+                if (page == LETTERS) autoCapitalize();
                 break;
             case SHIFT: {
+                autoShift = false;
                 long now = SystemClock.uptimeMillis();
                 if (shift == 0) shift = 1;
                 else if (shift == 1 && now - lastShiftTap < CAPS_LOCK_DOUBLE_TAP_MS) shift = 2;
@@ -621,25 +721,46 @@ final class KeyboardView extends View {
                 fixOriginal = null;
                 if (typed.length() > 0) typed.setLength(typed.length() - 1);
                 if (output != null) output.special(KeyOutput.BACKSPACE);
+                lastSpaceAt = 0;
                 updateSuggestion();
+                autoCapitalize();
                 break;
             case ENTER:
                 autocorrectWord(null);
                 typed.setLength(0);
                 fixOriginal = null;
                 if (output != null) output.special(KeyOutput.ENTER);
+                lastSpaceAt = 0;
+                autoCapitalize();
                 break;
             case SPECIAL:
                 if (k.value == KeyOutput.TAB) typed.append('\t');
                 if (output != null) output.special(k.value);
                 break;
             case SPACE:
+                if (doubleSpace()) break;
+                // fall through
             case CHAR: {
                 char c = k.ch;
+                if (k.type == CHAR && page == LETTERS && shift == 0 && Character.isLetter(c)
+                        && startsText()) {
+                    // The first letter in the box: the box may only now say it wants a capital.
+                    autoCapitalize();
+                }
                 if (page == LETTERS && shift > 0) c = Character.toUpperCase(c);
                 if (isBoundary(c)) autocorrectWord(String.valueOf(c));
                 typeText(String.valueOf(c));
-                if (shift == 1 && k.type == CHAR) shift = 0;
+                if (shift == 1 && k.type == CHAR) {
+                    shift = 0;
+                    autoShift = false;
+                }
+                if (k.type == SPACE) {
+                    lastSpaceAt = SystemClock.uptimeMillis();
+                    autoCapitalize();
+                } else {
+                    lastSpaceAt = 0;
+                    if (c == '.' || c == '!' || c == '?') autoShift = false;
+                }
                 updateSuggestion();
                 break;
             }

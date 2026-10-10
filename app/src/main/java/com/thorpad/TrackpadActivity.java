@@ -606,6 +606,7 @@ public class TrackpadActivity extends Activity
         Prefs prefs = new Prefs(this);
         keyboard.reset();
         keyboard.setTypeOnRelease(prefs.typeOnRelease());
+        keyboard.setSentenceHelp(prefs.doubleSpacePeriod(), prefs.autoCaps());
         keyboard.setAutocorrect(prefs.autocorrect() ? Autocorrect.get(this) : null);
         keyboardDeviceFailed = false;
         // With the ThorPad keyboard picked in Android, keys go straight into the text box.
@@ -651,7 +652,25 @@ public class TrackpadActivity extends Activity
     private boolean keyboardDeviceFailed;
 
     /** Picks where each key goes, as the selected text box can change while typing. */
-    private final KeyOutput typing = new KeyOutput() {
+    private final KeyOutput typing = new Typing();
+
+    private final class Typing implements KeyOutput, TextContext {
+        // Only an Android text box (through ThorPad's Android keyboard) can answer these.
+        @Override public boolean capitalizeNext() {
+            ThorPadIme ime = ThorPadIme.active();
+            return ime != null && ime.capitalizeNext();
+        }
+
+        @Override public boolean allowsCorrections() {
+            ThorPadIme ime = ThorPadIme.active();
+            return ime == null || ime.allowsCorrections();
+        }
+
+        @Override public CharSequence textBefore(int n) {
+            ThorPadIme ime = ThorPadIme.active();
+            return ime != null ? ime.textBefore(n) : null;
+        }
+
         @Override public void typeChar(char c) {
             KeyOutput o = keyTarget();
             if (o != null) o.typeChar(c);
@@ -661,7 +680,7 @@ public class TrackpadActivity extends Activity
             KeyOutput o = keyTarget();
             if (o != null) o.special(key);
         }
-    };
+    }
 
     private KeyOutput keyTarget() {
         KeyOutput ime = ThorPadIme.active();
