@@ -51,6 +51,9 @@ public class SettingsActivity extends Activity {
         toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
                 + "instant you touch, most responsive)",
                 Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
+        toggle("Open the keyboard when a text box is selected on the top screen (uses the "
+                        + "ThorPad accessibility service; with Shizuku it switches that on for you)",
+                Prefs.KEY_AUTO_KEYBOARD, prefs.autoKeyboard(), false);
 
         TextView help = text("\nGestures\n"
                 + "• One finger: move the pointer\n"

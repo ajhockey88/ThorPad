@@ -25,7 +25,8 @@ import java.util.List;
  * its own (pressing the next key before lifting the last still counts), touch events are read
  * unbatched, and each press flashes and buzzes so you can tell it registered. An optional
  * "type on release" setting instead types when the finger lifts, so sliding onto the right
- * key fixes a near miss. Backspace repeats while held.
+ * key fixes a near miss. Backspace repeats while held, and while it is held the space bar
+ * turns into a red "Clear all" key.
  */
 final class KeyboardView extends View {
     interface Listener { void onCloseKeyboard(); }
@@ -284,6 +285,12 @@ final class KeyboardView extends View {
             fg = (k.type == SHIFT && shift > 0) ? Color.WHITE : Color.rgb(0xcf, 0xd6, 0xe2);
             size = k.label.length() > 2 ? rowHeight * 0.18f : rowHeight * 0.24f;
             text.setFakeBoldText(k.type == SHIFT && shift > 0);
+        } else if (k.type == SPACE && repeating != null) {
+            // While backspace is held, the space bar becomes "Clear all".
+            bg = Color.rgb(0x3a, 0x1f, 0x23);
+            fg = Color.rgb(0xff, 0x9a, 0x9a);
+            size = rowHeight * 0.17f;
+            text.setFakeBoldText(true);
         } else if (k.type == SPACE) {
             bg = KEY;
             fg = Color.rgb(0x8a, 0x90, 0x9b);
@@ -303,7 +310,7 @@ final class KeyboardView extends View {
         canvas.drawRect(k.rect.left, k.rect.top, k.rect.right - hair, k.rect.bottom - hair, fill);
         text.setColor(fg);
         text.setTextSize(size);
-        String label = k.label;
+        String label = k.type == SPACE && repeating != null ? "Clear all" : k.label;
         if (k.type == CHAR && shift > 0 && page == LETTERS) label = label.toUpperCase();
         float cy = k.rect.centerY() - (text.descent() + text.ascent()) / 2f;
         canvas.drawText(label, k.rect.centerX(), cy, text);
@@ -392,6 +399,14 @@ final class KeyboardView extends View {
                     rejectSuggestion();
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP,
                             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                }
+                if (repeating != null && k != null && k.type == SPACE) {
+                    // While backspace is held the space bar reads "Clear all": tapping it
+                    // wipes the text, and the held backspace stops repeating.
+                    down.put(id, null);
+                    clearAll();
+                    invalidate();
+                    return true;
                 }
                 if (k != null) {
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP,
@@ -558,6 +573,18 @@ final class KeyboardView extends View {
         flash = k;
         handler.removeCallbacks(endFlash);
         handler.postDelayed(endFlash, FLASH_MS);
+    }
+
+    private void clearAll() {
+        flashKey(repeating);
+        repeating = null;
+        handler.removeCallbacks(repeat);
+        typed.setLength(0);
+        fixOriginal = null;
+        clearSuggestion();
+        if (output != null) output.special(KeyOutput.CLEAR_ALL);
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
     }
 
     private void cancelTouches() {

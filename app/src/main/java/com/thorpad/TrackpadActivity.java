@@ -27,7 +27,8 @@ import android.widget.TextView;
  * through the accessibility service.
  */
 public class TrackpadActivity extends Activity
-        implements ShizukuClient.Listener, UinputDevice.StateListener, KeyboardView.Listener {
+        implements ShizukuClient.Listener, UinputDevice.StateListener, KeyboardView.Listener,
+        ThorPadService.TextFieldListener {
     private TrackpadView pad;
     private View setupPanel;
     private TextView mouseStatus;
@@ -38,6 +39,8 @@ public class TrackpadActivity extends Activity
     private KeyboardView keyboard;
     private String mouseError;
     private boolean started;
+    /** Already tried to switch on the accessibility service through Shizuku. */
+    private boolean triedEnablingService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,6 +225,7 @@ public class TrackpadActivity extends Activity
     protected void onStart() {
         super.onStart();
         started = true;
+        ThorPadService.setTextFieldListener(this);
         refresh();
     }
 
@@ -241,6 +245,7 @@ public class TrackpadActivity extends Activity
     protected void onStop() {
         super.onStop();
         started = false;
+        ThorPadService.setTextFieldListener(null);
         // Unplug the virtual mouse and hide the overlay pointer while the trackpad is away.
         mouse.stop();
         onCloseKeyboard();
@@ -286,6 +291,33 @@ public class TrackpadActivity extends Activity
         keyboard.setVisibility(View.VISIBLE);
     }
 
+    /** A text box was selected on the top screen: open the keyboard for it. */
+    @Override
+    public void onTextFieldSelected() {
+        if (!started || keyboard.getVisibility() == View.VISIBLE) return;
+        if (!new Prefs(this).autoKeyboard() || currentOutput() == null) return;
+        openKeyboard();
+    }
+
+    /**
+     * Opening the keyboard by itself needs the accessibility service to see text boxes being
+     * selected. In mouse mode Shizuku can switch it on, so nobody has to dig through settings.
+     */
+    private void enableServiceThroughShizuku() {
+        if (triedEnablingService) return;
+        triedEnablingService = true;
+        String current = Settings.Secure.getString(getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        String me = new ComponentName(this, ThorPadService.class).flattenToString();
+        final String list = TextUtils.isEmpty(current) ? me : current + ":" + me;
+        new Thread(new Runnable() {
+            @Override public void run() {
+                ShizukuClient.runShell("settings put secure enabled_accessibility_services '" + list
+                        + "' && settings put secure accessibility_enabled 1");
+            }
+        }, "ThorPad enable service").start();
+    }
+
     private KeyOutput touchTyping() {
         return isServiceEnabled() ? ThorPadService.get() : null;
     }
@@ -310,6 +342,10 @@ public class TrackpadActivity extends Activity
 
         boolean shizukuReady = ShizukuClient.hasPermission();
         if (shizukuReady && !mouse.isReady() && mouseError == null) mouse.start();
+
+        if (shizukuReady && new Prefs(this).autoKeyboard() && !isServiceEnabled()) {
+            enableServiceThroughShizuku();
+        }
 
         ThorPadService service = isServiceEnabled() ? ThorPadService.get() : null;
         PadOutput out;

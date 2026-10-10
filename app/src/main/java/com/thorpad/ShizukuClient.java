@@ -66,6 +66,18 @@ final class ShizukuClient {
         return service.newProcess(cmd, null, null);
     }
 
+    /** Runs a shell command as the Shizuku user and waits for it. Call off the main thread. */
+    static boolean runShell(String command) {
+        try {
+            IRemoteProcess p = newProcess(new String[] {"sh", "-c", command});
+            int code = p.waitFor();
+            p.destroy();
+            return code == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /** Called by {@link ShizukuBinderProvider} when Shizuku sends us its binder. */
     static void onBinderReceived(IBinder newBinder, String packageName) {
         if (newBinder == null || newBinder == binder) return;

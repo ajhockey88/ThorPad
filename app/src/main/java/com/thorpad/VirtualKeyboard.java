@@ -6,6 +6,9 @@ package com.thorpad;
  */
 final class VirtualKeyboard extends UinputDevice implements KeyOutput {
     private static final int KEY_LEFTSHIFT = 42;
+    private static final int KEY_LEFTCTRL = 29;
+    private static final int KEY_A = 30;
+    private static final int KEY_BACKSPACE = 14;
 
     /** Linux key code for each printable ASCII character; negative = needs Shift. */
     private static final int[] ASCII = new int[128];
@@ -61,6 +64,7 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
         int[] codes = new int[128];
         int n = 0;
         codes[n++] = KEY_LEFTSHIFT;
+        codes[n++] = KEY_LEFTCTRL;
         for (int code : new int[] {28, 14, 15, 1, 105, 106, 103, 108}) codes[n++] = code;
         boolean[] seen = new boolean[256];
         for (int v : ASCII) {
@@ -93,6 +97,13 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
     }
 
     @Override public void special(int key) {
+        if (key == CLEAR_ALL) {
+            // Select all, then delete the selection.
+            send(EV_KEY, KEY_LEFTCTRL, 1, EV_KEY, KEY_A, 1);
+            send(EV_KEY, KEY_A, 0, EV_KEY, KEY_LEFTCTRL, 0);
+            press(KEY_BACKSPACE);
+            return;
+        }
         int code = specialCode(key);
         if (code != 0) press(code);
     }

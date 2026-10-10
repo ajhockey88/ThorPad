@@ -13,6 +13,7 @@ final class Prefs {
     static final String KEY_POINTER_SIZE = "pointer_size";
     static final String KEY_AUTOCORRECT = "autocorrect";
     static final String KEY_TYPE_ON_RELEASE = "type_on_release";
+    static final String KEY_AUTO_KEYBOARD = "auto_keyboard";
 
     private final SharedPreferences sp;
 
@@ -37,4 +38,6 @@ final class Prefs {
     boolean autocorrect() { return sp.getBoolean(KEY_AUTOCORRECT, true); }
     /** Keyboard: type when the finger lifts instead of when it lands. */
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
+    /** Keyboard: open it when a text box is selected on the pointer screen. */
+    boolean autoKeyboard() { return sp.getBoolean(KEY_AUTO_KEYBOARD, true); }
 }
