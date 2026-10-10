@@ -47,7 +47,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 
 ## 🔀 Two modes
 
-🖱️ **Mouse mode (needed for GameNative / Winlator games such as Bloons TD6).** ThorPad plugs in a
+🖱️ **Mouse mode (needed for GameNative / Winlatorgames).** ThorPad plugs in a
 virtual USB mouse using Android's built-in `uinput` tool, started through
 [Shizuku](https://github.com/RikkaApps/Shizuku). Android and every app see a real mouse: the
 system cursor shows on the top screen, games get real mouse movement and button presses, and
