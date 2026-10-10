@@ -52,6 +52,8 @@ public class TrackpadActivity extends Activity
     private boolean started;
     /** Open the keyboard as soon as the trackpad is up (asked for by the ThorPad keyboard). */
     private boolean keyboardRequested;
+    /** The keyboard was opened by a text box (not the Keyboard button), so it closes with it. */
+    private boolean keyboardForTextBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +77,10 @@ public class TrackpadActivity extends Activity
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setPadding((int) (6 * d), (int) (6 * d), (int) (6 * d), 0);
         bar.addView(barButton("Keyboard", new View.OnClickListener() {
-            @Override public void onClick(View v) { openKeyboard(); }
+            @Override public void onClick(View v) {
+                keyboardForTextBox = false;
+                openKeyboard();
+            }
         }), weight());
         modeButton = barButton("", new View.OnClickListener() {
             @Override public void onClick(View v) { showModeMenu(); }
@@ -503,7 +508,10 @@ public class TrackpadActivity extends Activity
         refresh();
         if (keyboardRequested) {
             keyboardRequested = false;
-            if (keyboard.getVisibility() != View.VISIBLE) openKeyboard();
+            if (keyboard.getVisibility() != View.VISIBLE) {
+                keyboardForTextBox = true;
+                openKeyboard();
+            }
         }
         restartIdleTimer();
     }
@@ -579,7 +587,18 @@ public class TrackpadActivity extends Activity
     @Override
     public void onKeyboardWanted() {
         if (!started || keyboard.getVisibility() == View.VISIBLE) return;
+        if (pcKeys.getVisibility() == View.VISIBLE) {
+            pcKeys.setVisibility(View.GONE);
+            pcKeys.reset();
+        }
+        keyboardForTextBox = true;
         openKeyboard();
+    }
+
+    /** The text box that opened the keyboard is gone: put the keyboard away too. */
+    @Override
+    public void onKeyboardDone() {
+        if (keyboardForTextBox && keyboard.getVisibility() == View.VISIBLE) onCloseKeyboard();
     }
 
     @Override
@@ -620,6 +639,8 @@ public class TrackpadActivity extends Activity
     @Override
     public void onCloseKeyboard() {
         if (keyboard.getVisibility() != View.VISIBLE) return;
+        keyboardForTextBox = false;
+        ThorPadIme.bottomKeyboardClosed();
         keyboard.setVisibility(View.GONE);
         keyboard.setOutput(null);
         keyboard.setAutocorrect(null); // lets the word list be freed while the keyboard is shut

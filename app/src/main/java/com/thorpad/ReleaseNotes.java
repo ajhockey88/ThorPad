@@ -20,7 +20,9 @@ final class ReleaseNotes {
         for (String raw : lines) {
             String line = raw.trim();
             if (line.isEmpty()) continue;
-            if (line.startsWith("## 📲")) { // install steps don't matter inside the app
+            // Below a "---" come the app overview, release history and install steps, which
+            // don't matter inside the app; so do install steps in older notes.
+            if (line.equals("---") || line.startsWith("## 📲")) {
                 skipping = true;
                 continue;
             }

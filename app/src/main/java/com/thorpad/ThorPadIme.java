@@ -1,6 +1,8 @@
 package com.thorpad;
 
 import android.inputmethodservice.InputMethodService;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -14,11 +16,40 @@ import android.view.inputmethod.InputConnection;
  */
 public class ThorPadIme extends InputMethodService implements KeyOutput {
     /** Told when a text box asks for the keyboard; set while the trackpad is open. */
-    interface Listener { void onKeyboardWanted(); }
+    interface Listener {
+        void onKeyboardWanted();
+        /** The top screen left its text box (or the app hid the keyboard). */
+        void onKeyboardDone();
+    }
 
     private static ThorPadIme instance;
     private static Listener listener;
     private boolean inputStarted;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    // Leaving one text box for another finishes one input and starts the next, so "done" waits
+    // a moment and is called off if a text box starts again.
+    private static final long DONE_DELAY_MS = 300;
+    private final Runnable done = new Runnable() {
+        @Override public void run() {
+            Listener l = listener;
+            if (l != null) l.onKeyboardDone();
+        }
+    };
+
+    private void doneSoon() {
+        handler.removeCallbacks(done);
+        handler.postDelayed(done, DONE_DELAY_MS);
+    }
+
+    /**
+     * The bottom-screen keyboard was closed: hide this (invisible) keyboard window too, so the
+     * next tap on a text box asks for a keyboard again and reopens it.
+     */
+    static void bottomKeyboardClosed() {
+        ThorPadIme ime = instance;
+        if (ime != null && ime.isInputViewShown()) ime.requestHideSelf(0);
+    }
 
     static void setListener(Listener l) { listener = l; }
 
@@ -88,18 +119,29 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     @Override
     public void onStartInput(EditorInfo attribute, boolean restarting) {
         super.onStartInput(attribute, restarting);
+        boolean wasStarted = inputStarted;
         inputStarted = attribute.inputType != android.text.InputType.TYPE_NULL;
+        if (inputStarted) handler.removeCallbacks(done);
+        else if (wasStarted) doneSoon(); // focus moved to something that isn't a text box
     }
 
     @Override
     public void onFinishInput() {
+        if (inputStarted) doneSoon();
         inputStarted = false;
         super.onFinishInput();
     }
 
     @Override
+    public void onFinishInputView(boolean finishingInput) {
+        doneSoon(); // the app hid the keyboard, e.g. after Search or Send
+        super.onFinishInputView(finishingInput);
+    }
+
+    @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        handler.removeCallbacks(done);
         makeInvisible();
         if (!onPointerScreen()) {
             // A text box on the trackpad's own screen (e.g. ThorPad's settings): stay out of the way.
