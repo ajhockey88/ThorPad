@@ -35,7 +35,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 
 ## ⚙️ Settings
 
-Settings has pointer speed, acceleration, scroll speed, pointer size, tap to click,
+Settings has pointer speed, acceleration, scroll speed, pointer size,
 classic (mouse-wheel) scroll direction, and a swap-screens option.
 
 ## 🔀 Two modes

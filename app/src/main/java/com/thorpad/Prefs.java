@@ -9,7 +9,6 @@ final class Prefs {
     static final String KEY_ACCELERATION = "acceleration";
     static final String KEY_SCROLL_SPEED = "scroll_speed";
     static final String KEY_INVERT_SCROLL = "invert_scroll";
-    static final String KEY_TAP_TO_CLICK = "tap_to_click";
     static final String KEY_SWAP_SCREENS = "swap_screens";
     static final String KEY_POINTER_SIZE = "pointer_size";
     static final String KEY_AUTOCORRECT = "autocorrect";
@@ -31,7 +30,6 @@ final class Prefs {
     float scrollSpeed() { return sp.getFloat(KEY_SCROLL_SPEED, 2.0f); }
     /** false = natural (content follows fingers), true = classic scroll wheel direction. */
     boolean invertScroll() { return sp.getBoolean(KEY_INVERT_SCROLL, false); }
-    boolean tapToClick() { return sp.getBoolean(KEY_TAP_TO_CLICK, true); }
     /** Use the top screen as the trackpad and put the pointer on the bottom screen. */
     boolean swapScreens() { return sp.getBoolean(KEY_SWAP_SCREENS, false); }
     float pointerSize() { return sp.getFloat(KEY_POINTER_SIZE, 1.0f); }

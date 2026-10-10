@@ -39,7 +39,6 @@ public class SettingsActivity extends Activity {
         slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
         slider("Scroll speed", Prefs.KEY_SCROLL_SPEED, prefs.scrollSpeed(), 0.5f, 5f, false);
         slider("Pointer size", Prefs.KEY_POINTER_SIZE, prefs.pointerSize(), 0.6f, 2.5f, true);
-        toggle("Tap to click", Prefs.KEY_TAP_TO_CLICK, prefs.tapToClick(), false);
         toggle("Classic scroll direction (fingers down scrolls down, like a mouse wheel)",
                 Prefs.KEY_INVERT_SCROLL, prefs.invertScroll(), false);
         toggle("Swap screens (pointer on bottom, trackpad on top). Reopen ThorPad after changing.",
