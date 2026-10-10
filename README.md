@@ -70,7 +70,8 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ✨ **Autocorrect** (on by default, switch in Settings) fixes a misspelled word when you finish it
   with a space or punctuation. While you type, the strip shows "→ correction"; tap the strip to keep
   your spelling. Pressing backspace right after a correction undoes it. Either way, ThorPad
-  remembers that word and won't correct it again.
+  remembers that word and won't correct it again. It knows about 134,000 words, including names,
+  slang and the apps and games people type (Gmail, TikTok, Minecraft, RetroArch...).
 
 ## ⚙️ Settings
 
