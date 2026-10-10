@@ -43,13 +43,43 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     @Override
     public View onCreateInputView() {
         // Nothing to show on the top screen: the keys are on the bottom screen.
-        View v = new View(this);
-        v.setMinimumHeight(1);
-        return v;
+        return new View(this);
+    }
+
+    /**
+     * The keyboard window takes no room and no touches: apps are never pushed up or covered,
+     * on either screen.
+     */
+    @Override
+    public void onComputeInsets(Insets outInsets) {
+        super.onComputeInsets(outInsets);
+        int h = 0;
+        if (getWindow() != null && getWindow().getWindow() != null) {
+            h = getWindow().getWindow().getDecorView().getHeight();
+        }
+        outInsets.contentTopInsets = h;
+        outInsets.visibleTopInsets = h;
+        outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_REGION;
+        outInsets.touchableRegion.setEmpty();
+    }
+
+    /** No background or navigation-bar strip: the keyboard window is fully see-through. */
+    private void makeInvisible() {
+        if (getWindow() == null || getWindow().getWindow() == null) return;
+        android.view.Window w = getWindow().getWindow();
+        w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+        w.getDecorView().setBackgroundColor(android.graphics.Color.TRANSPARENT);
     }
 
     @Override
     public boolean onEvaluateFullscreenMode() { return false; }
+
+    @Override
+    public void onWindowShown() {
+        super.onWindowShown();
+        makeInvisible();
+    }
 
     /** Keep answering text boxes while ThorPad's virtual USB keyboard is plugged in. */
     @Override
@@ -70,11 +100,17 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        makeInvisible();
+        if (!onPointerScreen()) {
+            // A text box on the trackpad's own screen (e.g. ThorPad's settings): stay out of the way.
+            requestHideSelf(0);
+            return;
+        }
         if (restarting) return;
         Listener l = listener;
         if (l != null) {
             l.onKeyboardWanted();
-        } else if (onPointerScreen()) {
+        } else {
             // ThorPad isn't open: bring up the trackpad with its keyboard showing.
             LauncherActivity.openTrackpad(this, true);
         }

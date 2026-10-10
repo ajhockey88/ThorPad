@@ -39,6 +39,8 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
         d = getResources().getDisplayMetrics().density;
+        // Settings has no text boxes: never let a keyboard window cover it.
+        getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         // Long notes scroll, so the buttons always stay on screen.
         final int maxH = (int) (getResources().getDisplayMetrics().heightPixels * 0.55f);
