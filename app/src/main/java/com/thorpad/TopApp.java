@@ -3,7 +3,10 @@ package com.thorpad;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.widget.Toast;
 import android.view.Display;
 
 import java.io.ByteArrayOutputStream;
@@ -15,7 +18,7 @@ import moe.shizuku.server.IRemoteProcess;
 
 /** Closes the app on the pointer screen, like swiping it away in recent apps. Needs Shizuku. */
 final class TopApp {
-    private static final Pattern RECORD = Pattern.compile("u\\d+ ([\\w.]+)/\\S* t(\\d+)");
+    private static final Pattern RECORD = Pattern.compile("u\\d+ ([\\w.]+)/\\S+ t(\\d+)");
 
     private TopApp() {}
 
@@ -28,30 +31,56 @@ final class TopApp {
             @Override public void run() {
                 String dump = output("dumpsys activity activities");
                 Matcher m = resumedOn(dump, displayId);
-                if (m == null) return;
+                if (m == null) {
+                    toast(context, "Couldn't find the app on the top screen");
+                    return;
+                }
                 String pkg = m.group(1), task = m.group(2);
                 // Never close ThorPad itself, the home screen or the system UI.
                 if (pkg.equals(me) || pkg.equals(home) || pkg.equals("com.android.systemui")) return;
-                if (!ShizukuClient.runShell("am stack remove " + task)) {
-                    ShizukuClient.runShell("am force-stop " + pkg);
-                }
+                // Swipe it out of recent apps, and make sure it's really closed.
+                ShizukuClient.runShell("am stack remove " + task + " ; cmd activity remove-task " + task
+                        + " ; am force-stop " + pkg);
+                toast(context, "Closed " + label(context, pkg));
             }
         }, "ThorPad close app").start();
     }
 
-    /** The resumed (on-screen) activity of the given display in a dumpsys activity dump. */
+    /**
+     * The resumed (on-screen) activity of the given display in a dumpsys activity dump. Android
+     * versions word this differently, so any "ResumedActivity" line in that display's section
+     * counts; failing that, the display's topmost activity.
+     */
     private static Matcher resumedOn(String dump, int displayId) {
         int display = -1;
+        Matcher first = null;
         for (String line : dump.split("\n")) {
             String t = line.trim();
             if (t.startsWith("Display #")) {
                 display = parseInt(t.substring(9));
-            } else if (display == displayId && t.startsWith("ResumedActivity:")) {
+            } else if (display == displayId) {
                 Matcher m = RECORD.matcher(t);
-                if (m.find()) return m;
+                if (!m.find()) continue;
+                if (t.contains("ResumedActivity")) return m;
+                if (first == null && t.startsWith("* Hist")) first = m;
             }
         }
-        return null;
+        return first;
+    }
+
+    private static String label(Context context, String pkg) {
+        try {
+            return context.getPackageManager().getApplicationLabel(
+                    context.getPackageManager().getApplicationInfo(pkg, 0)).toString();
+        } catch (Exception e) {
+            return pkg;
+        }
+    }
+
+    private static void toast(final Context context, final String text) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override public void run() { Toast.makeText(context, text, Toast.LENGTH_SHORT).show(); }
+        });
     }
 
     private static int parseInt(String s) {
