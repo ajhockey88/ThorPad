@@ -83,12 +83,12 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   capital letter, or twice quickly for caps lock. Hold ⌫ to keep deleting.
 - 🧹 **Clear all:** while you hold ⌫, the space bar turns red and says **Clear all**. Tap it to wipe the whole text box.
 - 🪄 **Opens by itself:** in Settings > **Choose keyboard**, pick **ThorPad keyboard**. Then whenever a
-  text box on the top screen asks for a keyboard, ThorPad's keyboard opens on the bottom screen (and
-  the trackpad opens too if it was closed), with no other keyboard popping up on the top screen. Keys
+  text box on the top screen asks for a keyboard, ThorPad's keyboard opens on the bottom screen (if
+  ThorPad is closed, just the keyboard appears over whatever is there), with no other keyboard popping up on the top screen. Keys
   go straight into the text box. When the top screen leaves the text box (or the app hides its
   keyboard, e.g. after Search, or with Shizuku you tap outside the text box), the keyboard closes again; one opened with the **Keyboard** button
-  stays open until you close it. If ThorPad wasn't on the bottom screen
-  when the text box opened it, the bottom screen goes back to the app that was there. With Shizuku, ThorPad switches keyboards for you; without it,
+  stays open until you close it. When a keyboard shown over another app
+  closes, that app is right where you left it. With Shizuku, ThorPad switches keyboards for you; without it,
   Android asks you to turn the keyboard on and pick it. Text boxes drawn inside a Windows game in
   GameNative aren't Android text boxes, so open the keyboard yourself there.
 - 🔌 Where the keys go: with ThorPad keyboard picked, straight into the selected text box. Otherwise, in

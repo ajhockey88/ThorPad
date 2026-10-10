@@ -10,8 +10,9 @@ import android.view.inputmethod.InputConnection;
 
 /**
  * ThorPad as an Android keyboard. Picked as the keyboard in Settings, it shows nothing on the
- * top screen: when a text box there asks for a keyboard, it opens ThorPad's keyboard on the
- * bottom screen instead, and that keyboard types straight into the text box.
+ * top screen: when a text box there asks for a keyboard, it shows ThorPad's keyboard on the
+ * bottom screen instead (in the trackpad, or on its own when the trackpad is closed), and that
+ * keyboard types straight into the text box.
  */
 public class ThorPadIme extends InputMethodService implements KeyOutput {
     /** Told when a text box asks for the keyboard; set while the trackpad is open. */
@@ -34,6 +35,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         @Override public void run() {
             Listener l = listener;
             KeyboardLog.add("done, trackpad " + (l != null ? "open" : "closed"));
+            hideOverlay();
             if (l != null) l.onKeyboardDone();
         }
     };
@@ -48,11 +50,92 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         Listener l = listener;
         KeyboardLog.add("ask for keyboard, trackpad " + (l != null ? "open" : "closed"));
         if (l != null) {
+            hideOverlay();
             l.onKeyboardWanted();
         } else {
-            // ThorPad isn't open: bring up the trackpad with its keyboard showing.
-            LauncherActivity.openTrackpad(this, true);
+            showOverlay();
         }
+    }
+
+    // ---- Keyboard on the bottom screen while the trackpad is closed ------------------------
+
+    private KeyboardOverlay overlay;
+    private TouchWatcher overlayTaps;
+
+    /**
+     * ThorPad isn't open: show just the keyboard on the bottom screen, in a window that never
+     * takes focus, so the top screen's text box keeps listening. Opening the trackpad instead
+     * pulled focus to the bottom screen and the typed text went nowhere.
+     */
+    private void showOverlay() {
+        if (overlay == null) {
+            overlay = new KeyboardOverlay(this, new KeyboardOverlay.Listener() {
+                @Override public void onOverlayClosed() {
+                    stopOverlayTaps();
+                    if (isInputViewShown()) requestHideSelf(0);
+                }
+            });
+        }
+        if (overlay.isShowing()) return;
+        if (overlay.show(this)) {
+            watchOverlayTaps();
+            return;
+        }
+        if (KeyboardOverlay.allowed(this) || !ShizukuClient.hasPermission()) {
+            openTrackpadInstead();
+            return;
+        }
+        // Drawing over other apps isn't allowed yet: Shizuku can allow it, once.
+        new Thread(new Runnable() {
+            @Override public void run() {
+                ShizukuClient.runShell("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow");
+                handler.post(new Runnable() {
+                    @Override public void run() {
+                        if (!inputStarted || listener != null) return;
+                        if (overlay.show(ThorPadIme.this)) watchOverlayTaps();
+                        else openTrackpadInstead();
+                    }
+                });
+            }
+        }, "ThorPad overlay permission").start();
+    }
+
+    private void openTrackpadInstead() {
+        KeyboardLog.add("overlay not possible, opening trackpad");
+        LauncherActivity.openTrackpad(this, true);
+    }
+
+    private void hideOverlay() {
+        stopOverlayTaps();
+        if (overlay != null) overlay.hide();
+    }
+
+    /** A tap on the top screen outside the text box closes the keyboard, as in the trackpad. */
+    private void watchOverlayTaps() {
+        if (overlayTaps == null) {
+            overlayTaps = new TouchWatcher(new TouchWatcher.Listener() {
+                @Override public void onTap(String device, final long downAt) {
+                    // Taps on the keyboard itself are the bottom screen's.
+                    if (overlay == null || Math.abs(downAt - overlay.lastTouchAt) < 250) return;
+                    handler.postDelayed(new Runnable() {
+                        @Override public void run() {
+                            if (overlay == null || !overlay.isShowing()) return;
+                            if (Math.abs(downAt - overlay.lastTouchAt) < 250) return;
+                            if (lastTextBoxActivity < downAt) {
+                                KeyboardLog.add("overlay: tap outside the text box");
+                                hideOverlay();
+                                if (isInputViewShown()) requestHideSelf(0);
+                            }
+                        }
+                    }, 350);
+                }
+            });
+        }
+        overlayTaps.start();
+    }
+
+    private void stopOverlayTaps() {
+        if (overlayTaps != null) overlayTaps.stop();
     }
 
     private void doneSoon() {
@@ -97,6 +180,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     /** The text was sent: close the bottom keyboard now. */
     private void finished() {
         handler.removeCallbacks(done);
+        hideOverlay();
         Listener l = listener;
         if (l != null) l.onKeyboardDone();
     }
@@ -114,7 +198,16 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         if (ime != null && ime.isInputViewShown()) ime.requestHideSelf(0);
     }
 
-    static void setListener(Listener l) { listener = l; }
+    static void setListener(Listener l) {
+        listener = l;
+        // The trackpad opened: it has its own keyboard.
+        final ThorPadIme ime = instance;
+        if (l != null && ime != null) {
+            ime.handler.post(new Runnable() {
+                @Override public void run() { ime.hideOverlay(); }
+            });
+        }
+    }
 
     /** The ThorPad keyboard, while it is the keyboard for a selected text box; else null. */
     static ThorPadIme active() {
@@ -131,6 +224,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     @Override
     public void onDestroy() {
         if (instance == this) instance = null;
+        hideOverlay();
         super.onDestroy();
     }
 

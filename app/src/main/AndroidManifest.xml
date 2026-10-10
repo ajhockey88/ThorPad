@@ -12,6 +12,8 @@
     <!-- Only for Settings > Check for updates: reads ThorPad's GitHub releases. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Shows the keyboard on the bottom screen over other apps when the trackpad is closed. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
