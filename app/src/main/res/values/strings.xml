@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ThorPad</string>
+    <string name="settings_title">ThorPad settings</string>
+    <string name="service_label">ThorPad trackpad</string>
+    <string name="service_description">Lets ThorPad show a mouse pointer on the top screen and click, drag and scroll where it points, using the bottom screen as a trackpad. ThorPad does not read what is on your screen.</string>
+</resources>

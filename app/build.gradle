@@ -1,0 +1,25 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.thorpad"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.thorpad"
+        minSdk 31
+        targetSdk 33
+        versionCode 2
+        versionName "1.1"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation "dev.rikka.shizuku:aidl:13.1.5"
+}
