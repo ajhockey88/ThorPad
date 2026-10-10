@@ -42,13 +42,7 @@ public class SettingsActivity extends Activity {
         // Settings has no text boxes: never let a keyboard window cover it.
         getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        // Long notes scroll, so the buttons always stay on screen.
-        final int maxH = (int) (getResources().getDisplayMetrics().heightPixels * 0.55f);
-        ScrollView scroll = new ScrollView(this) {
-            @Override protected void onMeasure(int w, int h) {
-                super.onMeasure(w, MeasureSpec.makeMeasureSpec(maxH, MeasureSpec.AT_MOST));
-            }
-        };
+        ScrollView scroll = new ScrollView(this);
         scroll.setBackgroundColor(Color.BLACK);
         list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
