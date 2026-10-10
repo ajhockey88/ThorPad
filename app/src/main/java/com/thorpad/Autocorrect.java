@@ -54,7 +54,7 @@ final class Autocorrect {
 
     private static Autocorrect instance;
 
-    private final Map<String, Integer> freq = new HashMap<>(120000);
+    private final Map<String, Integer> freq = new HashMap<>(180000);
     private final Set<String> learned = new HashSet<>();
     private final SharedPreferences store;
     private volatile boolean loaded;
@@ -82,7 +82,7 @@ final class Autocorrect {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(
                 context.getAssets().open("words.txt"), StandardCharsets.UTF_8), 1 << 16)) {
             String line;
-            Map<String, Integer> map = new HashMap<>(120000);
+            Map<String, Integer> map = new HashMap<>(180000);
             while ((line = in.readLine()) != null) {
                 if (line.isEmpty() || line.charAt(0) == '#') continue;
                 int tab = line.indexOf('\t');

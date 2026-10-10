@@ -153,7 +153,7 @@ download the new APK. Nothing else is sent anywhere. In touch mode it reads only
 ## 🙏 Credits
 
 The autocorrect dictionary (`app/src/main/assets/words.txt`, built by `tools/make_dictionary.py`)
-takes its spellings from SCOWL's American English word list and its word frequencies from
+takes its spellings from SCOWL's "huge" American English word list (about 133,000 words with names, brands and gaming terms) and its word frequencies from
 [wordfreq](https://github.com/rspeer/wordfreq) (data licensed CC BY-SA 4.0).
 
 ## 🏗️ Building
