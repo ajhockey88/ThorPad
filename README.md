@@ -21,6 +21,8 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings"> |
 | ⌨️ Choose keyboard | 🎉 Update available, with what's new |
 | <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/update-available.png" width="400" alt="Update available screen with the release notes"> |
+| 🖥️ PC keys (for Moonlight) | ✨ Mode menu: Auto, Android or PC |
+| <img src="docs/screenshots/pc-keys.png" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> | <img src="docs/screenshots/mode-menu.png" width="400" alt="Mode menu with Auto, Android, PC and Go home"> |
 | 🚀 First-run setup | |
 | <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> | |
 
@@ -40,7 +42,29 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 
 The bottom of the trackpad lists these gestures in three columns: one, two and three fingers.
 
-The bar along the top has ⌨️ Keyboard, 🏠 Home, 🗂️ Apps (recents), ⚙️ Settings and ✖️ Close.
+The bar along the top has ⌨️ Keyboard, ✨ the mode menu, 🖥️ PC keys, ⚙️ Settings and ✖️ Close.
+
+## 🖥️ PC mode (Moonlight and other PC streaming)
+
+When the top screen is streaming a PC, gestures act on the PC instead of on Android (mouse mode
+only, as the shortcuts go through the virtual keyboard):
+
+| On the bottom screen | On the PC |
+|---|---|
+| 👉 / 👈 Two fingers swiped right / left | Back / forward (Alt+← / Alt+→, which every PC browser understands) |
+| 🤟 Three fingers swiped up | Task view (Win+Tab) |
+| 🤟 Three fingers swiped down | Show the desktop (Win+D) |
+| 🤟 Three fingers swiped left or right | Switch app (Alt+Tab) |
+
+- ✨ **Mode menu** (second button in the top bar): **Auto** switches to PC controls whenever
+  Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on the top screen;
+  **Android** and **PC** fix the mode. **Always PC for (app)** adds any other app. **Go home**
+  shows the Android home screen. In Auto, ThorPad checks the top-screen app when you start
+  touching the trackpad (at most every few seconds), never in the background.
+- 🖥️ **PC keys** (third button): Esc, F1 to F12, one-tap Alt+Tab, Win+Tab, Win+D, Alt+F4,
+  Ctrl+Shift+Esc and Print Screen, Home / End / Page Up / Page Down / Delete / Backspace and arrows.
+  Ctrl, Alt, Shift and Win stay held after a tap and go with the next key, for any combo.
+  **ABC** switches to the normal keyboard.
 
 📳 **Haptics:** you feel a buzz for every action: taps, right clicks, the start and end of a drag,
 press and hold, each scroll-wheel notch, back/forward and three-finger swipes, every keyboard key, Clear all, and the top-bar buttons.

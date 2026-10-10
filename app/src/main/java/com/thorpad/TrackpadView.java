@@ -46,6 +46,27 @@ final class TrackpadView extends View {
     private Prefs prefs;
     private PadOutput output;
 
+    /** Sends PC shortcuts while a PC is being streamed (Moonlight and the like). */
+    interface PcShortcuts {
+        /** Whether gestures should act on a PC right now. */
+        boolean pcActive();
+        void pcKeys(int... codes);
+    }
+
+    private PcShortcuts pc;
+    private boolean pcHints;
+
+    void setPcShortcuts(PcShortcuts pc) { this.pc = pc; }
+
+    /** Shows the PC versions of the gesture hints. */
+    void setPcHints(boolean on) {
+        if (pcHints == on) return;
+        pcHints = on;
+        invalidate();
+    }
+
+    private boolean pc() { return pc != null && pc.pcActive(); }
+
     private int state = DONE;
     private long downAt;
     private long lastTapUpAt;
@@ -113,6 +134,11 @@ final class TrackpadView extends View {
             {"Up / down", "scroll", "Tap", "right click", "Swipe right", "back", "Swipe left", "forward"},
             {"Swipe up", "recent apps", "Swipe down", "close app"},
     };
+    private static final String[][] PC_HINTS = {
+            HINTS[0],
+            {"Up / down", "scroll", "Tap", "right click", "Swipe right", "back (Alt+←)", "Swipe left", "forward (Alt+→)"},
+            {"Swipe up", "task view", "Swipe down", "show desktop", "Swipe left / right", "switch app"},
+    };
 
     /** The gesture cheat sheet along the bottom: one column per number of fingers. */
     private void drawHints(Canvas canvas) {
@@ -137,13 +163,14 @@ final class TrackpadView extends View {
             label.setFakeBoldText(false);
             label.setTextSize(19 * u);
             y += titleH - 20 * u + 19 * u;
-            for (int i = 0; i < HINTS[c].length; i += 2) {
-                String key = HINTS[c][i] + ": ";
+            String[] hints = (pcHints ? PC_HINTS : HINTS)[c];
+            for (int i = 0; i < hints.length; i += 2) {
+                String key = hints[i] + ": ";
                 label.setColor(Color.argb(140, 255, 255, 255));
                 canvas.drawText(key, x, y, label);
                 float w = label.measureText(key);
                 label.setColor(Color.argb(97, 255, 255, 255));
-                canvas.drawText(HINTS[c][i + 1], x + w, y, label);
+                canvas.drawText(hints[i + 1], x + w, y, label);
                 y += rowH;
             }
         }
@@ -198,8 +225,15 @@ final class TrackpadView extends View {
                     if (ev.getPointerCount() < 3) return true;
                     float dx = (ev.getX(0) + ev.getX(1) + ev.getX(2)) / 3f - threeStartX;
                     float dy = (ev.getY(0) + ev.getY(1) + ev.getY(2)) / 3f - threeStartY;
-                    if (Math.abs(dy) > SWIPE_DP * density && Math.abs(dy) > 1.5f * Math.abs(dx)) {
-                        if (dy < 0) {
+                    if (pc() && Math.abs(dx) > SWIPE_DP * density && Math.abs(dx) > 1.5f * Math.abs(dy)) {
+                        pc.pcKeys(VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_TAB); // switch app
+                        buzz(Haptics.THREE_FINGER);
+                        state = DONE;
+                    } else if (Math.abs(dy) > SWIPE_DP * density && Math.abs(dy) > 1.5f * Math.abs(dx)) {
+                        if (pc()) {
+                            // Task view, or show the desktop.
+                            pc.pcKeys(VirtualKeyboard.KEY_LEFTMETA, dy < 0 ? VirtualKeyboard.KEY_TAB : VirtualKeyboard.KEY_D);
+                        } else if (dy < 0) {
                             if (s != null) s.recents();
                         } else if (ShizukuClient.hasPermission()) {
                             TopApp.close(getContext());
@@ -225,7 +259,12 @@ final class TrackpadView extends View {
                     }
                     if (swiping) {
                         if (Math.abs(sideways) > SWIPE_DP * density) {
-                            if (s != null) {
+                            if (pc()) {
+                                // PC browsers' back and forward keys; streaming apps may not
+                                // pass a mouse's side buttons on.
+                                pc.pcKeys(VirtualKeyboard.KEY_LEFTALT,
+                                        sideways > 0 ? VirtualKeyboard.KEY_LEFT : VirtualKeyboard.KEY_RIGHT);
+                            } else if (s != null) {
                                 if (sideways > 0) s.navigateBack();
                                 else s.navigateForward();
                             }

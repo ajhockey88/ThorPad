@@ -14,6 +14,10 @@ final class Prefs {
     static final String KEY_AUTOCORRECT = "autocorrect";
     static final String KEY_TYPE_ON_RELEASE = "type_on_release";
     static final String KEY_DIM_WHEN_IDLE = "dim_when_idle";
+    static final String KEY_PC_MODE = "pc_mode";
+    static final String KEY_PC_APPS = "pc_apps";
+    /** PC controls: switch automatically for streaming apps, never, or always. */
+    static final int PC_AUTO = 0, PC_NEVER = 1, PC_ALWAYS = 2;
 
     private final SharedPreferences sp;
 
@@ -40,4 +44,15 @@ final class Prefs {
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
     /** Turn the trackpad screen's brightness right down after a while without a touch. */
     boolean dimWhenIdle() { return sp.getBoolean(KEY_DIM_WHEN_IDLE, true); }
+    int pcMode() { return sp.getInt(KEY_PC_MODE, PC_AUTO); }
+    void setPcMode(int mode) { sp.edit().putInt(KEY_PC_MODE, mode).apply(); }
+    /** Apps the user marked as PC streaming apps, on top of the ones ThorPad knows. */
+    java.util.Set<String> pcApps() {
+        return new java.util.HashSet<>(sp.getStringSet(KEY_PC_APPS, java.util.Collections.<String>emptySet()));
+    }
+    void setPcApp(String pkg, boolean pc) {
+        java.util.Set<String> apps = pcApps();
+        if (pc) apps.add(pkg); else apps.remove(pkg);
+        sp.edit().putStringSet(KEY_PC_APPS, apps).apply();
+    }
 }

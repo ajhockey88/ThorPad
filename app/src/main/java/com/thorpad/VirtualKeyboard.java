@@ -9,9 +9,17 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
     private static final int KEY_LEFTCTRL = 29;
     private static final int KEY_A = 30;
     private static final int KEY_BACKSPACE = 14;
+    /** Linux key codes for PC keys and shortcuts. */
+    static final int KEY_ESC = 1, KEY_TAB = 15, KEY_D = 32, KEY_LEFTALT = 56, KEY_LEFTMETA = 125,
+            KEY_LCTRL = 29, KEY_LSHIFT = 42, KEY_F4 = 62, KEY_SYSRQ = 99,
+            KEY_HOME = 102, KEY_UP = 103, KEY_PAGEUP = 104, KEY_LEFT = 105, KEY_RIGHT = 106,
+            KEY_END = 107, KEY_DOWN = 108, KEY_PAGEDOWN = 109, KEY_INSERT = 110, KEY_DELETE = 111,
+            KEY_BKSP = 14;
+    /** F1 to F12. */
+    static final int[] KEY_F = {59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 87, 88};
 
     /** Linux key code for each printable ASCII character; negative = needs Shift. */
-    private static final int[] ASCII = new int[128];
+    private static final int[] ASCII = new int[160];
 
     static {
         String letters = "abcdefghijklmnopqrstuvwxyz";
@@ -61,11 +69,13 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
     }
 
     private static int[] allKeyCodes() {
-        int[] codes = new int[128];
+        int[] codes = new int[160];
         int n = 0;
         codes[n++] = KEY_LEFTSHIFT;
         codes[n++] = KEY_LEFTCTRL;
-        for (int code : new int[] {28, 14, 15, 1, 105, 106, 103, 108}) codes[n++] = code;
+        for (int code : new int[] {28, 14, 15, 1, 105, 106, 103, 108, KEY_LEFTALT, KEY_LEFTMETA,
+                KEY_SYSRQ, KEY_HOME, KEY_PAGEUP, KEY_END, KEY_PAGEDOWN, KEY_INSERT, KEY_DELETE}) codes[n++] = code;
+        for (int code : KEY_F) codes[n++] = code;
         boolean[] seen = new boolean[256];
         for (int v : ASCII) {
             int c = Math.abs(v);
@@ -106,6 +116,12 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
         }
         int code = specialCode(key);
         if (code != 0) press(code);
+    }
+
+    /** A shortcut: presses the keys in order (modifiers first), then lets go in reverse. */
+    void combo(int... codes) {
+        for (int c : codes) send(EV_KEY, c, 1);
+        for (int i = codes.length - 1; i >= 0; i--) send(EV_KEY, codes[i], 0);
     }
 
     /** Down and up as two reports, queued in order so quick repeats of a key never merge. */

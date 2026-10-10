@@ -22,6 +22,49 @@ final class TopApp {
 
     private TopApp() {}
 
+    private static final String[] PC_STREAMING_APPS = {
+            "com.valvesoftware.steamlink", "com.parsec.app", "com.microsoft.rdc.androidx",
+            "com.microsoft.rdc.android", "com.google.chromeremotedesktop", "com.carriez.flutter_hbb",
+    };
+
+    /**
+     * Whether an app streams a PC: Moonlight and its forks (which keep Moonlight's code even
+     * when renamed), Steam Link, Parsec, remote desktop apps, or one the user added.
+     */
+    static boolean streamsPc(String pkg, String cls, java.util.Set<String> userApps) {
+        if (pkg == null) return false;
+        if (userApps.contains(pkg)) return true;
+        String p = pkg.toLowerCase(java.util.Locale.US);
+        if (p.contains("moonlight") || p.contains("limelight")) return true;
+        if (cls != null && cls.startsWith("com.limelight.")) return true;
+        for (String a : PC_STREAMING_APPS) if (a.equals(pkg)) return true;
+        return false;
+    }
+
+    static String label(Context context, String pkg) {
+        try {
+            return context.getPackageManager().getApplicationLabel(
+                    context.getPackageManager().getApplicationInfo(pkg, 0)).toString();
+        } catch (Exception e) {
+            return pkg;
+        }
+    }
+
+    /**
+     * The app on the given display: {package, activity class}, or null. Needs Shizuku and runs
+     * a shell command, so call it off the main thread.
+     */
+    static String[] on(int displayId) {
+        String dump = output("dumpsys activity activities | grep -E 'Display #|ResumedActivity|\\* Hist'");
+        Matcher m = resumedOn(dump, displayId);
+        if (m == null) return null;
+        String component = m.group(0).substring(m.group(0).indexOf(' ') + 1);
+        String cls = component.substring(component.indexOf('/') + 1);
+        cls = cls.substring(0, cls.lastIndexOf(" t"));
+        if (cls.startsWith(".")) cls = m.group(1) + cls;
+        return new String[] {m.group(1), cls};
+    }
+
     static void close(final Context context) {
         final Display target = Displays.pointerDisplay(context);
         final int displayId = target != null ? target.getDisplayId() : Display.DEFAULT_DISPLAY;
@@ -68,14 +111,6 @@ final class TopApp {
         return first;
     }
 
-    private static String label(Context context, String pkg) {
-        try {
-            return context.getPackageManager().getApplicationLabel(
-                    context.getPackageManager().getApplicationInfo(pkg, 0)).toString();
-        } catch (Exception e) {
-            return pkg;
-        }
-    }
 
     private static void toast(final Context context, final String text) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {

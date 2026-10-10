@@ -8,10 +8,12 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -32,7 +35,7 @@ import android.widget.TextView;
  */
 public class TrackpadActivity extends Activity
         implements ShizukuClient.Listener, UinputDevice.StateListener, KeyboardView.Listener,
-        ThorPadIme.Listener {
+        ThorPadIme.Listener, PcKeysView.Listener, TrackpadView.PcShortcuts {
     static final String EXTRA_OPEN_KEYBOARD = "open_keyboard";
 
     private TrackpadView pad;
@@ -43,6 +46,8 @@ public class TrackpadActivity extends Activity
     private VirtualMouse mouse;
     private VirtualKeyboard keyboardDevice;
     private KeyboardView keyboard;
+    private PcKeysView pcKeys;
+    private Button modeButton;
     private String mouseError;
     private boolean started;
     /** Open the keyboard as soon as the trackpad is up (asked for by the ThorPad keyboard). */
@@ -72,11 +77,12 @@ public class TrackpadActivity extends Activity
         bar.addView(barButton("Keyboard", new View.OnClickListener() {
             @Override public void onClick(View v) { openKeyboard(); }
         }), weight());
-        bar.addView(barButton("Home", new View.OnClickListener() {
-            @Override public void onClick(View v) { PadOutput o = currentOutput(); if (o != null) o.home(); }
-        }), weight());
-        bar.addView(barButton("Apps", new View.OnClickListener() {
-            @Override public void onClick(View v) { PadOutput o = currentOutput(); if (o != null) o.recents(); }
+        modeButton = barButton("", new View.OnClickListener() {
+            @Override public void onClick(View v) { showModeMenu(); }
+        });
+        bar.addView(modeButton, weight());
+        bar.addView(barButton("PC keys", new View.OnClickListener() {
+            @Override public void onClick(View v) { openPcKeys(); }
         }), weight());
         bar.addView(barButton("Settings", new View.OnClickListener() {
             @Override public void onClick(View v) { startActivity(new Intent(TrackpadActivity.this, SettingsActivity.class)); }
@@ -88,6 +94,7 @@ public class TrackpadActivity extends Activity
 
         FrameLayout padArea = new FrameLayout(this);
         pad = new TrackpadView(this);
+        pad.setPcShortcuts(this);
         padArea.addView(pad, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         modeLabel = new TextView(this);
@@ -110,6 +117,11 @@ public class TrackpadActivity extends Activity
         keyboard.setListener(this);
         keyboard.setVisibility(View.GONE);
         frame.addView(keyboard, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        pcKeys = new PcKeysView(this);
+        pcKeys.setListener(this);
+        pcKeys.setVisibility(View.GONE);
+        frame.addView(pcKeys, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         setContentView(frame);
@@ -166,6 +178,7 @@ public class TrackpadActivity extends Activity
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) swallowTouch = false;
             return true;
         }
+        if (action == MotionEvent.ACTION_DOWN) checkTopApp(false);
         return super.dispatchTouchEvent(ev);
     }
 
@@ -176,8 +189,203 @@ public class TrackpadActivity extends Activity
         if (level >= TRIM_MEMORY_UI_HIDDEN) Autocorrect.release();
     }
 
+    // ---- PC mode ----------------------------------------------------------------------------
+    // While a PC is streamed (Moonlight, a fork of it, Steam Link...), gestures send Windows
+    // shortcuts through the virtual keyboard. Which app is on the top screen is checked when a
+    // touch starts (at most every few seconds), never in the background.
+
+    private static final long TOP_CHECK_EVERY_MS = 3000;
+    private HandlerThread topThread;
+    private Handler topHandler;
+    private long lastTopCheck;
+    private String topPackage, topLabel;
+    private boolean topStreamsPc;
+
+    private void checkTopApp(boolean force) {
+        if (!mouse.isReady() || new Prefs(this).pcMode() != Prefs.PC_AUTO) return;
+        long now = SystemClock.uptimeMillis();
+        if (!force && now - lastTopCheck < TOP_CHECK_EVERY_MS) return;
+        lastTopCheck = now;
+        if (topThread == null) {
+            topThread = new HandlerThread("ThorPad top app");
+            topThread.start();
+            topHandler = new Handler(topThread.getLooper());
+        }
+        Display target = Displays.pointerDisplay(this);
+        final int displayId = target != null ? target.getDisplayId() : Display.DEFAULT_DISPLAY;
+        topHandler.post(new Runnable() {
+            @Override public void run() {
+                final String[] top = TopApp.on(displayId);
+                runOnUiThread(new Runnable() {
+                    @Override public void run() { onTopApp(top); }
+                });
+            }
+        });
+    }
+
+    private void onTopApp(String[] top) {
+        if (top == null || top[0].equals(getPackageName())) return; // keep the last answer
+        topPackage = top[0];
+        topLabel = TopApp.label(this, top[0]);
+        topStreamsPc = TopApp.streamsPc(top[0], top[1], new Prefs(this).pcApps());
+        refresh();
+    }
+
+    @Override
+    public boolean pcActive() {
+        if (!mouse.isReady()) return false; // PC shortcuts go through the virtual keyboard
+        switch (new Prefs(this).pcMode()) {
+            case Prefs.PC_ALWAYS: return true;
+            case Prefs.PC_NEVER: return false;
+            default: return topStreamsPc;
+        }
+    }
+
+    @Override
+    public void pcKeys(int... codes) {
+        if (!mouse.isReady()) return;
+        if (!keyboardDevice.isStartingOrReady()) keyboardDevice.start(); // keys queue meanwhile
+        keyboardDevice.combo(codes);
+    }
+
+    /** The virtual keyboard stays plugged in while something might type on it. */
+    private void updateKeyboardDevice() {
+        boolean needed = mouse.isReady() && (keyboard.getVisibility() == View.VISIBLE
+                || pcKeys.getVisibility() == View.VISIBLE || pcActive());
+        if (needed && ThorPadIme.active() == null) {
+            if (!keyboardDevice.isStartingOrReady()) keyboardDevice.start();
+        } else if (!needed && keyboardDevice.isStartingOrReady()) {
+            keyboardDevice.stop(); // unplug, so the top screen's own touch keyboard works again
+        }
+    }
+
+    private void openPcKeys() {
+        if (!mouse.isReady()) {
+            android.widget.Toast.makeText(this, "PC keys need mouse mode (Shizuku)",
+                    android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+        pcKeys.reset();
+        pad.setOutput(null);
+        pcKeys.setVisibility(View.VISIBLE);
+        updateKeyboardDevice();
+    }
+
+    @Override
+    public void onPcKeys(int... codes) { pcKeys(codes); }
+
+    @Override
+    public void onPcKeysLetters() {
+        pcKeys.setVisibility(View.GONE);
+        openKeyboard();
+    }
+
+    @Override
+    public void onPcKeysClose() {
+        pcKeys.setVisibility(View.GONE);
+        pcKeys.reset();
+        updateKeyboardDevice();
+        refresh();
+    }
+
+    private String modeButtonText() {
+        int mode = new Prefs(this).pcMode();
+        if (mode == Prefs.PC_ALWAYS) return "🖥️ PC ▾";
+        if (mode == Prefs.PC_NEVER) return "📱 Android ▾";
+        return topStreamsPc ? "🖥️ Auto: PC ▾" : "✨ Auto ▾";
+    }
+
+    private PopupWindow modeMenu;
+
+    private void showModeMenu() {
+        final Prefs prefs = new Prefs(this);
+        float d = getResources().getDisplayMetrics().density;
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(0x1c, 0x1f, 0x26));
+        bg.setStroke(Math.max(1, (int) d), Color.rgb(0x2e, 0x34, 0x40));
+        bg.setCornerRadius(12 * d);
+        list.setBackground(bg);
+        list.setClipToOutline(true);
+        int mode = prefs.pcMode();
+        list.addView(menuRow("✨ Auto", "PC controls when Moonlight, Steam Link, Parsec or another "
+                + "PC streaming app is on the top screen", mode == Prefs.PC_AUTO, new Runnable() {
+            @Override public void run() { setPcMode(Prefs.PC_AUTO); }
+        }));
+        list.addView(menuRow("📱 Android", "Recent apps, close app, Android back", mode == Prefs.PC_NEVER,
+                new Runnable() {
+                    @Override public void run() { setPcMode(Prefs.PC_NEVER); }
+                }));
+        list.addView(menuRow("🖥️ PC", "Task view, desktop, Alt+Tab, Alt+← back", mode == Prefs.PC_ALWAYS,
+                new Runnable() {
+                    @Override public void run() { setPcMode(Prefs.PC_ALWAYS); }
+                }));
+        if (topPackage != null) {
+            final String pkg = topPackage;
+            final boolean added = prefs.pcApps().contains(pkg);
+            if (added || !topStreamsPc) {
+                list.addView(menuRow(added ? "✕ Stop PC for " + topLabel : "➕ Always PC for " + topLabel,
+                        added ? "Use Android controls for this app again"
+                                : "Treat this app as a PC streaming app in Auto", false, new Runnable() {
+                            @Override public void run() {
+                                prefs.setPcApp(pkg, !added);
+                                topStreamsPc = !added;
+                                setPcMode(Prefs.PC_AUTO);
+                            }
+                        }));
+            }
+        }
+        list.addView(menuRow("🏠 Go home", "Android home screen on the top screen", false, new Runnable() {
+            @Override public void run() {
+                PadOutput o = currentOutput();
+                if (o != null) o.home();
+            }
+        }));
+        int w = (int) (getResources().getDisplayMetrics().widthPixels * 0.47f);
+        // Not focusable: the app on the top screen keeps focus (and its mouse capture).
+        modeMenu = new PopupWindow(list, w, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        modeMenu.setOutsideTouchable(true);
+        modeMenu.setElevation(16 * d);
+        modeMenu.showAsDropDown(modeButton, 0, (int) (4 * d));
+    }
+
+    private View menuRow(String title, String detail, boolean selected, final Runnable action) {
+        float d = getResources().getDisplayMetrics().density;
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        int p = (int) (12 * d);
+        row.setPadding(p, (int) (10 * d), p, (int) (10 * d));
+        if (selected) row.setBackgroundColor(Color.rgb(0x1f, 0x3a, 0x52));
+        TextView t = new TextView(this);
+        t.setText(selected ? title + "   ✓" : title);
+        t.setTextSize(16);
+        t.setTextColor(selected ? Color.WHITE : Color.rgb(0xe8, 0xe8, 0xe8));
+        row.addView(t);
+        TextView s = new TextView(this);
+        s.setText(detail);
+        s.setTextSize(11);
+        s.setTextColor(selected ? Color.rgb(0x9f, 0xc3, 0xdd) : Color.rgb(0x8a, 0x90, 0x9b));
+        row.addView(s);
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Haptics.play(TrackpadActivity.this, Haptics.BAR);
+                if (modeMenu != null) modeMenu.dismiss();
+                action.run();
+            }
+        });
+        return row;
+    }
+
+    private void setPcMode(int mode) {
+        new Prefs(this).setPcMode(mode);
+        if (mode == Prefs.PC_AUTO) checkTopApp(true);
+        refresh();
+    }
+
     @Override
     protected void onDestroy() {
+        if (topThread != null) topThread.quitSafely();
         ShizukuClient.removeListener(this);
         mouse.quit();
         keyboardDevice.quit();
@@ -303,6 +511,7 @@ public class TrackpadActivity extends Activity
     @Override
     protected void onResume() {
         super.onResume();
+        checkTopApp(true);
         refresh();
     }
 
@@ -323,6 +532,9 @@ public class TrackpadActivity extends Activity
         // Unplug the virtual mouse and hide the overlay pointer while the trackpad is away.
         mouse.stop();
         onCloseKeyboard();
+        if (pcKeys.getVisibility() == View.VISIBLE) onPcKeysClose();
+        if (modeMenu != null) modeMenu.dismiss();
+        keyboardDevice.stop();
         ThorPadService s = ThorPadService.get();
         if (s != null) s.hidePointer();
         pad.setOutput(null);
@@ -411,7 +623,7 @@ public class TrackpadActivity extends Activity
         keyboard.setVisibility(View.GONE);
         keyboard.setOutput(null);
         keyboard.setAutocorrect(null); // lets the word list be freed while the keyboard is shut
-        keyboardDevice.stop(); // unplug, so the top screen's own touch keyboard works again
+        updateKeyboardDevice();
         refresh();
     }
 
@@ -445,7 +657,16 @@ public class TrackpadActivity extends Activity
             out = null; // waiting for the virtual mouse, or nothing set up yet
             modeLabel.setText(shizukuReady && mouseError == null ? "Starting mouse…" : "");
         }
-        pad.setOutput(keyboard.getVisibility() == View.VISIBLE ? null : out);
+        boolean covered = keyboard.getVisibility() == View.VISIBLE || pcKeys.getVisibility() == View.VISIBLE;
+        pad.setOutput(covered ? null : out);
+        boolean pc = pcActive();
+        pad.setPcHints(pc);
+        modeButton.setText(modeButtonText());
+        if (pc && out == mouse) {
+            modeLabel.setText("Mouse mode · PC controls" + (new Prefs(this).pcMode() == Prefs.PC_AUTO
+                    && topLabel != null ? " (" + topLabel + ")" : ""));
+        }
+        updateKeyboardDevice();
 
         if (mouseError != null) {
             mouseStatus.setText("The virtual mouse couldn't start: " + mouseError);
