@@ -14,6 +14,10 @@ interface PadOutput {
     /** dy is in trackpad pixels, already scaled and signed for the user's scroll direction. */
     void scrollBy(float dy);
     void scrollEnd();
+    /** Two-finger swipe right: back, like a browser's back button. */
+    void navigateBack();
+    /** Two-finger swipe left: forward. */
+    void navigateForward();
     void back();
     void home();
     void recents();

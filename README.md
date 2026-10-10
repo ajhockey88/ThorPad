@@ -30,12 +30,14 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | 👆 Tap | Click (a tap still counts if your finger rolls a little) |
 | ✊ Tap, then quickly touch again, pause a moment, and slide | Drag (press, move, release) |
 | ✌️ Two fingers up or down | Mouse wheel (real wheel notches in mouse mode) |
+| 👉 Two fingers swiped right | Back, like a browser's back button (the mouse's back side button in mouse mode) |
+| 👈 Two fingers swiped left | Forward (the mouse's forward side button; mouse mode only) |
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 
 The bar along the top has ⌨️ Keyboard, 🏠 Home, 🗂️ Apps (recents), ⚙️ Settings and ✖️ Close.
 
 📳 **Haptics:** you feel a buzz for every action: taps, right clicks, the start and end of a drag,
-press and hold, each scroll-wheel notch, every keyboard key, Clear all, and the top-bar buttons.
+press and hold, each scroll-wheel notch, back/forward swipes, every keyboard key, Clear all, and the top-bar buttons.
 In Settings > Haptics, each action gets its own feel (Off, Tick, Click, Heavy, Double or Buzz) and
 strength, and every change plays a preview.
 

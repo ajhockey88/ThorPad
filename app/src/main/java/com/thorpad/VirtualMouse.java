@@ -7,7 +7,7 @@ package com.thorpad;
  */
 final class VirtualMouse extends UinputDevice implements PadOutput {
     private static final int REL_X = 0, REL_Y = 1, REL_HWHEEL = 6, REL_WHEEL = 8;
-    private static final int BTN_LEFT = 272, BTN_RIGHT = 273, BTN_MIDDLE = 274;
+    private static final int BTN_LEFT = 272, BTN_RIGHT = 273, BTN_MIDDLE = 274, BTN_SIDE = 275, BTN_EXTRA = 276;
     private static final int KEY_BACK = 158, KEY_HOMEPAGE = 172, KEY_APPSELECT = 580;
     /**
      * How long a click holds the button. Like a real mouse click (~80-120 ms), it must span
@@ -23,7 +23,7 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     VirtualMouse(float density, StateListener listener) {
         super("ThorPad Mouse", 22137,
                 bits(UI_SET_EVBIT, EV_KEY, EV_REL) + ","
-                        + bits(UI_SET_KEYBIT, BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_BACK, KEY_HOMEPAGE, KEY_APPSELECT) + ","
+                        + bits(UI_SET_KEYBIT, BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, BTN_SIDE, BTN_EXTRA, KEY_BACK, KEY_HOMEPAGE, KEY_APPSELECT) + ","
                         + bits(UI_SET_RELBIT, REL_X, REL_Y, REL_WHEEL, REL_HWHEEL),
                 listener);
         this.density = density;
@@ -143,6 +143,11 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     }
 
     @Override public void scrollEnd() { wheelAcc = 0; }
+
+    /** The mouse's back and forward side buttons, which browsers (and Windows) use to go back and forward. */
+    @Override public void navigateBack() { tap(BTN_SIDE, CLICK_HOLD_MS); }
+
+    @Override public void navigateForward() { tap(BTN_EXTRA, CLICK_HOLD_MS); }
 
     @Override public void back() { tap(KEY_BACK, CLICK_HOLD_MS); }
 

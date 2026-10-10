@@ -274,6 +274,11 @@ public class ThorPadService extends AccessibilityService
 
     @Override public void twoFingerTap() { back(); }
 
+    @Override public void navigateBack() { back(); }
+
+    /** Touch mode can't send a forward key, so a swipe left does nothing there. */
+    @Override public void navigateForward() {}
+
     @Override public void back() { performGlobalAction(GLOBAL_ACTION_BACK); }
 
     @Override public void home() { performGlobalAction(GLOBAL_ACTION_HOME); }

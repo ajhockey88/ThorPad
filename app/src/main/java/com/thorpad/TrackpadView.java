@@ -30,6 +30,8 @@ final class TrackpadView extends View {
     /** ...and the finger must rest this long before sliding, or it just moves the pointer. */
     private static final long DRAG_SETTLE_MS = 100;
     private static final long LONG_PRESS_MS = 550;
+    /** How far two fingers travel sideways to go back or forward. */
+    private static final float SWIPE_DP = 70;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final float slop;
@@ -53,6 +55,9 @@ final class TrackpadView extends View {
     private boolean longPressed;
     private int maxPointers;
     private float twoLastY, twoTravel;
+    /** Where the two fingers started, to tell a sideways swipe from a scroll. */
+    private float twoStartX, twoStartY;
+    private boolean swiping;
     private float tickAcc;
     private boolean scrolling;
     private boolean touching;
@@ -130,7 +135,10 @@ final class TrackpadView extends View {
                 if (ev.getPointerCount() == 2) {
                     state = TWO_FINGER;
                     twoLastY = (ev.getY(0) + ev.getY(1)) / 2f;
+                    twoStartX = (ev.getX(0) + ev.getX(1)) / 2f;
+                    twoStartY = twoLastY;
                     twoTravel = 0;
+                    swiping = false;
                 } else {
                     // Three or more fingers: not a gesture ThorPad uses.
                     endScroll(s);
@@ -142,9 +150,26 @@ final class TrackpadView extends View {
                 if (state == TWO_FINGER) {
                     if (ev.getPointerCount() < 2) return true;
                     float avgY = (ev.getY(0) + ev.getY(1)) / 2f;
+                    float avgX = (ev.getX(0) + ev.getX(1)) / 2f;
                     float dy = avgY - twoLastY;
                     twoLastY = avgY;
                     twoTravel += Math.abs(dy);
+                    float sideways = avgX - twoStartX;
+                    if (!scrolling && !swiping && Math.abs(sideways) > slop
+                            && Math.abs(sideways) > 1.5f * Math.abs(avgY - twoStartY)) {
+                        swiping = true; // a sideways swipe: back or forward, not a scroll
+                    }
+                    if (swiping) {
+                        if (Math.abs(sideways) > SWIPE_DP * density) {
+                            if (s != null) {
+                                if (sideways > 0) s.navigateBack();
+                                else s.navigateForward();
+                            }
+                            buzz(Haptics.NAVIGATE);
+                            state = DONE;
+                        }
+                        return true;
+                    }
                     if (!scrolling && twoTravel > slop) {
                         scrolling = true;
                         tickAcc = 0;
@@ -216,7 +241,7 @@ final class TrackpadView extends View {
                 if (state == DRAGGING) {
                     if (s != null) s.dragEnd();
                     buzz(Haptics.DRAG_END);
-                } else if (state == TWO_FINGER && !scrolling && maxPointers == 2 && held < 350) {
+                } else if (state == TWO_FINGER && !scrolling && !swiping && maxPointers == 2 && held < 350) {
                     if (s != null) s.twoFingerTap();
                     buzz(Haptics.RIGHT_CLICK);
                 } else if (maybeTap(s, held, now)) {

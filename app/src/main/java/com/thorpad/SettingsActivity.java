@@ -77,6 +77,7 @@ public class SettingsActivity extends Activity {
                 + "• Tap, then quickly touch again, pause a moment, and slide: drag\n"
                 + "• Press and hold: long press\n"
                 + "• Two fingers up or down: scroll\n"
+                + "• Two fingers swiped right: back; swiped left: forward\n"
                 + "• Two-finger tap: back", 14);
         help.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(help);
