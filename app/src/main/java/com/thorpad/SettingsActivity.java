@@ -58,14 +58,6 @@ public class SettingsActivity extends Activity {
 
         TextView title = text("ThorPad settings", 20);
         list.addView(title);
-        // Hidden helper for bug reports: long-press the title to save screenshots of both
-        // screens and the list of windows on them to Download (needs Shizuku).
-        title.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override public boolean onLongClick(View v) {
-                saveDiagnostics();
-                return true;
-            }
-        });
 
         slider("Pointer speed", Prefs.KEY_SENSITIVITY, prefs.sensitivity(), 0.5f, 5f, false);
         slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
@@ -124,6 +116,8 @@ public class SettingsActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refreshKeyboardLabel();
+        ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
     }
 
     // ---- Which keyboard opens for top-screen text boxes ------------------------------------
@@ -428,6 +422,15 @@ public class SettingsActivity extends Activity {
         t.setTextSize(sp);
         t.setTextColor(Color.WHITE);
         t.setPadding(0, (int) (10 * d), 0, (int) (4 * d));
+        if (sp >= 17) {
+            // Headings: long-press saves screenshots and the window list for bug reports.
+            t.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override public boolean onLongClick(View v) {
+                    saveDiagnostics();
+                    return true;
+                }
+            });
+        }
         return t;
     }
 
