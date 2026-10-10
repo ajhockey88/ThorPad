@@ -10,7 +10,7 @@
 |---|---|
 | ☝️ Slide one finger | Moves the pointer (faster flicks travel further) |
 | 👆 Tap | Click |
-| ✊ Tap, then touch again and slide | Drag (press, move, release) |
+| ✊ Tap, then quickly touch again, pause a moment, and slide | Drag (press, move, release) |
 | ✌️ Two fingers up or down | Mouse wheel (real wheel notches in mouse mode) |
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 

@@ -55,7 +55,7 @@ public class SettingsActivity extends Activity {
         TextView help = text("\nGestures\n"
                 + "• One finger: move the pointer\n"
                 + "• Tap: click\n"
-                + "• Tap, then touch again and slide: drag\n"
+                + "• Tap, then quickly touch again, pause a moment, and slide: drag\n"
                 + "• Press and hold: long press\n"
                 + "• Two fingers up or down: scroll\n"
                 + "• Two-finger tap: back", 14);

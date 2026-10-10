@@ -26,7 +26,10 @@ final class TrackpadView extends View {
     private static final int DONE = 4;      // ignore the rest of this touch
 
     private static final long TAP_MAX_MS = 350;
-    private static final long DRAG_WINDOW_MS = 260;
+    /** A drag must start this soon after a tap's finger lifts... */
+    private static final long DRAG_WINDOW_MS = 180;
+    /** ...and the finger must rest this long before sliding, or it just moves the pointer. */
+    private static final long DRAG_SETTLE_MS = 100;
     private static final long LONG_PRESS_MS = 550;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -95,7 +98,7 @@ final class TrackpadView extends View {
         rect.set(inset, inset, getWidth() - inset, getHeight() - inset);
         border.setColor(touching ? Color.argb(90, 120, 200, 255) : Color.argb(40, 255, 255, 255));
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
-        canvas.drawText("Tap: click  ·  Two fingers: scroll  ·  Tap, then slide: drag",
+        canvas.drawText("Tap: click  ·  Two fingers: scroll  ·  Tap, hold, slide: drag",
                 getWidth() / 2f, getHeight() - 18 * density, label);
     }
 
@@ -177,7 +180,9 @@ final class TrackpadView extends View {
                 if (state == IDLE) {
                     if (Math.hypot(x - downX, y - downY) < slop) return true;
                     handler.removeCallbacks(longPress);
-                    if (dragArmed && s != null) {
+                    // Tap-then-drag: only when the second touch came quickly and settled first.
+                    // A quick tap followed by an immediate swipe is just moving the pointer.
+                    if (dragArmed && s != null && now - downAt >= DRAG_SETTLE_MS) {
                         s.dragBegin();
                         buzz(HapticFeedbackConstants.LONG_PRESS);
                         state = DRAGGING;
