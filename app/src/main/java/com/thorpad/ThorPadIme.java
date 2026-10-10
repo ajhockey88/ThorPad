@@ -71,7 +71,42 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     public void onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart, int newSelEnd,
             int candidatesStart, int candidatesEnd) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
-        lastTextBoxActivity = android.os.SystemClock.uptimeMillis();
+        long now = android.os.SystemClock.uptimeMillis();
+        if (newSelStart == 0 && newSelEnd == 0 && (oldSelStart > 0 || oldSelEnd > 0)
+                && now - lastOwnEdit > OWN_EDIT_MS && isEmpty()) {
+            // The text box emptied without ThorPad's keys doing it: the app sent the message
+            // (a Send button on the top screen, say). The keyboard's job is done.
+            KeyboardLog.add("text sent");
+            finished();
+            return;
+        }
+        lastTextBoxActivity = now;
+    }
+
+    private static final long OWN_EDIT_MS = 400;
+    /** When ThorPad's keys last changed the text box. */
+    private long lastOwnEdit;
+
+    private boolean isEmpty() {
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return false;
+        CharSequence before = ic.getTextBeforeCursor(1, 0), after = ic.getTextAfterCursor(1, 0);
+        return before != null && after != null && before.length() == 0 && after.length() == 0;
+    }
+
+    /** The text was sent: close the bottom keyboard now. */
+    private void finished() {
+        handler.removeCallbacks(done);
+        Listener l = listener;
+        if (l != null) l.onKeyboardDone();
+    }
+
+    private boolean closesOnEnter() {
+        EditorInfo info = getCurrentInputEditorInfo();
+        if (info == null) return false;
+        int action = info.imeOptions & EditorInfo.IME_MASK_ACTION;
+        return action == EditorInfo.IME_ACTION_SEND || action == EditorInfo.IME_ACTION_SEARCH
+                || action == EditorInfo.IME_ACTION_GO || action == EditorInfo.IME_ACTION_DONE;
     }
 
     static void bottomKeyboardClosed() {
@@ -210,6 +245,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     // ---- Typing ---------------------------------------------------------------------------
 
     @Override public void typeChar(char c) {
+        lastOwnEdit = android.os.SystemClock.uptimeMillis();
         InputConnection ic = getCurrentInputConnection();
         if (ic != null) ic.commitText(String.valueOf(c), 1);
     }
@@ -232,13 +268,20 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     }
 
     @Override public void special(int key) {
+        // Enter doesn't count: a box that empties right after Enter has sent its text.
+        if (key != ENTER) lastOwnEdit = android.os.SystemClock.uptimeMillis();
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
         switch (key) {
             case BACKSPACE: backspace(ic); break;
             case ENTER:
                 // Search, Go, Send, Next... or a new line in a multi-line box.
-                if (!sendDefaultEditorAction(true)) sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+                if (!sendDefaultEditorAction(true)) {
+                    sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+                } else if (closesOnEnter()) {
+                    KeyboardLog.add("enter: editor action");
+                    finished(); // Send, Search, Go or Done: nothing more to type here
+                }
                 break;
             case TAB: sendDownUpKeyEvents(KeyEvent.KEYCODE_TAB); break;
             case ESCAPE: sendDownUpKeyEvents(KeyEvent.KEYCODE_ESCAPE); break;
