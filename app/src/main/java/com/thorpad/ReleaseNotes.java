@@ -16,13 +16,26 @@ final class ReleaseNotes {
     static CharSequence format(String markdown) {
         SpannableStringBuilder out = new SpannableStringBuilder();
         String[] lines = markdown.replace("\r", "").split("\n");
+        boolean skipping = false;
         for (String raw : lines) {
             String line = raw.trim();
             if (line.isEmpty()) continue;
-            if (line.startsWith("## 📲")) break; // install steps don't matter inside the app
-            if (out.length() > 0) out.append('\n');
+            if (line.startsWith("## 📲")) { // install steps don't matter inside the app
+                skipping = true;
+                continue;
+            }
+            boolean version = line.startsWith("# "); // one release among several
+            if (skipping && !version) continue;
+            skipping = false;
+            if (out.length() > 0) out.append(version ? "\n\n" : "\n");
             int start = out.length();
-            if (line.startsWith("#")) {
+            if (version) {
+                appendInline(out, line.substring(2));
+                out.setSpan(new StyleSpan(Typeface.BOLD), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                out.setSpan(new RelativeSizeSpan(1.35f), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                out.setSpan(new ForegroundColorSpan(Color.WHITE), start, out.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (line.startsWith("#")) {
                 appendInline(out, line.replaceFirst("^#+\\s*", ""));
                 out.setSpan(new StyleSpan(Typeface.BOLD), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 out.setSpan(new RelativeSizeSpan(1.15f), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

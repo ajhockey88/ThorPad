@@ -109,7 +109,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's
-  new in it (its release notes). Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt
+  new in every version since yours, newest first. Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt
   (the first time, allow ThorPad to install apps).
 - 🔁 **Reinstall** (just below): downloads the latest release and installs it again even if it's the version you have, for when a release's APK was replaced
 

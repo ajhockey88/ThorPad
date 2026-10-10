@@ -29,6 +29,7 @@ import moe.shizuku.server.IRemoteProcess;
  */
 final class Updater {
     static final String LATEST = "https://api.github.com/repos/ajhockey88/ThorPad/releases/latest";
+    static final String ALL = "https://api.github.com/repos/ajhockey88/ThorPad/releases?per_page=50";
 
     interface Listener {
         /** Progress text for the settings screen. done = the check is over. */
@@ -95,7 +96,15 @@ final class Updater {
                     post("Version " + latest + " is out, but its release has no APK yet.", true);
                     return;
                 }
-                final Release r = new Release(latest, mine, release.optString("body", ""), url, size);
+                String notes = release.optString("body", "");
+                if (cmp > 0) {
+                    try {
+                        notes = notesSince(mine, latest, notes);
+                    } catch (Exception ignored) {
+                        // Just the newest release's notes, then.
+                    }
+                }
+                final Release r = new Release(latest, mine, notes, url, size);
                 post(cmp == 0 ? "Ready to reinstall ThorPad " + latest + "."
                         : "ThorPad " + latest + " is available.", true);
                 main.post(new Runnable() {
@@ -119,6 +128,33 @@ final class Updater {
                 installWithPrompt(apk);
             }
         });
+    }
+
+    /**
+     * The notes of every release newer than the installed version, newest first, each under a
+     * "# ThorPad x" header, so someone a few versions behind sees everything they're getting.
+     */
+    private String notesSince(String mine, String latest, String latestNotes) throws Exception {
+        JSONArray all = new JSONArray(readAll(open(ALL)));
+        java.util.List<String[]> found = new java.util.ArrayList<>();
+        for (int i = 0; i < all.length(); i++) {
+            JSONObject rel = all.getJSONObject(i);
+            if (rel.optBoolean("draft") || rel.optBoolean("prerelease")) continue;
+            String tag = rel.optString("tag_name", "");
+            String v = tag.startsWith("v") ? tag.substring(1) : tag;
+            if (compareVersions(v, mine) > 0 && compareVersions(v, latest) <= 0) {
+                found.add(new String[] {v, rel.optString("body", "")});
+            }
+        }
+        if (found.size() <= 1) return latestNotes;
+        java.util.Collections.sort(found, new java.util.Comparator<String[]>() {
+            @Override public int compare(String[] a, String[] b) { return compareVersions(b[0], a[0]); }
+        });
+        StringBuilder sb = new StringBuilder();
+        for (String[] rel : found) {
+            sb.append("# ThorPad ").append(rel[0]).append('\n').append(rel[1]).append("\n\n");
+        }
+        return sb.toString();
     }
 
     private interface Task { void run() throws Exception; }
