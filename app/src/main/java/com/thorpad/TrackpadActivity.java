@@ -70,6 +70,7 @@ public class TrackpadActivity extends Activity
                 @Override public void run() {
                     if (Math.abs(downAt - lastOwnDownAt) < OWN_TOUCH_SLACK_MS) return;
                     if (ThorPadIme.lastTextBoxActivity >= downAt) return; // the tap was in a text box
+                    KeyboardLog.add("trackpad: tap outside the text box");
                     if (keyboardForTextBox && keyboard.getVisibility() == View.VISIBLE) onCloseKeyboard();
                 }
             }, TAP_SETTLE_MS);
@@ -611,6 +612,7 @@ public class TrackpadActivity extends Activity
     /** A text box on the top screen asked for a keyboard, and ThorPad is the keyboard. */
     @Override
     public void onKeyboardWanted() {
+        KeyboardLog.add("trackpad: keyboard wanted, started=" + started + " open=" + (keyboard.getVisibility() == View.VISIBLE));
         if (!started || keyboard.getVisibility() == View.VISIBLE) return;
         if (pcKeys.getVisibility() == View.VISIBLE) {
             pcKeys.setVisibility(View.GONE);
@@ -624,6 +626,7 @@ public class TrackpadActivity extends Activity
     /** The text box that opened the keyboard is gone: put the keyboard away too. */
     @Override
     public void onKeyboardDone() {
+        KeyboardLog.add("trackpad: done, forTextBox=" + keyboardForTextBox + " open=" + (keyboard.getVisibility() == View.VISIBLE));
         if (keyboardForTextBox && keyboard.getVisibility() == View.VISIBLE) onCloseKeyboard();
     }
 
@@ -665,6 +668,7 @@ public class TrackpadActivity extends Activity
     @Override
     public void onCloseKeyboard() {
         if (keyboard.getVisibility() != View.VISIBLE) return;
+        KeyboardLog.add("trackpad: keyboard closed");
         keyboardForTextBox = false;
         touchWatcher.stop();
         ThorPadIme.bottomKeyboardClosed();

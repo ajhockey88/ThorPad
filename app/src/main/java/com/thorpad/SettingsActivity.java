@@ -214,10 +214,16 @@ public class SettingsActivity extends Activity {
             return;
         }
         Toast.makeText(this, "Saving screenshots…", Toast.LENGTH_SHORT).show();
+        String log = "";
+        try {
+            log = "cp '" + KeyboardLog.save(this).getAbsolutePath() + "' /sdcard/Download/; ";
+        } catch (Exception ignored) {
+        }
+        final String copyLog = log;
         new Thread(new Runnable() {
             @Override public void run() {
                 final boolean ok = ShizukuClient.runShell(
-                        "d=/sdcard/Download; "
+                        "d=/sdcard/Download; " + copyLog
                         + "dumpsys window windows > $d/thorpad-windows.txt; "
                         + "i=0; for id in $(dumpsys SurfaceFlinger --display-id | sed -n 's/^Display \\([0-9]*\\).*/\\1/p'); do "
                         + "i=$((i+1)); screencap -d $id -p $d/thorpad-screen-$i.png; done; "

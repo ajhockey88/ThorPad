@@ -3,7 +3,6 @@ package com.thorpad;
 import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -34,18 +33,20 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     private final Runnable done = new Runnable() {
         @Override public void run() {
             Listener l = listener;
+            KeyboardLog.add("done, trackpad " + (l != null ? "open" : "closed"));
             if (l != null) l.onKeyboardDone();
         }
     };
 
     private final Runnable wanted = new Runnable() {
         @Override public void run() {
-            if (inputStarted && onPointerScreen()) askForKeyboard();
+            if (inputStarted && !isOwnScreen(getCurrentInputEditorInfo())) askForKeyboard();
         }
     };
 
     private void askForKeyboard() {
         Listener l = listener;
+        KeyboardLog.add("ask for keyboard, trackpad " + (l != null ? "open" : "closed"));
         if (l != null) {
             l.onKeyboardWanted();
         } else {
@@ -148,6 +149,8 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         super.onStartInput(attribute, restarting);
         boolean wasStarted = inputStarted;
         inputStarted = attribute.inputType != android.text.InputType.TYPE_NULL;
+        KeyboardLog.add("startInput " + attribute.packageName + " field=" + attribute.fieldId
+                + " type=" + attribute.inputType + " restarting=" + restarting);
         if (inputStarted) {
             lastTextBoxActivity = android.os.SystemClock.uptimeMillis();
             handler.removeCallbacks(done);
@@ -166,6 +169,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
 
     @Override
     public void onFinishInput() {
+        KeyboardLog.add("finishInput");
         if (inputStarted) doneSoon();
         inputStarted = false;
         super.onFinishInput();
@@ -173,6 +177,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
 
     @Override
     public void onFinishInputView(boolean finishingInput) {
+        KeyboardLog.add("finishInputView");
         doneSoon(); // the app hid the keyboard, e.g. after Search or Send
         super.onFinishInputView(finishingInput);
     }
@@ -180,9 +185,10 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        KeyboardLog.add("startInputView " + info.packageName + " restarting=" + restarting);
         handler.removeCallbacks(done);
         makeInvisible();
-        if (!onPointerScreen()) {
+        if (isOwnScreen(info)) {
             // A text box on the trackpad's own screen (e.g. ThorPad's settings): stay out of the way.
             requestHideSelf(0);
             return;
@@ -191,17 +197,14 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         askForKeyboard();
     }
 
-    /** Whether the text box is on the top screen, not an app sharing the trackpad's screen. */
-    private boolean onPointerScreen() {
-        Display target = Displays.pointerDisplay(this);
-        Display here = null;
-        try {
-            if (getWindow() != null && getWindow().getWindow() != null) {
-                here = getWindow().getWindow().getDecorView().getDisplay();
-            }
-        } catch (RuntimeException ignored) {
-        }
-        return here == null || target == null || here.getDisplayId() == target.getDisplayId();
+    /**
+     * Whether the text box is ThorPad's own (its settings, on the trackpad's screen). This
+     * keyboard's window isn't a guide to which screen a text box is on: Android moves it
+     * between screens and it can still be on the last one, which stopped every text box after
+     * the first from opening the keyboard.
+     */
+    private boolean isOwnScreen(EditorInfo info) {
+        return info != null && getPackageName().equals(info.packageName);
     }
 
     // ---- Typing ---------------------------------------------------------------------------
