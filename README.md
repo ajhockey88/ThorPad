@@ -1,5 +1,9 @@
 # <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="48" align="center" alt="ThorPad icon"> ThorPad
 
+[![Downloads](https://img.shields.io/github/downloads/ajhockey88/ThorPad/total?style=for-the-badge&logo=github&label=Downloads&color=yellowgreen)](https://github.com/ajhockey88/ThorPad/releases)
+[![Latest release](https://img.shields.io/github/v/release/ajhockey88/ThorPad?style=for-the-badge&logo=github&label=Latest%20release&color=blue)](https://github.com/ajhockey88/ThorPad/releases/latest)
+[![Reddit](https://img.shields.io/badge/Reddit-View%20post-ff4500?style=for-the-badge&logo=reddit&logoColor=white)](https://www.reddit.com/r/AynThor/comments/1x230sz/thorpad_a_trackpad_and_keyboard_for_the_ayn_thors/)
+
 🎮 A simple trackpad with bonus features designed for the AYN Thor.
 
 🖱️ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse pointer on the top screen, plus a full-screen keyboard ⌨️ for typing.
