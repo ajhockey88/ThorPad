@@ -70,8 +70,6 @@ final class KeyboardOverlay implements KeyboardView.Listener {
                     PixelFormat.OPAQUE);
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             lp.setTitle("ThorPad keyboard");
-            view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             wm.addView(view, lp);
             windows = wm;
             keyboard = view;

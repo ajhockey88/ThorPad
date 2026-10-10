@@ -76,28 +76,58 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
                 }
             });
         }
-        if (overlay.isShowing()) return;
-        if (overlay.show(this)) {
-            watchOverlayTaps();
+        if (!ShizukuClient.hasPermission()) {
+            // No way to check which screen the text box is on: show it unless that's not allowed.
+            if (!overlay.isShowing() && !overlay.show(overlayKeys)) openTrackpadInstead();
+            else if (overlay.isShowing()) watchOverlayTaps();
             return;
         }
-        if (KeyboardOverlay.allowed(this) || !ShizukuClient.hasPermission()) {
-            openTrackpadInstead();
-            return;
-        }
-        // Drawing over other apps isn't allowed yet: Shizuku can allow it, once.
+        final String field = lastField;
+        final EditorInfo info = getCurrentInputEditorInfo();
+        final String pkg = info != null ? info.packageName : null;
         new Thread(new Runnable() {
             @Override public void run() {
-                ShizukuClient.runShell("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow");
+                // Only a text box on the top screen gets the keyboard. One in an app on the bottom
+                // screen would be covered by it, and every tap there turned into a key press.
+                android.view.Display top = Displays.pointerDisplay(ThorPadIme.this);
+                String[] app = top != null ? TopApp.on(top.getDisplayId()) : null;
+                final boolean onTop = app == null || pkg == null || app[0].equals(pkg);
+                if (onTop && !KeyboardOverlay.allowed(ThorPadIme.this)) {
+                    // Drawing over other apps isn't allowed yet: Shizuku can allow it, once.
+                    ShizukuClient.runShell("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow");
+                }
                 handler.post(new Runnable() {
                     @Override public void run() {
-                        if (!inputStarted || listener != null) return;
-                        if (overlay.show(ThorPadIme.this)) watchOverlayTaps();
+                        if (!inputStarted || listener != null || field == null || !field.equals(lastField)) return;
+                        if (!onTop) {
+                            KeyboardLog.add("overlay: " + pkg + " isn't on the top screen");
+                            hideOverlay();
+                            return;
+                        }
+                        if (overlay.isShowing() || overlay.show(overlayKeys)) watchOverlayTaps();
                         else openTrackpadInstead();
                     }
                 });
             }
-        }, "ThorPad overlay permission").start();
+        }, "ThorPad overlay check").start();
+    }
+
+    /** Keys from the bottom-screen keyboard: dropped (and the keyboard put away) without a text box. */
+    private final KeyOutput overlayKeys = new KeyOutput() {
+        @Override public void typeChar(char c) {
+            if (active() == null) { strayKey(); return; }
+            ThorPadIme.this.typeChar(c);
+        }
+
+        @Override public void special(int key) {
+            if (active() == null) { strayKey(); return; }
+            ThorPadIme.this.special(key);
+        }
+    };
+
+    private void strayKey() {
+        KeyboardLog.add("overlay: key with no text box, closing");
+        hideOverlay();
     }
 
     private void openTrackpadInstead() {
