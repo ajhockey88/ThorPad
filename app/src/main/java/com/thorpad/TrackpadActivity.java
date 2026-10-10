@@ -120,7 +120,7 @@ public class TrackpadActivity extends Activity
         return lp;
     }
 
-    private Button barButton(String text, View.OnClickListener listener) {
+    private Button barButton(String text, final View.OnClickListener listener) {
         Button b = new Button(this);
         b.setText(text);
         b.setAllCaps(false);
@@ -131,7 +131,13 @@ public class TrackpadActivity extends Activity
         bg.setColor(Color.rgb(28, 28, 32));
         bg.setCornerRadius(10 * getResources().getDisplayMetrics().density);
         b.setBackground(bg);
-        b.setOnClickListener(listener);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY,
+                        android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                listener.onClick(v);
+            }
+        });
         return b;
     }
 
