@@ -4,4 +4,5 @@
     <string name="settings_title">ThorPad settings</string>
     <string name="service_label">ThorPad trackpad</string>
     <string name="service_description">Lets ThorPad show a mouse pointer on the top screen and click, drag and scroll where it points, using the bottom screen as a trackpad. In touch mode, the ThorPad keyboard types into the selected text box on the top screen; ThorPad reads nothing else on screen and sends nothing anywhere.</string>
+    <string name="ime_label">ThorPad keyboard</string>
 </resources>

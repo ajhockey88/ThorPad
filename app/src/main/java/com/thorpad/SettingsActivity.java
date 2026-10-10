@@ -1,6 +1,16 @@
 package com.thorpad;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.provider.Settings;
+import android.view.View;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.Toast;
+import java.util.List;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -51,9 +61,7 @@ public class SettingsActivity extends Activity {
         toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
                 + "instant you touch, most responsive)",
                 Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
-        toggle("Open the keyboard when a text box is selected on the top screen (uses the "
-                        + "ThorPad accessibility service; with Shizuku it switches that on for you)",
-                Prefs.KEY_AUTO_KEYBOARD, prefs.autoKeyboard(), false);
+        keyboardChooser();
 
         TextView help = text("\nGestures\n"
                 + "• One finger: move the pointer\n"
@@ -66,6 +74,103 @@ public class SettingsActivity extends Activity {
         list.addView(help);
 
         setContentView(scroll);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshKeyboardLabel();
+    }
+
+    // ---- Which keyboard opens for top-screen text boxes ------------------------------------
+
+    private TextView keyboardLabel;
+
+    private void keyboardChooser() {
+        keyboardLabel = text("", 15);
+        list.addView(keyboardLabel);
+        TextView hint = text("Pick ThorPad keyboard and the keyboard on the bottom screen opens by "
+                + "itself whenever a text box is selected on the top screen, with no other keyboard "
+                + "popping up.", 13);
+        hint.setTextColor(Color.argb(170, 255, 255, 255));
+        list.addView(hint);
+        Button choose = new Button(this);
+        choose.setText("Choose keyboard");
+        choose.setAllCaps(false);
+        choose.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { showKeyboardList(); }
+        });
+        list.addView(choose, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    }
+
+    private InputMethodManager imm() {
+        return (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+    }
+
+    private String currentKeyboardId() {
+        return Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+    }
+
+    private void refreshKeyboardLabel() {
+        if (keyboardLabel == null) return;
+        String name = "unknown";
+        String current = currentKeyboardId();
+        for (InputMethodInfo info : imm().getInputMethodList()) {
+            if (info.getId().equals(current)) name = info.loadLabel(getPackageManager()).toString();
+        }
+        keyboardLabel.setText("Keyboard for text boxes on the top screen: " + name);
+    }
+
+    private void showKeyboardList() {
+        final List<InputMethodInfo> all = imm().getInputMethodList();
+        String current = currentKeyboardId();
+        String[] names = new String[all.size()];
+        int checked = -1;
+        for (int i = 0; i < all.size(); i++) {
+            names[i] = all.get(i).loadLabel(getPackageManager()).toString();
+            if (all.get(i).getId().equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Keyboard for text boxes")
+                .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        useKeyboard(all.get(which));
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void useKeyboard(final InputMethodInfo info) {
+        if (ShizukuClient.hasPermission()) {
+            // Shizuku can switch keyboards directly.
+            final String id = info.getId();
+            new Thread(new Runnable() {
+                @Override public void run() {
+                    ShizukuClient.runShell("ime enable " + id + " && ime set " + id);
+                    runOnUiThread(new Runnable() {
+                        @Override public void run() { refreshKeyboardLabel(); }
+                    });
+                }
+            }, "ThorPad set keyboard").start();
+            return;
+        }
+        boolean enabled = false;
+        for (InputMethodInfo e : imm().getEnabledInputMethodList()) {
+            if (e.getId().equals(info.getId())) enabled = true;
+        }
+        if (enabled) {
+            // Android only lets the user switch keyboards, through its own picker.
+            imm().showInputMethodPicker();
+        } else {
+            Toast.makeText(this, "Turn on " + info.loadLabel(getPackageManager())
+                    + " here, then come back and choose it again.", Toast.LENGTH_LONG).show();
+            Intent i = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }
     }
 
     private TextView text(String s, int sp) {

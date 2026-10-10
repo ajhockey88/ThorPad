@@ -28,7 +28,9 @@ import android.widget.TextView;
  */
 public class TrackpadActivity extends Activity
         implements ShizukuClient.Listener, UinputDevice.StateListener, KeyboardView.Listener,
-        ThorPadService.TextFieldListener {
+        ThorPadIme.Listener {
+    static final String EXTRA_OPEN_KEYBOARD = "open_keyboard";
+
     private TrackpadView pad;
     private View setupPanel;
     private TextView mouseStatus;
@@ -39,8 +41,8 @@ public class TrackpadActivity extends Activity
     private KeyboardView keyboard;
     private String mouseError;
     private boolean started;
-    /** Already tried to switch on the accessibility service through Shizuku. */
-    private boolean triedEnablingService;
+    /** Open the keyboard as soon as the trackpad is up (asked for by the ThorPad keyboard). */
+    private boolean keyboardRequested;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +108,7 @@ public class TrackpadActivity extends Activity
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         setContentView(frame);
+        keyboardRequested = getIntent().getBooleanExtra(EXTRA_OPEN_KEYBOARD, false);
         ShizukuClient.addListener(this);
     }
 
@@ -225,8 +228,12 @@ public class TrackpadActivity extends Activity
     protected void onStart() {
         super.onStart();
         started = true;
-        ThorPadService.setTextFieldListener(this);
+        ThorPadIme.setListener(this);
         refresh();
+        if (keyboardRequested) {
+            keyboardRequested = false;
+            if (keyboard.getVisibility() != View.VISIBLE) openKeyboard();
+        }
     }
 
     @Override
@@ -245,7 +252,7 @@ public class TrackpadActivity extends Activity
     protected void onStop() {
         super.onStop();
         started = false;
-        ThorPadService.setTextFieldListener(null);
+        ThorPadIme.setListener(null);
         // Unplug the virtual mouse and hide the overlay pointer while the trackpad is away.
         mouse.stop();
         onCloseKeyboard();
@@ -268,8 +275,7 @@ public class TrackpadActivity extends Activity
             refresh();
         } else if (device == keyboardDevice && !ready && keyboard.getVisibility() == View.VISIBLE) {
             // The virtual keyboard failed: type through the accessibility service if it's on.
-            keyboard.setOutput(touchTyping());
-            keyboard.invalidate();
+            keyboardDeviceFailed = true;
         }
     }
 
@@ -280,42 +286,52 @@ public class TrackpadActivity extends Activity
         keyboard.reset();
         keyboard.setTypeOnRelease(prefs.typeOnRelease());
         keyboard.setAutocorrect(prefs.autocorrect() ? Autocorrect.get(this) : null);
-        if (mouse.isReady()) {
-            // Mouse mode: plug in a virtual keyboard so keys arrive like a real USB keyboard.
-            keyboardDevice.start();
-            keyboard.setOutput(keyboardDevice);
-        } else {
-            keyboard.setOutput(touchTyping());
-        }
+        keyboardDeviceFailed = false;
+        // With the ThorPad keyboard picked in Android, keys go straight into the text box.
+        // Otherwise, in mouse mode, plug in a virtual keyboard so keys arrive like a real USB
+        // keyboard (which games need).
+        if (ThorPadIme.active() == null && mouse.isReady()) keyboardDevice.start();
+        keyboard.setOutput(typing);
         pad.setOutput(null);
         keyboard.setVisibility(View.VISIBLE);
     }
 
-    /** A text box was selected on the top screen: open the keyboard for it. */
+    /** A text box on the top screen asked for a keyboard, and ThorPad is the keyboard. */
     @Override
-    public void onTextFieldSelected() {
+    public void onKeyboardWanted() {
         if (!started || keyboard.getVisibility() == View.VISIBLE) return;
-        if (!new Prefs(this).autoKeyboard() || currentOutput() == null) return;
         openKeyboard();
     }
 
-    /**
-     * Opening the keyboard by itself needs the accessibility service to see text boxes being
-     * selected. In mouse mode Shizuku can switch it on, so nobody has to dig through settings.
-     */
-    private void enableServiceThroughShizuku() {
-        if (triedEnablingService) return;
-        triedEnablingService = true;
-        String current = Settings.Secure.getString(getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        String me = new ComponentName(this, ThorPadService.class).flattenToString();
-        final String list = TextUtils.isEmpty(current) ? me : current + ":" + me;
-        new Thread(new Runnable() {
-            @Override public void run() {
-                ShizukuClient.runShell("settings put secure enabled_accessibility_services '" + list
-                        + "' && settings put secure accessibility_enabled 1");
-            }
-        }, "ThorPad enable service").start();
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getBooleanExtra(EXTRA_OPEN_KEYBOARD, false)) keyboardRequested = true;
+    }
+
+    private boolean keyboardDeviceFailed;
+
+    /** Picks where each key goes, as the selected text box can change while typing. */
+    private final KeyOutput typing = new KeyOutput() {
+        @Override public void typeChar(char c) {
+            KeyOutput o = keyTarget();
+            if (o != null) o.typeChar(c);
+        }
+
+        @Override public void special(int key) {
+            KeyOutput o = keyTarget();
+            if (o != null) o.special(key);
+        }
+    };
+
+    private KeyOutput keyTarget() {
+        KeyOutput ime = ThorPadIme.active();
+        if (ime != null) return ime;
+        if (mouse.isReady() && !keyboardDeviceFailed) {
+            if (!keyboardDevice.isStartingOrReady()) keyboardDevice.start(); // keys queue meanwhile
+            return keyboardDevice;
+        }
+        return touchTyping();
     }
 
     private KeyOutput touchTyping() {
@@ -342,10 +358,6 @@ public class TrackpadActivity extends Activity
 
         boolean shizukuReady = ShizukuClient.hasPermission();
         if (shizukuReady && !mouse.isReady() && mouseError == null) mouse.start();
-
-        if (shizukuReady && new Prefs(this).autoKeyboard() && !isServiceEnabled()) {
-            enableServiceThroughShizuku();
-        }
 
         ThorPadService service = isServiceEnabled() ? ThorPadService.get() : null;
         PadOutput out;

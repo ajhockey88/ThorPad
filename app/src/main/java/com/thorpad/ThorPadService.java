@@ -16,7 +16,6 @@ import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 
 /**
  * Draws the mouse pointer on the top screen and turns trackpad input into taps, drags and
@@ -33,13 +32,6 @@ public class ThorPadService extends AccessibilityService
     private static ThorPadService instance;
 
     static ThorPadService get() { return instance; }
-
-    /** Told when a text box is selected on the pointer screen; set while the trackpad is open. */
-    interface TextFieldListener { void onTextFieldSelected(); }
-
-    private static TextFieldListener textFieldListener;
-
-    static void setTextFieldListener(TextFieldListener l) { textFieldListener = l; }
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private GestureStreamer streamer;
@@ -68,19 +60,7 @@ public class ThorPadService extends AccessibilityService
     }
 
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        int type = event.getEventType();
-        if (type != AccessibilityEvent.TYPE_VIEW_FOCUSED && type != AccessibilityEvent.TYPE_VIEW_CLICKED) return;
-        TextFieldListener l = textFieldListener;
-        if (l == null) return;
-        AccessibilityNodeInfo node = event.getSource();
-        if (node == null || !node.isEditable()) return;
-        // Only text boxes on the pointer screen, not apps sharing the trackpad's screen.
-        AccessibilityWindowInfo window = node.getWindow();
-        Display target = Displays.pointerDisplay(this);
-        if (window != null && target != null && window.getDisplayId() != target.getDisplayId()) return;
-        l.onTextFieldSelected();
-    }
+    public void onAccessibilityEvent(AccessibilityEvent event) {}
 
     @Override
     public void onInterrupt() {}

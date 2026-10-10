@@ -46,10 +46,12 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔣 **?123** and **=\<** switch to numbers, symbols, Esc, Tab and arrow keys. Tap ⇧ once for one
   capital letter, or twice quickly for caps lock. Hold ⌫ to keep deleting.
 - 🧹 **Clear all:** while you hold ⌫, the space bar turns red and says **Clear all**. Tap it to wipe the whole text box.
-- 🪄 **Opens by itself:** select a text box on the top screen and the keyboard opens on the bottom screen
-  (switch this off in Settings). It uses ThorPad's accessibility service to see text boxes being
-  selected; in mouse mode ThorPad switches that on through Shizuku for you. Text boxes drawn inside
-  a Windows game in GameNative aren't Android text boxes, so open the keyboard yourself there.
+- 🪄 **Opens by itself:** in Settings > **Choose keyboard**, pick **ThorPad keyboard**. Then whenever a
+  text box on the top screen asks for a keyboard, ThorPad's keyboard opens on the bottom screen (and
+  the trackpad opens too if it was closed), with no other keyboard popping up on the top screen. Keys
+  go straight into the text box. With Shizuku, ThorPad switches keyboards for you; without it,
+  Android asks you to turn the keyboard on and pick it. Text boxes drawn inside a Windows game in
+  GameNative aren't Android text boxes, so open the keyboard yourself there.
 - 🔌 In mouse mode, ThorPad plugs in a virtual USB keyboard while the keyboard is open, so keys
   reach games and apps like a real keyboard. In touch mode, text goes into the selected text box.
 - ✨ **Autocorrect** (on by default, switch in Settings) fixes a misspelled word when you finish it
@@ -64,7 +66,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
 - ✨ **Autocorrect** on or off
-- 🪄 **Open the keyboard automatically** when a text box is selected on the top screen
+- ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 
 ## 🔀 Two modes
