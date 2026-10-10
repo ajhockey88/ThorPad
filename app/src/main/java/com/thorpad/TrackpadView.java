@@ -102,7 +102,10 @@ final class TrackpadView extends View {
         rect.set(inset, inset, getWidth() - inset, getHeight() - inset);
         border.setColor(touching ? Color.argb(90, 120, 200, 255) : Color.argb(40, 255, 255, 255));
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
-        canvas.drawText("Tap: click  ·  Two fingers: scroll  ·  Tap, hold, slide: drag",
+        float line = label.getTextSize() * 1.5f;
+        canvas.drawText("Tap: click  ·  Two fingers up/down: scroll  ·  Tap, hold, slide: drag",
+                getWidth() / 2f, getHeight() - 18 * density - line, label);
+        canvas.drawText("Two fingers right: back  ·  Two fingers left: forward",
                 getWidth() / 2f, getHeight() - 18 * density, label);
     }
 
