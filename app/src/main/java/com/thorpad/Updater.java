@@ -62,7 +62,13 @@ final class Updater {
     }
 
     /** Looks for a newer release; reports it through onUpdateAvailable. */
-    void check() {
+    void check() { check(false); }
+
+    /**
+     * reinstall = also offer the latest release when it's the version already installed, for
+     * when a release's APK was replaced without a new version number.
+     */
+    void check(final boolean reinstall) {
         background(new Task() {
             @Override public void run() throws Exception {
                 post("Checking for updates…", false);
@@ -70,7 +76,8 @@ final class Updater {
                 String tag = release.optString("tag_name", "");
                 String latest = tag.startsWith("v") ? tag.substring(1) : tag;
                 String mine = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-                if (compareVersions(latest, mine) <= 0) {
+                int cmp = compareVersions(latest, mine);
+                if (cmp < 0 || (cmp == 0 && !reinstall)) {
                     post("ThorPad " + mine + " is up to date.", true);
                     return;
                 }
@@ -89,7 +96,8 @@ final class Updater {
                     return;
                 }
                 final Release r = new Release(latest, mine, release.optString("body", ""), url, size);
-                post("ThorPad " + latest + " is available.", true);
+                post(cmp == 0 ? "Ready to reinstall ThorPad " + latest + "."
+                        : "ThorPad " + latest + " is available.", true);
                 main.post(new Runnable() {
                     @Override public void run() { listener.onUpdateAvailable(r); }
                 });

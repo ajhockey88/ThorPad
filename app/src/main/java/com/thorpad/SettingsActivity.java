@@ -267,6 +267,31 @@ public class SettingsActivity extends Activity {
         });
         list.addView(check, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // Installs the latest release again even if it's this version, e.g. after its APK
+        // was replaced on GitHub without a new version number.
+        final Button reinstall = new Button(this);
+        reinstall.setText("Reinstall");
+        reinstall.setAllCaps(false);
+        reinstall.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                reinstall.setEnabled(false);
+                final Updater[] updater = new Updater[1];
+                updater[0] = new Updater(SettingsActivity.this, new Updater.Listener() {
+                    @Override public void onUpdateStatus(String s, boolean done) {
+                        status.setText(s);
+                        if (done) reinstall.setEnabled(true);
+                    }
+
+                    @Override public void onUpdateAvailable(Updater.Release r) {
+                        showWhatsNew(r, updater[0]);
+                    }
+                });
+                updater[0].check(true);
+            }
+        });
+        list.addView(reinstall, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         // Room so the preview pill never covers the button.
         list.addView(new View(this), new LinearLayout.LayoutParams(1, (int) (50 * d)));
     }
@@ -279,13 +304,15 @@ public class SettingsActivity extends Activity {
         box.setPadding(pad, (int) (18 * d), pad, 0);
 
         TextView title = new TextView(this);
-        title.setText("🎉 ThorPad " + r.version + " is available");
+        final boolean same = r.version.equals(r.current);
+        title.setText(same ? "🔁 Reinstall ThorPad " + r.version + "?" : "🎉 ThorPad " + r.version + " is available");
         title.setTextSize(20);
         title.setTextColor(Color.WHITE);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         box.addView(title);
         TextView sub = new TextView(this);
-        sub.setText("You have " + r.current + (r.apkSize > 0 ? " · " + (r.apkSize / 1024) + " KB download" : ""));
+        sub.setText((same ? "Downloads this version again and installs it over the one you have. Settings are kept"
+                : "You have " + r.current) + (r.apkSize > 0 ? " · " + (r.apkSize / 1024) + " KB download" : ""));
         sub.setTextSize(13);
         sub.setTextColor(Color.rgb(0x8a, 0x90, 0x9b));
         sub.setPadding(0, (int) (4 * d), 0, (int) (10 * d));
@@ -309,7 +336,7 @@ public class SettingsActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setView(box)
                 .setNegativeButton("Not now", null)
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                .setPositiveButton(same ? "Reinstall" : "Update", new DialogInterface.OnClickListener() {
                     @Override public void onClick(DialogInterface dialog, int which) { updater.install(r); }
                 })
                 .show();
