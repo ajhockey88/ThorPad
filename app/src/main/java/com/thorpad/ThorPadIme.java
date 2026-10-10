@@ -136,11 +136,28 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         if (ic != null) ic.commitText(String.valueOf(c), 1);
     }
 
+    /**
+     * Deletes through the text box's connection, like commitText, so a correction's deletes and
+     * its new word arrive in order. A DEL key event is queued separately and can land after the
+     * new word, which left the typo in place. Boxes that show no text (terminals, games) still
+     * get the key.
+     */
+    private void backspace(InputConnection ic) {
+        CharSequence selected = ic.getSelectedText(0);
+        if (selected != null && selected.length() > 0) {
+            ic.commitText("", 1);
+            return;
+        }
+        CharSequence before = ic.getTextBeforeCursor(2, 0);
+        if (before != null && before.length() > 0 && ic.deleteSurroundingTextInCodePoints(1, 0)) return;
+        sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+    }
+
     @Override public void special(int key) {
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
         switch (key) {
-            case BACKSPACE: sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL); break;
+            case BACKSPACE: backspace(ic); break;
             case ENTER:
                 // Search, Go, Send, Next... or a new line in a multi-line box.
                 if (!sendDefaultEditorAction(true)) sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);

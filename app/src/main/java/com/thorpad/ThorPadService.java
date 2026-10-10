@@ -11,6 +11,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.WindowManager;
@@ -296,12 +297,14 @@ public class ThorPadService extends AccessibilityService
         if (key == BACKSPACE) {
             editFocusedText(null, true);
         } else if (key == CLEAR_ALL) {
+            lastText = null;
             AccessibilityNodeInfo node = findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
             if (node == null || !node.isEditable()) return;
             Bundle args = new Bundle();
             args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "");
             node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
         } else if (key == ENTER) {
+            lastText = null;
             AccessibilityNodeInfo node = findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
             if (node == null) return;
             if (!node.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.getId())) {
@@ -312,6 +315,15 @@ public class ThorPadService extends AccessibilityService
         }
     }
 
+    // What ThorPad last wrote into the text box. The box's own text can lag a few edits behind
+    // when keys come quickly (an autocorrect deletes the word and types the fix in one go), so
+    // for a short while ThorPad carries on from what it wrote rather than what the box reports.
+    private String lastText;
+    private AccessibilityNodeInfo lastNode;
+    private int lastCaret;
+    private long lastEditAt;
+    private static final long FRESH_MS = 600;
+
     private void editFocusedText(String insert, boolean deleteOne) {
         AccessibilityNodeInfo node = findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
         if (node == null || !node.isEditable()) return;
@@ -319,6 +331,10 @@ public class ThorPadService extends AccessibilityService
         String text = current == null ? "" : current.toString();
         int start = node.getTextSelectionStart();
         int end = node.getTextSelectionEnd();
+        if (lastText != null && node.equals(lastNode) && SystemClock.uptimeMillis() - lastEditAt < FRESH_MS) {
+            text = lastText;
+            start = end = lastCaret;
+        }
         if (start < 0 || end < 0 || start > text.length() || end > text.length()) {
             start = end = text.length();
         }
@@ -331,8 +347,15 @@ public class ThorPadService extends AccessibilityService
         String next = text.substring(0, start) + replacement + text.substring(end);
         Bundle args = new Bundle();
         args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, next);
-        if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return;
+        if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
+            lastText = null;
+            return;
+        }
         int caret = start + replacement.length();
+        lastText = next;
+        lastNode = node;
+        lastCaret = caret;
+        lastEditAt = SystemClock.uptimeMillis();
         Bundle sel = new Bundle();
         sel.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, caret);
         sel.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, caret);
