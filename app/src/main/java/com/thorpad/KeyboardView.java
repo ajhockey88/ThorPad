@@ -149,6 +149,10 @@ final class KeyboardView extends View {
             acThread = new HandlerThread("ThorPadAutocorrect");
             acThread.start();
             acHandler = new Handler(acThread.getLooper());
+        } else if (autocorrect == null && acThread != null) {
+            acThread.quitSafely();
+            acThread = null;
+            acHandler = null;
         }
         clearSuggestion();
     }
@@ -349,7 +353,9 @@ final class KeyboardView extends View {
         text.setColor(Color.rgb(0xe8, 0xe8, 0xe8));
         float room = right - x;
         String shown = typed.toString().replace('\n', '↵').replace('\t', '⇥');
-        while (shown.length() > 0 && text.measureText(shown) > room) shown = shown.substring(1);
+        // Keep as much of the end as fits, measured in one pass.
+        int fits = text.breakText(shown, false, Math.max(0, room), null);
+        if (fits < shown.length()) shown = shown.substring(shown.length() - fits);
         canvas.drawText(shown, x, cy - (text.descent() + text.ascent()) / 2f, text);
         float caretX = x + text.measureText(shown) + 3;
         fill.setColor(PRESSED);

@@ -13,6 +13,7 @@ final class Prefs {
     static final String KEY_POINTER_SIZE = "pointer_size";
     static final String KEY_AUTOCORRECT = "autocorrect";
     static final String KEY_TYPE_ON_RELEASE = "type_on_release";
+    static final String KEY_DIM_WHEN_IDLE = "dim_when_idle";
 
     private final SharedPreferences sp;
 
@@ -37,4 +38,6 @@ final class Prefs {
     boolean autocorrect() { return sp.getBoolean(KEY_AUTOCORRECT, true); }
     /** Keyboard: type when the finger lifts instead of when it lands. */
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
+    /** Turn the trackpad screen's brightness right down after a while without a touch. */
+    boolean dimWhenIdle() { return sp.getBoolean(KEY_DIM_WHEN_IDLE, true); }
 }

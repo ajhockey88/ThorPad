@@ -79,6 +79,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 📜 **Scroll speed**, and **classic scroll direction** (fingers down scrolls down, like a mouse wheel)
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
+- 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
 - ✨ **Autocorrect** on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)

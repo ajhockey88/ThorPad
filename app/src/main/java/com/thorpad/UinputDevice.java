@@ -128,19 +128,22 @@ class UinputDevice {
     void send(final int... events) {
         if (!isStartingOrReady()) return;
         io.post(new Runnable() {
-            @Override public void run() {
-                if (stdin == null) return;
-                StringBuilder sb = new StringBuilder("{\"id\":1,\"command\":\"inject\",\"events\":[");
-                for (int v : events) sb.append(v).append(',');
-                sb.append(EV_SYN).append(",0,0]}");
-                try {
-                    write(sb.toString());
-                } catch (IOException e) {
-                    stopNow();
-                    report(false, "The virtual device stopped (" + e.getMessage() + ")");
-                }
-            }
+            @Override public void run() { inject(events); }
         });
+    }
+
+    /** Writes events straight away. Only on the io thread. */
+    final void inject(int... events) {
+        if (stdin == null) return;
+        StringBuilder sb = new StringBuilder("{\"id\":1,\"command\":\"inject\",\"events\":[");
+        for (int v : events) sb.append(v).append(',');
+        sb.append(EV_SYN).append(",0,0]}");
+        try {
+            write(sb.toString());
+        } catch (IOException e) {
+            stopNow();
+            report(false, "The virtual device stopped (" + e.getMessage() + ")");
+        }
     }
 
     /** Presses and releases a key or button. */

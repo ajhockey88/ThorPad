@@ -35,7 +35,31 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     }
 
     @Override void send(int... events) {
-        if (isReady()) super.send(events); // a mouse drops input until it is plugged in
+        if (!isReady()) return; // a mouse drops input until it is plugged in
+        synchronized (moveLock) {
+            lastMove = null; // moves after this go after it, not into an earlier move
+        }
+        super.send(events);
+    }
+
+    // When the touch screen reports faster than moves can be written, the moves waiting in
+    // the queue add up into one instead of costing one write each.
+    private final Object moveLock = new Object();
+    private Move lastMove;
+
+    private final class Move implements Runnable {
+        int x, y;
+        boolean sent;
+
+        @Override public void run() {
+            int mx, my;
+            synchronized (moveLock) {
+                sent = true;
+                mx = x;
+                my = y;
+            }
+            inject(EV_REL, REL_X, mx, EV_REL, REL_Y, my);
+        }
     }
 
     @Override public void moveBy(float dx, float dy) {
@@ -45,7 +69,19 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
         if (ix == 0 && iy == 0) return;
         remX -= ix;
         remY -= iy;
-        send(EV_REL, REL_X, ix, EV_REL, REL_Y, iy);
+        if (!isReady()) return;
+        Move m;
+        synchronized (moveLock) {
+            if (lastMove != null && !lastMove.sent) {
+                lastMove.x += ix;
+                lastMove.y += iy;
+                return;
+            }
+            m = lastMove = new Move();
+            m.x = ix;
+            m.y = iy;
+        }
+        io.post(m);
     }
 
     /** Gap between waking the pointer and pressing the button. */

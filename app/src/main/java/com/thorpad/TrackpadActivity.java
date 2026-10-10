@@ -7,9 +7,13 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -49,8 +53,9 @@ public class TrackpadActivity extends Activity
         super.onCreate(savedInstanceState);
         // Never take input focus: the app on the top screen keeps the keyboard and gamepad,
         // and Back / Home / Recents act on the top screen instead of on the trackpad.
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // No FLAG_KEEP_SCREEN_ON: the Thor sleeps on its usual timer, and touching the trackpad
+        // counts as using it.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
 
         float d = getResources().getDisplayMetrics().density;
@@ -110,6 +115,65 @@ public class TrackpadActivity extends Activity
         setContentView(frame);
         keyboardRequested = getIntent().getBooleanExtra(EXTRA_OPEN_KEYBOARD, false);
         ShizukuClient.addListener(this);
+    }
+
+    // ---- Dim when idle --------------------------------------------------------------------
+
+    private static final long DIM_AFTER_MS = 30000;
+    private final Handler idleHandler = new Handler(Looper.getMainLooper());
+    private long lastTouchAt;
+    private boolean dimmed;
+    /** The touch that wakes a dimmed screen only wakes it; its later events are dropped too. */
+    private boolean swallowTouch;
+
+    private final Runnable dimCheck = new Runnable() {
+        @Override public void run() {
+            long left = lastTouchAt + DIM_AFTER_MS - SystemClock.uptimeMillis();
+            if (left > 0) {
+                idleHandler.postDelayed(this, left); // touched since: check again later
+            } else if (started && new Prefs(TrackpadActivity.this).dimWhenIdle()) {
+                setDimmed(true);
+            }
+        }
+    };
+
+    private void setDimmed(boolean dim) {
+        if (dimmed == dim) return;
+        dimmed = dim;
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = dim ? 0.01f : WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+        getWindow().setAttributes(lp);
+        getWindow().getDecorView().setAlpha(dim ? 0.25f : 1f);
+    }
+
+    private void restartIdleTimer() {
+        lastTouchAt = SystemClock.uptimeMillis();
+        idleHandler.removeCallbacks(dimCheck);
+        idleHandler.postDelayed(dimCheck, DIM_AFTER_MS);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // Only a timestamp per event; the timer itself is only reset when it fires.
+        lastTouchAt = SystemClock.uptimeMillis();
+        int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN && dimmed) {
+            setDimmed(false);
+            restartIdleTimer();
+            swallowTouch = true;
+        }
+        if (swallowTouch) {
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) swallowTouch = false;
+            return true;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        // ThorPad is out of sight: give back the autocorrect word list (it reloads when needed).
+        if (level >= TRIM_MEMORY_UI_HIDDEN) Autocorrect.release();
     }
 
     @Override
@@ -233,6 +297,7 @@ public class TrackpadActivity extends Activity
             keyboardRequested = false;
             if (keyboard.getVisibility() != View.VISIBLE) openKeyboard();
         }
+        restartIdleTimer();
     }
 
     @Override
@@ -252,6 +317,9 @@ public class TrackpadActivity extends Activity
         super.onStop();
         started = false;
         ThorPadIme.setListener(null);
+        setupPanel.removeCallbacks(recheck);
+        idleHandler.removeCallbacks(dimCheck);
+        setDimmed(false);
         // Unplug the virtual mouse and hide the overlay pointer while the trackpad is away.
         mouse.stop();
         onCloseKeyboard();
@@ -342,6 +410,7 @@ public class TrackpadActivity extends Activity
         if (keyboard.getVisibility() != View.VISIBLE) return;
         keyboard.setVisibility(View.GONE);
         keyboard.setOutput(null);
+        keyboard.setAutocorrect(null); // lets the word list be freed while the keyboard is shut
         keyboardDevice.stop(); // unplug, so the top screen's own touch keyboard works again
         refresh();
     }
@@ -398,7 +467,7 @@ public class TrackpadActivity extends Activity
 
         boolean waitingForMouse = shizukuReady && mouseError == null && !mouse.isReady();
         setupPanel.setVisibility(out != null || waitingForMouse ? View.GONE : View.VISIBLE);
-        if (out == null) {
+        if (out == null && started) {
             // Keep checking while the user sets things up in other apps.
             setupPanel.removeCallbacks(recheck);
             setupPanel.postDelayed(recheck, 1000);

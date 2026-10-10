@@ -61,6 +61,9 @@ public class SettingsActivity extends Activity {
                 Prefs.KEY_INVERT_SCROLL, prefs.invertScroll(), false);
         toggle("Swap screens (pointer on bottom, trackpad on top). Reopen ThorPad after changing.",
                 Prefs.KEY_SWAP_SCREENS, prefs.swapScreens(), true);
+        toggle("Dim the trackpad screen after 30 seconds without a touch, to save battery "
+                + "(the first touch only wakes it)",
+                Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
 
         list.addView(text("\nKeyboard", 17));
         toggle("Autocorrect (fixes a misspelled word when you finish it; tap the suggestion "

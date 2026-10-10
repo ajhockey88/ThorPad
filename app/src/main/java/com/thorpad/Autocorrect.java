@@ -78,19 +78,22 @@ final class Autocorrect {
         return instance;
     }
 
+    /** Drops the shared word list to free memory; the next get() loads it again. */
+    static synchronized void release() {
+        instance = null;
+    }
+
     private void load(Context context) {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(
                 context.getAssets().open("words.txt"), StandardCharsets.UTF_8), 1 << 16)) {
             String line;
-            Map<String, Integer> map = new HashMap<>(180000);
+            // Filled in place, with no second copy. Nothing reads it until `loaded` is set, and it
+            // never changes after that, so lookups need no lock.
             while ((line = in.readLine()) != null) {
                 if (line.isEmpty() || line.charAt(0) == '#') continue;
                 int tab = line.indexOf('\t');
                 if (tab <= 0) continue;
-                map.put(line.substring(0, tab), Integer.parseInt(line.substring(tab + 1)));
-            }
-            synchronized (freq) {
-                freq.putAll(map);
+                freq.put(line.substring(0, tab), Integer.parseInt(line.substring(tab + 1)));
             }
             loaded = true;
         } catch (Exception ignored) {
@@ -138,9 +141,7 @@ final class Autocorrect {
     }
 
     private boolean known(String w) {
-        synchronized (freq) {
-            return freq.containsKey(w);
-        }
+        return freq.containsKey(w);
     }
 
     private static final class Best {
@@ -149,10 +150,7 @@ final class Autocorrect {
     }
 
     private void consider(Best best, String candidate, float cost) {
-        Integer f;
-        synchronized (freq) {
-            f = freq.get(candidate);
-        }
+        Integer f = freq.get(candidate);
         if (f == null || f < 20) return; // ignore very rare words as corrections
         // Frequency counts, but not so much that a common short word beats an obvious slip.
         float score = 0.6f * (f / 10f) - 3.0f * cost;
