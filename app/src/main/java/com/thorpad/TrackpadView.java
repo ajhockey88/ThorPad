@@ -52,6 +52,7 @@ final class TrackpadView extends View {
     private int maxPointers;
     private float twoLastY, twoTravel;
     private float tickAcc;
+    private String lastTouch = "";
     private boolean scrolling;
     private boolean touching;
 
@@ -64,6 +65,7 @@ final class TrackpadView extends View {
                 longPressed = true;
                 state = DONE;
                 buzz(HapticFeedbackConstants.LONG_PRESS);
+                diagnose("press and hold");
             }
         }
     };
@@ -97,6 +99,9 @@ final class TrackpadView extends View {
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
         canvas.drawText("Tap: click  ·  Two fingers: scroll  ·  Tap, then slide: drag",
                 getWidth() / 2f, getHeight() - 18 * density, label);
+        if (!lastTouch.isEmpty()) {
+            canvas.drawText("Last touch: " + lastTouch, getWidth() / 2f, getHeight() - 40 * density, label);
+        }
     }
 
     @Override
@@ -212,36 +217,70 @@ final class TrackpadView extends View {
                 if (state == DRAGGING) {
                     if (s != null) s.dragEnd();
                     buzz(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
+                    diagnose("drag");
                 } else if (state == TWO_FINGER && !scrolling && maxPointers == 2 && held < 350) {
                     if (s != null) s.twoFingerTap();
                     buzz(HapticFeedbackConstants.CONTEXT_CLICK);
-                } else if ((state == IDLE || (state == MOVING && maxStray < tapSlop))
-                        && maxPointers == 1 && !longPressed && held < TAP_MAX_MS) {
-                    // A tap, even if the finger rolled a little and nudged the pointer.
-                    if (s != null && prefs.tapToClick()) {
-                        s.click();
-                        buzz(HapticFeedbackConstants.VIRTUAL_KEY);
-                    }
-                    lastTapUpAt = now;
-                    state = DONE;
+                    diagnose("two-finger tap");
+                } else if (maybeTap(s, held, now, "")) {
                     return true;
                 } else if (state == TWO_FINGER) {
                     endScroll(s);
+                    if (!scrolling) diagnose("not a tap (two fingers moved or held)");
                 }
                 state = DONE;
                 return true;
             }
             case MotionEvent.ACTION_CANCEL: {
+                // Android (or the Thor's touch handling) took the touch away. If it looked like a
+                // tap, still click: a short tap is the touch most likely to be cancelled.
                 handler.removeCallbacks(longPress);
+                long now = SystemClock.uptimeMillis();
                 touching = false;
                 invalidate();
                 if (state == DRAGGING && s != null) s.dragEnd();
                 endScroll(s);
+                if (!maybeTap(s, now - downAt, now, " (touch was cancelled)")) {
+                    diagnose("touch cancelled by the system");
+                }
                 state = DONE;
                 return true;
             }
         }
         return true;
+    }
+
+    /** Clicks if the touch that just ended was a tap. */
+    private boolean maybeTap(PadOutput s, long held, long now, String note) {
+        if (state == DRAGGING || state == TWO_FINGER || state == DONE) return false;
+        if (maxPointers != 1 || longPressed) return false;
+        if (held >= TAP_MAX_MS) {
+            diagnose("not a tap (held " + held + " ms)" + note);
+            return false;
+        }
+        if (maxStray >= tapSlop) {
+            diagnose("not a tap (moved " + Math.round(maxStray) + " px)" + note);
+            return false;
+        }
+        // A tap, even if the finger rolled a little and nudged the pointer.
+        buzz(HapticFeedbackConstants.VIRTUAL_KEY);
+        if (s == null) {
+            diagnose("tap, but ThorPad isn't connected to the top screen");
+        } else if (!prefs.tapToClick()) {
+            diagnose("tap, but \"Tap to click\" is off in Settings");
+        } else {
+            s.click();
+            diagnose("tap \u2192 click" + note);
+        }
+        lastTapUpAt = now;
+        state = DONE;
+        return true;
+    }
+
+    /** Shows, faintly on the pad, how the last touch was understood. Helps find misfires. */
+    private void diagnose(String what) {
+        lastTouch = what;
+        invalidate();
     }
 
     /** Haptic feedback for every action, even if the system's touch vibration is off for views. */
