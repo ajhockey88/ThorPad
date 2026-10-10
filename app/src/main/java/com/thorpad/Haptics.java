@@ -74,28 +74,27 @@ final class Haptics {
         return vibrator;
     }
 
+    /** Whether the vibration motor can buzz softer or harder, not just on or off. */
+    static boolean hasStrengthControl(Context context) {
+        Vibrator v = vibrator(context);
+        return v != null && v.hasAmplitudeControl();
+    }
+
+    // Base length of each feel, in ms.
+    private static final int[] FEEL_MS = {0, 10, 20, 40, 20, 80};
+
+    /**
+     * Strength sets the vibration's amplitude where the motor supports it, and its length
+     * too, so it still makes a difference on motors that only switch on and off.
+     */
     private static VibrationEffect effect(Vibrator v, int feel, float scale) {
-        // Crisp built-in clicks where the motor supports them, scaled to the strength.
-        boolean primitives = v.areAllPrimitivesSupported(
-                VibrationEffect.Composition.PRIMITIVE_TICK, VibrationEffect.Composition.PRIMITIVE_CLICK);
-        if (primitives && (feel == TICK || feel == TAP || feel == DOUBLE)) {
-            VibrationEffect.Composition c = VibrationEffect.startComposition();
-            if (feel == TICK) {
-                c.addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, scale);
-            } else {
-                c.addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, scale);
-                if (feel == DOUBLE) c.addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, scale, 70);
-            }
-            return c.compose();
+        boolean amplitude = v.hasAmplitudeControl();
+        int amp = amplitude ? Math.round(40 + scale * 215) : VibrationEffect.DEFAULT_AMPLITUDE;
+        float lengthScale = amplitude ? 0.6f + 0.8f * scale : 0.3f + 1.4f * scale;
+        long ms = Math.max(3, Math.round(FEEL_MS[feel] * lengthScale));
+        if (feel == DOUBLE) {
+            return VibrationEffect.createWaveform(new long[] {0, ms, 70, ms}, new int[] {0, amp, 0, amp}, -1);
         }
-        int amp = v.hasAmplitudeControl() ? Math.max(1, Math.round(scale * 255)) : VibrationEffect.DEFAULT_AMPLITUDE;
-        switch (feel) {
-            case TICK: return VibrationEffect.createOneShot(8, amp);
-            case TAP: return VibrationEffect.createOneShot(18, amp);
-            case HEAVY: return VibrationEffect.createOneShot(40, amp);
-            case DOUBLE:
-                return VibrationEffect.createWaveform(new long[] {0, 18, 70, 18}, new int[] {0, amp, 0, amp}, -1);
-            default: return VibrationEffect.createOneShot(80, amp);
-        }
+        return VibrationEffect.createOneShot(ms, amp);
     }
 }

@@ -245,6 +245,12 @@ public class SettingsActivity extends Activity {
         TextView hint = text("Pick a feel and strength for each action. Every change plays a preview.", 13);
         hint.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(hint);
+        if (!Haptics.hasStrengthControl(this)) {
+            TextView motor = text("This device's vibration motor can't buzz softer or harder, so strength "
+                    + "changes how long each buzz lasts instead.", 13);
+            motor.setTextColor(Color.argb(170, 255, 255, 255));
+            list.addView(motor);
+        }
         for (int a = 0; a < Haptics.ACTION_NAMES.length; a++) hapticRow(a);
     }
 
