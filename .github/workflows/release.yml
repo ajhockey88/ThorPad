@@ -1,0 +1,33 @@
+# Publishes a GitHub release whenever release/ changes on main.
+# The version comes from versionName in the app's manifest; the release gets release/notes.md
+# as its description and release/ThorPad.apk attached. If that version's release already
+# exists, its notes and APK are replaced in place.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: ['release/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -o 'versionName="[^"]*"' app/src/main/AndroidManifest.xml | cut -d'"' -f2)
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --notes-file release/notes.md
+            gh release upload "$tag" release/ThorPad.apk --clobber
+          else
+            gh release create "$tag" release/ThorPad.apk --target "$GITHUB_SHA" \
+              --title "$tag" --notes-file release/notes.md
+          fi
