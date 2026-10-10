@@ -37,6 +37,22 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         }
     };
 
+    private final Runnable wanted = new Runnable() {
+        @Override public void run() {
+            if (inputStarted && onPointerScreen()) askForKeyboard();
+        }
+    };
+
+    private void askForKeyboard() {
+        Listener l = listener;
+        if (l != null) {
+            l.onKeyboardWanted();
+        } else {
+            // ThorPad isn't open: bring up the trackpad with its keyboard showing.
+            LauncherActivity.openTrackpad(this, true);
+        }
+    }
+
     private void doneSoon() {
         handler.removeCallbacks(done);
         handler.postDelayed(done, DONE_DELAY_MS);
@@ -121,8 +137,15 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         super.onStartInput(attribute, restarting);
         boolean wasStarted = inputStarted;
         inputStarted = attribute.inputType != android.text.InputType.TYPE_NULL;
-        if (inputStarted) handler.removeCallbacks(done);
-        else if (wasStarted) doneSoon(); // focus moved to something that isn't a text box
+        if (inputStarted) {
+            handler.removeCallbacks(done);
+            // A text box got focus. Android only shows a keyboard's window when the app asks
+            // for it, and after the first time it often doesn't for an invisible one like this,
+            // so the focus itself opens the bottom keyboard.
+            if (!restarting) handler.post(wanted);
+        } else if (wasStarted) {
+            doneSoon(); // focus moved to something that isn't a text box
+        }
     }
 
     @Override
@@ -148,14 +171,8 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
             requestHideSelf(0);
             return;
         }
-        if (restarting) return;
-        Listener l = listener;
-        if (l != null) {
-            l.onKeyboardWanted();
-        } else {
-            // ThorPad isn't open: bring up the trackpad with its keyboard showing.
-            LauncherActivity.openTrackpad(this, true);
-        }
+        handler.removeCallbacks(wanted); // asking once is enough
+        askForKeyboard();
     }
 
     /** Whether the text box is on the top screen, not an app sharing the trackpad's screen. */

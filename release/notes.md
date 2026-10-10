@@ -2,7 +2,7 @@
 
 ## ✨ What's new in 1.7
 - 🙈 **Keyboard hides by itself:** when the top screen leaves a text box (you tap elsewhere, or the app hides the keyboard after Search or Send), ThorPad's keyboard closes and the trackpad comes back. A keyboard you opened with the **Keyboard** button stays open until you close it, so games still get it
-- 🪄 **Keyboard shows up every time:** tapping a text box again after you closed the keyboard now reopens it. Before, a second tap on the same text box could do nothing
+- 🪄 **Keyboard shows up every time:** ThorPad's keyboard now opens whenever a text box on the top screen gets focus, and tapping a text box again after you closed the keyboard reopens it. Before, it could stop opening after the first time
 - 🖥️ If PC keys are open when a text box asks for the keyboard, the keyboard takes over
 
 ---
