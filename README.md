@@ -19,7 +19,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/settings.png" width="400" alt="Settings screen"> |
 | 🧹 Hold ⌫ for Clear all | 📳 Haptics settings |
 | <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings"> |
-| ⌨️ Choose keyboard | 🎉 Update available, with what's new |
+| ⌨️ Use ThorPad keyboard | 🎉 Update available, with what's new |
 | <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/update-available.png" width="400" alt="Update available screen with the release notes"> |
 | 🖥️ PC keys (for Moonlight) | ✨ Mode menu: Auto, Android or PC |
 | <img src="docs/screenshots/pc-keys.png" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> | <img src="docs/screenshots/mode-menu.png" width="400" alt="Mode menu with Auto, Android, PC and Go home"> |
@@ -82,7 +82,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔣 **?123** and **=\<** switch to numbers, symbols, Esc, Tab and arrow keys. Tap ⇧ once for one
   capital letter, or twice quickly for caps lock. Hold ⌫ to keep deleting.
 - 🧹 **Clear all:** while you hold ⌫, the space bar turns red and says **Clear all**. Tap it to wipe the whole text box.
-- 🪄 **Opens by itself:** in Settings > **Choose keyboard**, pick **ThorPad keyboard**. Then whenever a
+- 🪄 **Opens by itself:** in Settings, tap **Use ThorPad keyboard** (it makes ThorPad Android's keyboard). Then whenever a
   text box on the top screen asks for a keyboard, ThorPad's keyboard opens on the bottom screen (if
   ThorPad is closed, just the keyboard appears over whatever is there), with no other keyboard popping up on the top screen. Keys
   go straight into the text box. When the top screen leaves the text box (or the app hides its
@@ -109,7 +109,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
 - ✨ **Autocorrect** on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
-- ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
+- ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's
   new in every version since yours, newest first. Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt
@@ -138,7 +138,7 @@ ThorPad uses mouse mode whenever Shizuku is running and has allowed it, and fall
    ThorPad, tap **Allow ThorPad in Shizuku** and allow it. Shizuku has to be started again after each reboot.
 3. For touch mode: tap **Accessibility settings** in ThorPad and turn on **ThorPad trackpad**.
    If Android says the setting is restricted: Settings > Apps > ThorPad > ⋮ > **Allow restricted settings**, then try again.
-4. Optional: in ThorPad's Settings, tap **Choose keyboard** and pick **ThorPad keyboard**, so the
+4. Optional: in ThorPad's Settings, tap **Use ThorPad keyboard**, so the
    keyboard opens by itself for text boxes on the top screen.
 
 🔄 **Updating:** tap **Check for updates** at the bottom of ThorPad's Settings, or install the

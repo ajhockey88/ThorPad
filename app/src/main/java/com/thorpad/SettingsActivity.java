@@ -120,22 +120,34 @@ public class SettingsActivity extends Activity {
     // ---- Which keyboard opens for top-screen text boxes ------------------------------------
 
     private TextView keyboardLabel;
+    private Button useThorPad;
 
     private void keyboardChooser() {
         keyboardLabel = text("", 15);
         list.addView(keyboardLabel);
-        TextView hint = text("Pick ThorPad keyboard and the keyboard on the bottom screen opens by "
-                + "itself whenever a text box is selected on the top screen, with no other keyboard "
-                + "popping up.", 13);
+        TextView hint = text("This is Android's own keyboard setting for the whole Thor. With ThorPad "
+                + "keyboard in use, the keyboard on the bottom screen opens by itself whenever a text "
+                + "box is selected on the top screen, with no other keyboard popping up.", 13);
         hint.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(hint);
+        LinearLayout row = new LinearLayout(this);
+        useThorPad = new Button(this);
+        useThorPad.setAllCaps(false);
+        useThorPad.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                InputMethodInfo mine = thorPadKeyboard();
+                if (mine != null) useKeyboard(mine);
+            }
+        });
+        row.addView(useThorPad);
         Button choose = new Button(this);
-        choose.setText("Choose keyboard");
+        choose.setText("Other keyboard");
         choose.setAllCaps(false);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { showKeyboardList(); }
         });
-        list.addView(choose, new LinearLayout.LayoutParams(
+        row.addView(choose);
+        list.addView(row, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
@@ -147,6 +159,13 @@ public class SettingsActivity extends Activity {
         return Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
     }
 
+    private InputMethodInfo thorPadKeyboard() {
+        for (InputMethodInfo info : imm().getInputMethodList()) {
+            if (info.getPackageName().equals(getPackageName())) return info;
+        }
+        return null;
+    }
+
     private void refreshKeyboardLabel() {
         if (keyboardLabel == null) return;
         String name = "unknown";
@@ -154,7 +173,11 @@ public class SettingsActivity extends Activity {
         for (InputMethodInfo info : imm().getInputMethodList()) {
             if (info.getId().equals(current)) name = info.loadLabel(getPackageManager()).toString();
         }
-        keyboardLabel.setText("Keyboard for text boxes on the top screen: " + name);
+        InputMethodInfo mine = thorPadKeyboard();
+        boolean inUse = mine != null && mine.getId().equals(current);
+        keyboardLabel.setText("Android keyboard: " + name + (inUse ? " ✅" : ""));
+        useThorPad.setText(inUse ? "ThorPad keyboard in use" : "Use ThorPad keyboard");
+        useThorPad.setEnabled(!inUse && mine != null);
     }
 
     private void showKeyboardList() {
@@ -185,8 +208,21 @@ public class SettingsActivity extends Activity {
             new Thread(new Runnable() {
                 @Override public void run() {
                     ShizukuClient.runShell("ime enable " + id + " && ime set " + id);
+                    if (!id.equals(currentKeyboardId())) {
+                        // Some firmware ignores "ime set": write Android's setting directly.
+                        ShizukuClient.runShell("settings put secure default_input_method " + id);
+                    }
                     runOnUiThread(new Runnable() {
-                        @Override public void run() { refreshKeyboardLabel(); }
+                        @Override public void run() {
+                            refreshKeyboardLabel();
+                            if (!id.equals(currentKeyboardId())) {
+                                // Still not switched: fall back to Android's own picker.
+                                imm().showInputMethodPicker();
+                            } else {
+                                Toast.makeText(SettingsActivity.this, info.loadLabel(getPackageManager())
+                                        + " is now Android's keyboard", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     });
                 }
             }, "ThorPad set keyboard").start();

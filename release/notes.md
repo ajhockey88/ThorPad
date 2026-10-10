@@ -6,6 +6,7 @@
 - 📨 **Closes when you send:** after Send, Search, Go or Done, or when the app empties the text box because your message was sent, the keyboard closes
 - 👆 **Tap outside to close:** with Shizuku on, tapping anywhere on the top screen outside the text box closes the keyboard, even in apps that keep the text box selected. ThorPad only watches for this while the keyboard is open
 - ↩️ **Works even when ThorPad is closed:** if ThorPad isn't on the bottom screen, tapping a text box shows just the keyboard over whatever is there, and it types straight into the top screen. When it closes, the app underneath is right where you left it. ThorPad allows itself to draw over apps through Shizuku the first time
+- ⌨️ **Use ThorPad keyboard:** one button in Settings makes ThorPad Android's keyboard for the whole Thor (Shizuku switches it for you). **Other keyboard** switches back
 - 🖥️ If PC keys are open when a text box asks for the keyboard, the keyboard takes over
 
 ---
