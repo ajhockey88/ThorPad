@@ -56,8 +56,9 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   go straight into the text box. With Shizuku, ThorPad switches keyboards for you; without it,
   Android asks you to turn the keyboard on and pick it. Text boxes drawn inside a Windows game in
   GameNative aren't Android text boxes, so open the keyboard yourself there.
-- 🔌 In mouse mode, ThorPad plugs in a virtual USB keyboard while the keyboard is open, so keys
-  reach games and apps like a real keyboard. In touch mode, text goes into the selected text box.
+- 🔌 Where the keys go: with ThorPad keyboard picked, straight into the selected text box. Otherwise, in
+  mouse mode, ThorPad plugs in a virtual USB keyboard while the keyboard is open, so keys reach games
+  and apps like a real keyboard; in touch mode, text goes into the selected text box.
 - ✨ **Autocorrect** (on by default, switch in Settings) fixes a misspelled word when you finish it
   with a space or punctuation. While you type, the strip shows "→ correction"; tap the strip to keep
   your spelling. Pressing backspace right after a correction undoes it. Either way, ThorPad
@@ -70,8 +71,8 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
 - ✨ **Autocorrect** on or off
-- ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
+- ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub, downloads it
   and installs it. With Shizuku it installs on its own; without it, Android shows its install prompt
@@ -99,6 +100,11 @@ ThorPad uses mouse mode whenever Shizuku is running and has allowed it, and fall
    ThorPad, tap **Allow ThorPad in Shizuku** and allow it. Shizuku has to be started again after each reboot.
 3. For touch mode: tap **Accessibility settings** in ThorPad and turn on **ThorPad trackpad**.
    If Android says the setting is restricted: Settings > Apps > ThorPad > ⋮ > **Allow restricted settings**, then try again.
+4. Optional: in ThorPad's Settings, tap **Choose keyboard** and pick **ThorPad keyboard**, so the
+   keyboard opens by itself for text boxes on the top screen.
+
+🔄 **Updating:** tap **Check for updates** at the bottom of ThorPad's Settings, or install the
+newest `ThorPad.apk` from [Releases](https://github.com/ajhockey88/ThorPad/releases) over the old one.
 
 ## 🛠️ How it works
 
@@ -123,6 +129,15 @@ Touch mode:
   momentum like a real swipe;
 - the trackpad window never takes input focus, so the top-screen app keeps the gamepad
   and keyboard, and Back/Home/Apps act on the top screen.
+
+ThorPad keyboard is an Android input method (`ThorPadIme`) with an empty view on the top screen.
+When a text box asks for a keyboard, it opens the bottom-screen keyboard (starting the trackpad if
+needed), and keys are committed to the text box through its input connection. Clear all is
+select-all then delete.
+
+Check for updates reads `releases/latest` from the GitHub API, compares its tag with the installed
+version, downloads the release's `.apk`, and installs it with `pm install` through Shizuku, or with
+Android's package installer (which asks to confirm) when Shizuku isn't allowed.
 
 🔒 ThorPad only goes online when you tap **Check for updates**, to read its GitHub releases and
 download the new APK. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
