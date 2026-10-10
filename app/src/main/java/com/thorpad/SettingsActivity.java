@@ -40,7 +40,13 @@ public class SettingsActivity extends Activity {
         prefs = new Prefs(this);
         d = getResources().getDisplayMetrics().density;
 
-        ScrollView scroll = new ScrollView(this);
+        // Long notes scroll, so the buttons always stay on screen.
+        final int maxH = (int) (getResources().getDisplayMetrics().heightPixels * 0.55f);
+        ScrollView scroll = new ScrollView(this) {
+            @Override protected void onMeasure(int w, int h) {
+                super.onMeasure(w, MeasureSpec.makeMeasureSpec(maxH, MeasureSpec.AT_MOST));
+            }
+        };
         scroll.setBackgroundColor(Color.BLACK);
         list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -219,18 +225,68 @@ public class SettingsActivity extends Activity {
         check.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 check.setEnabled(false);
-                new Updater(SettingsActivity.this, new Updater.Listener() {
+                final Updater[] updater = new Updater[1];
+                updater[0] = new Updater(SettingsActivity.this, new Updater.Listener() {
                     @Override public void onUpdateStatus(String s, boolean done) {
                         status.setText(s);
                         if (done) check.setEnabled(true);
                     }
-                }).checkAndInstall();
+
+                    @Override public void onUpdateAvailable(Updater.Release r) {
+                        showWhatsNew(r, updater[0]);
+                    }
+                });
+                updater[0].check();
             }
         });
         list.addView(check, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         // Room so the preview pill never covers the button.
         list.addView(new View(this), new LinearLayout.LayoutParams(1, (int) (50 * d)));
+    }
+
+    /** "ThorPad x is available": the release notes, with Update and Not now. */
+    private void showWhatsNew(final Updater.Release r, final Updater updater) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (22 * d);
+        box.setPadding(pad, (int) (18 * d), pad, 0);
+
+        TextView title = new TextView(this);
+        title.setText("🎉 ThorPad " + r.version + " is available");
+        title.setTextSize(20);
+        title.setTextColor(Color.WHITE);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        box.addView(title);
+        TextView sub = new TextView(this);
+        sub.setText("You have " + r.current + (r.apkSize > 0 ? " · " + (r.apkSize / 1024) + " KB download" : ""));
+        sub.setTextSize(13);
+        sub.setTextColor(Color.rgb(0x8a, 0x90, 0x9b));
+        sub.setPadding(0, (int) (4 * d), 0, (int) (10 * d));
+        box.addView(sub);
+
+        // Long notes scroll, so the buttons always stay on screen.
+        final int maxH = (int) (getResources().getDisplayMetrics().heightPixels * 0.55f);
+        ScrollView scroll = new ScrollView(this) {
+            @Override protected void onMeasure(int w, int h) {
+                super.onMeasure(w, MeasureSpec.makeMeasureSpec(maxH, MeasureSpec.AT_MOST));
+            }
+        };
+        TextView notes = new TextView(this);
+        notes.setText(ReleaseNotes.format(r.notes));
+        notes.setTextSize(14);
+        notes.setTextColor(Color.rgb(0xc9, 0xce, 0xd8));
+        notes.setLineSpacing(0, 1.15f);
+        scroll.addView(notes);
+        box.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        new AlertDialog.Builder(this)
+                .setView(box)
+                .setNegativeButton("Not now", null)
+                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface dialog, int which) { updater.install(r); }
+                })
+                .show();
     }
 
     // ---- Haptics -------------------------------------------------------------------------------

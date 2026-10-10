@@ -33,6 +33,23 @@ final class Updater {
     interface Listener {
         /** Progress text for the settings screen. done = the check is over. */
         void onUpdateStatus(String status, boolean done);
+
+        /** A newer version is out: show what's new and let the user decide. */
+        void onUpdateAvailable(Release release);
+    }
+
+    /** A newer ThorPad release found on GitHub. */
+    static final class Release {
+        final String version, current, notes, apkUrl;
+        final long apkSize;
+
+        Release(String version, String current, String notes, String apkUrl, long apkSize) {
+            this.version = version;
+            this.current = current;
+            this.notes = notes;
+            this.apkUrl = apkUrl;
+            this.apkSize = apkSize;
+        }
     }
 
     private final Context context;
@@ -44,48 +61,70 @@ final class Updater {
         this.listener = listener;
     }
 
-    void checkAndInstall() {
+    /** Looks for a newer release; reports it through onUpdateAvailable. */
+    void check() {
+        background(new Task() {
+            @Override public void run() throws Exception {
+                post("Checking for updates…", false);
+                JSONObject release = new JSONObject(readAll(open(LATEST)));
+                String tag = release.optString("tag_name", "");
+                String latest = tag.startsWith("v") ? tag.substring(1) : tag;
+                String mine = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+                if (compareVersions(latest, mine) <= 0) {
+                    post("ThorPad " + mine + " is up to date.", true);
+                    return;
+                }
+                String url = null;
+                long size = 0;
+                JSONArray assets = release.optJSONArray("assets");
+                for (int i = 0; assets != null && i < assets.length(); i++) {
+                    JSONObject a = assets.getJSONObject(i);
+                    if (a.optString("name").endsWith(".apk")) {
+                        url = a.optString("browser_download_url");
+                        size = a.optLong("size");
+                    }
+                }
+                if (url == null) {
+                    post("Version " + latest + " is out, but its release has no APK yet.", true);
+                    return;
+                }
+                final Release r = new Release(latest, mine, release.optString("body", ""), url, size);
+                post("ThorPad " + latest + " is available.", true);
+                main.post(new Runnable() {
+                    @Override public void run() { listener.onUpdateAvailable(r); }
+                });
+            }
+        });
+    }
+
+    /** Downloads and installs a release found by check(). */
+    void install(final Release r) {
+        background(new Task() {
+            @Override public void run() throws Exception {
+                File apk = new File(context.getCacheDir(), "ThorPad-update.apk");
+                download(r.apkUrl, apk, r.version);
+                if (ShizukuClient.hasPermission()) {
+                    post("Installing " + r.version + "… ThorPad will close and can be reopened.", false);
+                    if (installWithShizuku(apk)) return; // ThorPad is replaced and restarted
+                }
+                post("Installing " + r.version + "… confirm on the install prompt.", true);
+                installWithPrompt(apk);
+            }
+        });
+    }
+
+    private interface Task { void run() throws Exception; }
+
+    private void background(final Task task) {
         new Thread(new Runnable() {
             @Override public void run() {
                 try {
-                    run2();
+                    task.run();
                 } catch (Exception e) {
-                    post("Couldn't check for updates: " + (e.getMessage() != null ? e.getMessage() : e), true);
+                    post("Update failed: " + (e.getMessage() != null ? e.getMessage() : e), true);
                 }
             }
         }, "ThorPad update").start();
-    }
-
-    private void run2() throws Exception {
-        post("Checking for updates…", false);
-        JSONObject release = new JSONObject(readAll(open(LATEST)));
-        String tag = release.optString("tag_name", "");
-        String latest = tag.startsWith("v") ? tag.substring(1) : tag;
-        String mine = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-        if (compareVersions(latest, mine) <= 0) {
-            post("ThorPad " + mine + " is up to date.", true);
-            return;
-        }
-        String url = null;
-        JSONArray assets = release.optJSONArray("assets");
-        for (int i = 0; assets != null && i < assets.length(); i++) {
-            JSONObject a = assets.getJSONObject(i);
-            if (a.optString("name").endsWith(".apk")) url = a.optString("browser_download_url");
-        }
-        if (url == null) {
-            post("Version " + latest + " is out, but its release has no APK yet.", true);
-            return;
-        }
-
-        File apk = new File(context.getCacheDir(), "ThorPad-update.apk");
-        download(url, apk, latest);
-
-        if (ShizukuClient.hasPermission()) {
-            post("Installing " + latest + "… ThorPad will close and can be reopened.", false);
-            if (installWithShizuku(apk)) return; // ThorPad is replaced and restarted
-        }
-        post("Installing " + latest + "… confirm on the install prompt.", true);
-        installWithPrompt(apk);
     }
 
     private void download(String url, File to, String version) throws IOException {

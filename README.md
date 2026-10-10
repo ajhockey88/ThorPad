@@ -19,8 +19,10 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/settings.png" width="400" alt="Settings screen"> |
 | 🧹 Hold ⌫ for Clear all | 📳 Haptics settings |
 | <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings"> |
-| ⌨️ Choose keyboard | 🚀 First-run setup |
-| <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> |
+| ⌨️ Choose keyboard | 🎉 Update available, with what's new |
+| <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/update-available.png" width="400" alt="Update available screen with the release notes"> |
+| 🚀 First-run setup | |
+| <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> | |
 
 ## 👆 Gestures
 
@@ -80,8 +82,8 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - ⌨️ **Choose keyboard:** which keyboard opens for top-screen text boxes (pick ThorPad keyboard to have this one open by itself)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
-- 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub, downloads it
-  and installs it. With Shizuku it installs on its own; without it, Android shows its install prompt
+- 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's
+  new in it (its release notes). Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt
   (the first time, allow ThorPad to install apps).
 
 ## 🔀 Two modes
@@ -142,7 +144,7 @@ needed), and keys are committed to the text box through its input connection. Cl
 select-all then delete.
 
 Check for updates reads `releases/latest` from the GitHub API, compares its tag with the installed
-version, downloads the release's `.apk`, and installs it with `pm install` through Shizuku, or with
+version, shows the release notes (Markdown headers, bullets and bold), and on **Update** downloads the release's `.apk`, and installs it with `pm install` through Shizuku, or with
 Android's package installer (which asks to confirm) when Shizuku isn't allowed.
 
 🔒 ThorPad only goes online when you tap **Check for updates**, to read its GitHub releases and
