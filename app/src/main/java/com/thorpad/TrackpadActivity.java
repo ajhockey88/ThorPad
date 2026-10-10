@@ -52,6 +52,11 @@ public class TrackpadActivity extends Activity
     private boolean started;
     /** Open the keyboard as soon as the trackpad is up (asked for by the ThorPad keyboard). */
     private boolean keyboardRequested;
+    /**
+     * ThorPad came onto the bottom screen only because a text box wanted the keyboard, so when
+     * the keyboard closes it steps aside and the bottom screen goes back to what was there.
+     */
+    private boolean stepAsideAfterKeyboard;
     /** The keyboard was opened by a text box (not the Keyboard button), so it closes with it. */
     private boolean keyboardForTextBox;
 
@@ -101,6 +106,7 @@ public class TrackpadActivity extends Activity
         bar.addView(barButton("Keyboard", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 keyboardForTextBox = false;
+                stepAsideAfterKeyboard = false;
                 openKeyboard();
             }
         }), weight());
@@ -153,6 +159,7 @@ public class TrackpadActivity extends Activity
 
         setContentView(frame);
         keyboardRequested = getIntent().getBooleanExtra(EXTRA_OPEN_KEYBOARD, false);
+        stepAsideAfterKeyboard = keyboardRequested;
         ShizukuClient.addListener(this);
     }
 
@@ -559,6 +566,7 @@ public class TrackpadActivity extends Activity
     protected void onStop() {
         super.onStop();
         started = false;
+        stepAsideAfterKeyboard = false;
         ThorPadIme.setListener(null);
         setupPanel.removeCallbacks(recheck);
         idleHandler.removeCallbacks(dimCheck);
@@ -633,7 +641,11 @@ public class TrackpadActivity extends Activity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (intent.getBooleanExtra(EXTRA_OPEN_KEYBOARD, false)) keyboardRequested = true;
+        if (intent.getBooleanExtra(EXTRA_OPEN_KEYBOARD, false)) {
+            keyboardRequested = true;
+            // Only when ThorPad wasn't already showing; if it was, it stays.
+            if (!started) stepAsideAfterKeyboard = true;
+        }
     }
 
     private boolean keyboardDeviceFailed;
@@ -677,6 +689,11 @@ public class TrackpadActivity extends Activity
         keyboard.setAutocorrect(null); // lets the word list be freed while the keyboard is shut
         updateKeyboardDevice();
         refresh();
+        if (stepAsideAfterKeyboard && started) {
+            stepAsideAfterKeyboard = false;
+            KeyboardLog.add("trackpad: stepping aside for the previous app");
+            moveTaskToBack(true);
+        }
     }
 
     private PadOutput currentOutput() {
