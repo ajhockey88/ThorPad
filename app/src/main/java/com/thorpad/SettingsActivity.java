@@ -78,6 +78,7 @@ public class SettingsActivity extends Activity {
                 + "• Press and hold: long press\n"
                 + "• Two fingers up or down: scroll\n"
                 + "• Two fingers swiped right: back; swiped left: forward\n"
+                + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
                 + "• Two-finger tap: back", 14);
         help.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(help);

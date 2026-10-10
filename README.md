@@ -32,12 +32,16 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | ✌️ Two fingers up or down | Mouse wheel (real wheel notches in mouse mode) |
 | 👉 Two fingers swiped right | Back, like a browser's back button (the mouse's back side button in mouse mode) |
 | 👈 Two fingers swiped left | Forward (the mouse's forward side button; mouse mode only) |
+| 🤟 Three fingers swiped up | Recent apps |
+| 🤟 Three fingers swiped down | Closes the top-screen app (mouse mode, through Shizuku); Home in touch mode |
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
+
+The bottom of the trackpad lists these gestures in three columns: one, two and three fingers.
 
 The bar along the top has ⌨️ Keyboard, 🏠 Home, 🗂️ Apps (recents), ⚙️ Settings and ✖️ Close.
 
 📳 **Haptics:** you feel a buzz for every action: taps, right clicks, the start and end of a drag,
-press and hold, each scroll-wheel notch, back/forward swipes, every keyboard key, Clear all, and the top-bar buttons.
+press and hold, each scroll-wheel notch, back/forward and three-finger swipes, every keyboard key, Clear all, and the top-bar buttons.
 In Settings > Haptics, each action gets its own feel (Off, Tick, Click, Heavy, Double or Buzz) and
 strength, and every change plays a preview.
 
