@@ -86,7 +86,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   text box on the top screen asks for a keyboard, ThorPad's keyboard opens on the bottom screen (and
   the trackpad opens too if it was closed), with no other keyboard popping up on the top screen. Keys
   go straight into the text box. When the top screen leaves the text box (or the app hides its
-  keyboard, e.g. after Search), the keyboard closes again; one opened with the **Keyboard** button
+  keyboard, e.g. after Search, or with Shizuku you tap outside the text box), the keyboard closes again; one opened with the **Keyboard** button
   stays open until you close it. With Shizuku, ThorPad switches keyboards for you; without it,
   Android asks you to turn the keyboard on and pick it. Text boxes drawn inside a Windows game in
   GameNative aren't Android text boxes, so open the keyboard yourself there.

@@ -55,6 +55,27 @@ public class TrackpadActivity extends Activity
     /** The keyboard was opened by a text box (not the Keyboard button), so it closes with it. */
     private boolean keyboardForTextBox;
 
+    // ---- Tap outside the text box ----------------------------------------------------------
+    // Most apps keep a text box focused when you tap elsewhere, so nothing tells ThorPad you
+    // left it. While the keyboard is open for a text box (and Shizuku is on), ThorPad watches
+    // the touchscreens: a tap that isn't on its own screen and doesn't move the text box's
+    // cursor or focus a text box is a tap outside it, and the keyboard closes.
+
+    private static final long OWN_TOUCH_SLACK_MS = 250, TAP_SETTLE_MS = 350;
+    private long lastOwnDownAt;
+    private final TouchWatcher touchWatcher = new TouchWatcher(new TouchWatcher.Listener() {
+        @Override public void onTap(String device, final long downAt) {
+            if (Math.abs(downAt - lastOwnDownAt) < OWN_TOUCH_SLACK_MS) return; // on ThorPad's screen
+            idleHandler.postDelayed(new Runnable() {
+                @Override public void run() {
+                    if (Math.abs(downAt - lastOwnDownAt) < OWN_TOUCH_SLACK_MS) return;
+                    if (ThorPadIme.lastTextBoxActivity >= downAt) return; // the tap was in a text box
+                    if (keyboardForTextBox && keyboard.getVisibility() == View.VISIBLE) onCloseKeyboard();
+                }
+            }, TAP_SETTLE_MS);
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -182,6 +203,9 @@ public class TrackpadActivity extends Activity
         if (swallowTouch) {
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) swallowTouch = false;
             return true;
+        }
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
+            lastOwnDownAt = SystemClock.uptimeMillis();
         }
         if (action == MotionEvent.ACTION_DOWN) checkTopApp(false);
         return super.dispatchTouchEvent(ev);
@@ -511,6 +535,7 @@ public class TrackpadActivity extends Activity
             if (keyboard.getVisibility() != View.VISIBLE) {
                 keyboardForTextBox = true;
                 openKeyboard();
+                if (mouse.isReady()) touchWatcher.start();
             }
         }
         restartIdleTimer();
@@ -593,6 +618,7 @@ public class TrackpadActivity extends Activity
         }
         keyboardForTextBox = true;
         openKeyboard();
+        if (mouse.isReady()) touchWatcher.start();
     }
 
     /** The text box that opened the keyboard is gone: put the keyboard away too. */
@@ -640,6 +666,7 @@ public class TrackpadActivity extends Activity
     public void onCloseKeyboard() {
         if (keyboard.getVisibility() != View.VISIBLE) return;
         keyboardForTextBox = false;
+        touchWatcher.stop();
         ThorPadIme.bottomKeyboardClosed();
         keyboard.setVisibility(View.GONE);
         keyboard.setOutput(null);

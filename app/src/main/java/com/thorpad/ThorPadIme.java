@@ -25,6 +25,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
     private static ThorPadIme instance;
     private static Listener listener;
     private boolean inputStarted;
+    private String lastField;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     // Leaving one text box for another finishes one input and starts the next, so "done" waits
@@ -62,6 +63,16 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
      * The bottom-screen keyboard was closed: hide this (invisible) keyboard window too, so the
      * next tap on a text box asks for a keyboard again and reopens it.
      */
+    /** When the text box last changed its cursor or a text box last started (uptime ms). */
+    static volatile long lastTextBoxActivity;
+
+    @Override
+    public void onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart, int newSelEnd,
+            int candidatesStart, int candidatesEnd) {
+        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
+        lastTextBoxActivity = android.os.SystemClock.uptimeMillis();
+    }
+
     static void bottomKeyboardClosed() {
         ThorPadIme ime = instance;
         if (ime != null && ime.isInputViewShown()) ime.requestHideSelf(0);
@@ -138,13 +149,18 @@ public class ThorPadIme extends InputMethodService implements KeyOutput {
         boolean wasStarted = inputStarted;
         inputStarted = attribute.inputType != android.text.InputType.TYPE_NULL;
         if (inputStarted) {
+            lastTextBoxActivity = android.os.SystemClock.uptimeMillis();
             handler.removeCallbacks(done);
-            // A text box got focus. Android only shows a keyboard's window when the app asks
-            // for it, and after the first time it often doesn't for an invisible one like this,
-            // so the focus itself opens the bottom keyboard.
-            if (!restarting) handler.post(wanted);
-        } else if (wasStarted) {
-            doneSoon(); // focus moved to something that isn't a text box
+            // A text box got focus: open the bottom keyboard, without waiting for the app to ask
+            // for a keyboard window. Android passes restarting = true for every text box after
+            // the first in the same app, so only a restart of the very same text box is skipped.
+            String field = attribute.packageName + "/" + attribute.fieldId;
+            boolean sameField = restarting && field.equals(lastField);
+            lastField = field;
+            if (!sameField) handler.post(wanted);
+        } else {
+            lastField = null; // coming back to the same text box later counts as new
+            if (wasStarted) doneSoon(); // focus moved to something that isn't a text box
         }
     }
 
