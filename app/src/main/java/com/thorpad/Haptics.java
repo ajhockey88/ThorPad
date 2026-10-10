@@ -15,18 +15,18 @@ import android.os.VibratorManager;
 final class Haptics {
     // Actions.
     static final int CLICK = 0, RIGHT_CLICK = 1, DRAG_START = 2, DRAG_END = 3, HOLD = 4,
-            SCROLL = 5, KEY = 6, CLEAR_ALL = 7, BAR = 8, NAVIGATE = 9;
+            SCROLL = 5, KEY = 6, CLEAR_ALL = 7, BAR = 8, NAVIGATE = 9, THREE_FINGER = 10;
     static final String[] ACTION_NAMES = {"Click", "Right click", "Drag start", "Drag end",
-            "Press and hold", "Scroll wheel notch", "Keyboard key", "Clear all", "Top bar buttons", "Back / forward swipe"};
+            "Press and hold", "Scroll wheel notch", "Keyboard key", "Clear all", "Top bar buttons", "Back / forward swipe", "Three-finger swipe"};
     private static final String[] ACTION_KEYS = {"click", "right_click", "drag_start", "drag_end",
-            "hold", "scroll", "key", "clear_all", "bar", "navigate"};
+            "hold", "scroll", "key", "clear_all", "bar", "navigate", "three_finger"};
 
     // Feels.
     static final int OFF = 0, TICK = 1, TAP = 2, HEAVY = 3, DOUBLE = 4, BUZZ = 5;
     static final String[] FEEL_NAMES = {"Off", "Tick", "Click", "Heavy", "Double", "Buzz"};
 
-    private static final int[] DEFAULT_FEEL = {TAP, DOUBLE, HEAVY, TICK, HEAVY, TICK, TAP, HEAVY, TAP, TAP};
-    private static final int[] DEFAULT_STRENGTH = {60, 60, 80, 50, 80, 35, 45, 100, 50, 70};
+    private static final int[] DEFAULT_FEEL = {TAP, DOUBLE, HEAVY, TICK, HEAVY, TICK, TAP, HEAVY, TAP, TAP, HEAVY};
+    private static final int[] DEFAULT_STRENGTH = {60, 60, 80, 50, 80, 35, 45, 100, 50, 70, 70};
 
     private Haptics() {}
 

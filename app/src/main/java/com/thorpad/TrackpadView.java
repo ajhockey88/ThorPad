@@ -23,6 +23,7 @@ final class TrackpadView extends View {
     private static final int DRAGGING = 2;  // holding a press on the top screen
     private static final int TWO_FINGER = 3; // scrolling, or a two-finger tap
     private static final int DONE = 4;      // ignore the rest of this touch
+    private static final int THREE_FINGER = 5; // swiping up or down with three fingers
 
     private static final long TAP_MAX_MS = 350;
     /** A drag must start this soon after a tap's finger lifts... */
@@ -58,6 +59,7 @@ final class TrackpadView extends View {
     /** Where the two fingers started, to tell a sideways swipe from a scroll. */
     private float twoStartX, twoStartY;
     private boolean swiping;
+    private float threeStartX, threeStartY;
     private float tickAcc;
     private boolean scrolling;
     private boolean touching;
@@ -102,11 +104,49 @@ final class TrackpadView extends View {
         rect.set(inset, inset, getWidth() - inset, getHeight() - inset);
         border.setColor(touching ? Color.argb(90, 120, 200, 255) : Color.argb(40, 255, 255, 255));
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
-        float line = label.getTextSize() * 1.5f;
-        canvas.drawText("Tap: click  ·  Two fingers up/down: scroll  ·  Tap, hold, slide: drag",
-                getWidth() / 2f, getHeight() - 18 * density - line, label);
-        canvas.drawText("Two fingers right: back  ·  Two fingers left: forward",
-                getWidth() / 2f, getHeight() - 18 * density, label);
+        drawHints(canvas);
+    }
+
+    private static final String[] HINT_TITLES = {"☝️ One finger", "✌️ Two fingers", "🤟 Three fingers"};
+    private static final String[][] HINTS = {
+            {"Slide", "move", "Tap", "click", "Hold", "right click", "Tap, hold, slide", "drag"},
+            {"Up / down", "scroll", "Tap", "right click", "Swipe right", "back", "Swipe left", "forward"},
+            {"Swipe up", "recent apps", "Swipe down", "close app"},
+    };
+
+    /** The gesture cheat sheet along the bottom: one column per number of fingers. */
+    private void drawHints(Canvas canvas) {
+        float u = getWidth() / 1240f; // sized to match the design at the Thor's 1240 px width
+        float side = 22 * u, bottom = getHeight() - 30 * u;
+        float rowH = 19 * u * 1.45f, titleH = 20 * u * 1.6f;
+        float colW = (getWidth() - 2 * 16 * u) / 3f;
+        float top = bottom - titleH - 4 * rowH;
+        label.setTextAlign(Paint.Align.LEFT);
+        for (int c = 0; c < 3; c++) {
+            float x0 = 16 * u + c * colW;
+            if (c > 0) {
+                label.setColor(Color.argb(20, 255, 255, 255));
+                canvas.drawRect(x0, top, x0 + Math.max(1, 2 * u), bottom, label);
+            }
+            float x = x0 + side;
+            label.setFakeBoldText(true);
+            label.setTextSize(20 * u);
+            label.setColor(Color.argb(140, 120, 200, 255));
+            float y = top + 20 * u;
+            canvas.drawText(HINT_TITLES[c], x, y, label);
+            label.setFakeBoldText(false);
+            label.setTextSize(19 * u);
+            y += titleH - 20 * u + 19 * u;
+            for (int i = 0; i < HINTS[c].length; i += 2) {
+                String key = HINTS[c][i] + ": ";
+                label.setColor(Color.argb(140, 255, 255, 255));
+                canvas.drawText(key, x, y, label);
+                float w = label.measureText(key);
+                label.setColor(Color.argb(97, 255, 255, 255));
+                canvas.drawText(HINTS[c][i + 1], x + w, y, label);
+                y += rowH;
+            }
+        }
     }
 
     @Override
@@ -142,14 +182,35 @@ final class TrackpadView extends View {
                     twoStartY = twoLastY;
                     twoTravel = 0;
                     swiping = false;
-                } else {
-                    // Three or more fingers: not a gesture ThorPad uses.
+                } else if (ev.getPointerCount() == 3) {
                     endScroll(s);
+                    state = THREE_FINGER;
+                    threeStartX = (ev.getX(0) + ev.getX(1) + ev.getX(2)) / 3f;
+                    threeStartY = (ev.getY(0) + ev.getY(1) + ev.getY(2)) / 3f;
+                } else {
+                    // Four or more fingers: not a gesture ThorPad uses.
                     state = DONE;
                 }
                 return true;
             }
             case MotionEvent.ACTION_MOVE: {
+                if (state == THREE_FINGER) {
+                    if (ev.getPointerCount() < 3) return true;
+                    float dx = (ev.getX(0) + ev.getX(1) + ev.getX(2)) / 3f - threeStartX;
+                    float dy = (ev.getY(0) + ev.getY(1) + ev.getY(2)) / 3f - threeStartY;
+                    if (Math.abs(dy) > SWIPE_DP * density && Math.abs(dy) > 1.5f * Math.abs(dx)) {
+                        if (dy < 0) {
+                            if (s != null) s.recents();
+                        } else if (ShizukuClient.hasPermission()) {
+                            TopApp.close(getContext());
+                        } else if (s != null) {
+                            s.home(); // touch mode can't close apps
+                        }
+                        buzz(Haptics.THREE_FINGER);
+                        state = DONE;
+                    }
+                    return true;
+                }
                 if (state == TWO_FINGER) {
                     if (ev.getPointerCount() < 2) return true;
                     float avgY = (ev.getY(0) + ev.getY(1)) / 2f;
