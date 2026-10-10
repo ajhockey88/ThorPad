@@ -4,6 +4,18 @@
 
 🖱️ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse pointer on the top screen, plus a full-screen keyboard ⌨️ for typing.
 
+## 📸 Screens
+
+Everything happens on the Thor's bottom screen (1240 × 1080).
+
+| 🖱️ Trackpad | ⌨️ Keyboard with autocorrect |
+|---|---|
+| <img src="docs/screenshots/trackpad.png" width="400" alt="Trackpad screen"> | <img src="docs/screenshots/keyboard.png" width="400" alt="Keyboard with an autocorrect suggestion"> |
+| 🔣 Numbers and symbols | ⚙️ Settings |
+| <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/settings.png" width="400" alt="Settings screen"> |
+| 🚀 First-run setup | |
+| <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> | |
+
 ## 👆 Gestures
 
 | On the bottom screen | On the top screen |
