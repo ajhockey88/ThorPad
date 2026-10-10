@@ -58,6 +58,14 @@ public class SettingsActivity extends Activity {
 
         TextView title = text("ThorPad settings", 20);
         list.addView(title);
+        // Hidden helper for bug reports: long-press the title to save screenshots of both
+        // screens and the list of windows on them to Download (needs Shizuku).
+        title.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override public boolean onLongClick(View v) {
+                saveDiagnostics();
+                return true;
+            }
+        });
 
         slider("Pointer speed", Prefs.KEY_SENSITIVITY, prefs.sensitivity(), 0.5f, 5f, false);
         slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
@@ -207,6 +215,31 @@ public class SettingsActivity extends Activity {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
+    }
+
+    private void saveDiagnostics() {
+        if (!ShizukuClient.hasPermission()) {
+            Toast.makeText(this, "Needs Shizuku", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, "Saving screenshots…", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override public void run() {
+                final boolean ok = ShizukuClient.runShell(
+                        "d=/sdcard/Download; "
+                        + "dumpsys window windows > $d/thorpad-windows.txt; "
+                        + "i=0; for id in $(dumpsys SurfaceFlinger --display-id | sed -n 's/^Display \\([0-9]*\\).*/\\1/p'); do "
+                        + "i=$((i+1)); screencap -d $id -p $d/thorpad-screen-$i.png; done; "
+                        + "screencap -p $d/thorpad-screen-main.png; true");
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        Toast.makeText(SettingsActivity.this, ok
+                                ? "Saved thorpad-screen and thorpad-windows files to Download"
+                                : "Couldn't save the screenshots", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }, "ThorPad diagnostics").start();
     }
 
     // ---- Updates -------------------------------------------------------------------------------
