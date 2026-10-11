@@ -11,6 +11,9 @@ interface TextContext {
     /** False for passwords, emails, web addresses and number boxes: type exactly what's pressed. */
     boolean allowsCorrections();
 
+    /** Whether the text box is a password box. */
+    boolean isPassword();
+
     /** Up to n characters before the cursor, or null if unknown. */
     CharSequence textBefore(int n);
 }

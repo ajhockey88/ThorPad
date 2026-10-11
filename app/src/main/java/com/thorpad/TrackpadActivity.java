@@ -707,6 +707,11 @@ public class TrackpadActivity extends Activity
             return ime == null || ime.allowsCorrections();
         }
 
+        @Override public boolean isPassword() {
+            ThorPadIme ime = ThorPadIme.active();
+            return ime != null && ime.isPassword();
+        }
+
         @Override public CharSequence textBefore(int n) {
             ThorPadIme ime = ThorPadIme.active();
             return ime != null ? ime.textBefore(n) : null;

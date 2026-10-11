@@ -119,6 +119,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
         @Override public boolean capitalizeNext() { return active() != null && ThorPadIme.this.capitalizeNext(); }
         @Override public boolean allowsCorrections() { return ThorPadIme.this.allowsCorrections(); }
         @Override public CharSequence textBefore(int n) { return active() != null ? ThorPadIme.this.textBefore(n) : null; }
+        @Override public boolean isPassword() { return ThorPadIme.this.isPassword(); }
 
         @Override public void typeChar(char c) {
             if (active() == null) { strayKey(); return; }
@@ -392,6 +393,19 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
                 && v != android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
                 && v != android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
                 && v != android.text.InputType.TYPE_TEXT_VARIATION_URI;
+    }
+
+    @Override public boolean isPassword() {
+    EditorInfo info = getCurrentInputEditorInfo();
+    if (info == null) return false;
+    int v = info.inputType & android.text.InputType.TYPE_MASK_VARIATION;
+    int cls = info.inputType & android.text.InputType.TYPE_MASK_CLASS;
+    return cls == android.text.InputType.TYPE_CLASS_TEXT
+            && (v == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            || v == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            || v == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
+            || cls == android.text.InputType.TYPE_CLASS_NUMBER
+            && v == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD;
     }
 
     @Override public CharSequence textBefore(int n) {

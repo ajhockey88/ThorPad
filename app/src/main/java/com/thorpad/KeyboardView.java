@@ -677,12 +677,22 @@ final class KeyboardView extends View {
      * A second quick space right after a word types ". " in place of the first, like phones do,
      * and the next word starts with a capital.
      */
+    /** Only a password box gets two plain spaces: everywhere else they're a period. */
+    private boolean periodAllowed() {
+        return !(output instanceof TextContext) || !((TextContext) output).isPassword();
+    }
+
     private boolean doubleSpace() {
         int n = typed.length();
-        if (!doubleSpacePeriod || n < 2 || typed.charAt(n - 1) != ' ' || !correctionsAllowed()) return false;
-        if (SystemClock.uptimeMillis() - lastSpaceAt > DOUBLE_SPACE_MS) return false;
-        char before = typed.charAt(n - 2);
-        if (!Character.isLetterOrDigit(before) && before != ')' && before != '"' && before != '\'') return false;
+        if (!doubleSpacePeriod || n < 1 || typed.charAt(n - 1) != ' ') return false;
+        long since = SystemClock.uptimeMillis() - lastSpaceAt;
+        char before = n >= 2 ? typed.charAt(n - 2) : '?';
+        if (since > DOUBLE_SPACE_MS || !Character.isLetterOrDigit(before) && before != ')'
+                && before != '"' && before != '\'' || !periodAllowed()) {
+            KeyboardLog.add("double space skipped: since=" + since + " before=" + (int) before
+                    + " allowed=" + periodAllowed());
+            return false;
+        }
         deleteChars(1);
         typeText(". ");
         lastSpaceAt = 0;
