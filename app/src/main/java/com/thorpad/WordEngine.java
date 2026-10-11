@@ -27,6 +27,22 @@ final class WordEngine {
     /** Letters just above the space bar: hitting one instead of space joins two words. */
     private static final String NEAR_SPACE = "cvbnm";
     private static final Map<String, String> CONTRACTIONS = new HashMap<>();
+    /** After these, "its", "ill" and "id" are the plain words ("of its", "your id"). */
+    private static final java.util.Set<String> OWNER_WORDS = new java.util.HashSet<>(Arrays.asList(
+            "the", "a", "an", "my", "your", "his", "her", "our", "their", "this", "that", "these",
+            "those", "every", "each", "no", "any", "some", "very", "so", "too", "really", "is",
+            "was", "be", "been", "being", "are", "were", "feel", "feeling", "felt", "look", "looks"));
+    private static final java.util.Set<String> PREPOSITIONS = new java.util.HashSet<>(Arrays.asList(
+            "of", "in", "on", "at", "to", "for", "with", "by", "from", "into", "onto", "about",
+            "over", "under", "through", "without", "within", "across", "along", "around", "behind",
+            "during", "against", "among", "between", "toward", "towards", "near", "upon", "via", "per"));
+    /** After these, "its" and "ill" start a clause: "where it's", "now I'll". */
+    private static final java.util.Set<String> CLAUSE_WORDS = new java.util.HashSet<>(Arrays.asList(
+            "where", "what", "how", "why", "who", "now", "say", "see", "sure", "know", "knew",
+            "thought", "think", "bet", "said", "since", "though", "once", "until", "unless",
+            "while", "until", "whether", "guess", "hope", "mean", "means", "like", "cuz", "cos",
+            "lol", "omg", "well", "anyway", "actually", "honestly", "plus", "also", "still"));
+
     /** Chat shorthand that isn't in the dictionary but is typed on purpose. */
     private static final java.util.Set<String> SLANG = new java.util.HashSet<>(Arrays.asList(
             "omw", "brb", "lol", "lmao", "lmfao", "rofl", "idk", "idc", "imo", "imho", "tbh", "smh",
@@ -224,13 +240,27 @@ final class WordEngine {
     /** "ill" at the start of a sentence (or after and/so/think...) is I'll; elsewhere, ill. */
     private String contractionInContext(String prev, String word, String lw, String maybe) {
         switch (lw) {
-            case "ill": case "id": case "hes": case "shes": case "hed":
-            case "its": case "lets": case "whos":
-                return startish(prev) ? fixed(word, maybe) : null;
+            case "hes": case "shes": case "hed": case "whos":
+                return fixed(word, maybe); // hardly ever meant as typed
+            case "ill": case "id": case "its": case "lets":
+                // The contraction, unless the word before is one the plain word usually follows
+                // ("of its", "very ill", "your id", "he lets").
+                if (prev != null && !lw.equals("lets")
+                        && (OWNER_WORDS.contains(prev) || PREPOSITIONS.contains(prev))) return null;
+                if (startish(prev) || CLAUSE_WORDS.contains(prev) || !followsOften(prev, lw)) {
+                    return fixed(word, maybe);
+                }
+                return null;
             default:
                 // well/were/wed/shell are common words in their own right: leave them.
                 return null;
         }
+    }
+
+    /** Whether w turns up after prev more often than it does anywhere. */
+    private boolean followsOften(String prev, String w) {
+        int p = pair(prev, w);
+        return p >= 0 && -p / 10f > z(w) / 10f - 9f;
     }
 
     /** A real word that is probably a slip for another: confused pairs, or a rare near-miss. */

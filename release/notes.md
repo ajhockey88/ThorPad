@@ -3,7 +3,7 @@
 ## ✨ What's new in 1.8
 - 🧩 **Splits run-together words:** a missed space (`helloworld` → `hello world`) or a letter typed by grazing the space bar (`seebyou` → `see you`) is split back into words, even across a whole phrase
 - 🔤 **Stronger spelling fixes:** missing, extra, doubled and swapped letters are caught more often (`definately`, `tommorow`, `accomodate`), and a rare word one slip from a common one is fixed (`adn` → `and`)
-- 🧠 **Context-aware spelling:** the word before helps pick the right fix (`more then` → `more than`), and `ill`, `its` and `lets` become `I'll`, `it's` and `let's` where that's what's meant
+- 🧠 **Context-aware spelling:** the word before helps pick the right fix (`more then` → `more than`), and `its`, `ill`, `id` and `lets` become `it's`, `I'll`, `I'd` and `let's` unless the word before shows the plain word is meant (`of its`, `very ill`, `your id`, `he lets`)
 - ✏️ **Contractions and compound words:** more apostrophes added (`shouldve`, `theyd`, `heres`) and run-together pairs fixed (`alot`, `infront`, `atleast`, `everytime`)
 - ⏺️ **Double-space period:** two quick spaces type ". " and the next word starts with a capital
 - 🔠 **Auto-capitals:** sentences start with a capital letter (not in email or password boxes)
