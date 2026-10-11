@@ -550,8 +550,16 @@ final class KeyboardView extends View {
         boolean cap = false;
         if (last == ' ' || last == '\n') {
             TextContext ctx = (TextContext) output;
-            // An Android text box knows best; without one (a game), go by what was typed here.
-            cap = ctx.textBefore(1) != null ? ctx.capitalizeNext() : n > 0 && sentenceEnded(typed);
+            if (!ctx.allowsCorrections()) {
+                cap = false; // passwords and email addresses
+            } else if (hasText(typed)) {
+                // Mid-text, what was typed here says it all: no waiting on the app, and it works
+                // in boxes (like a browser's address bar) that never ask for capitals.
+                cap = sentenceEnded(typed);
+            } else {
+                // The start of what was typed here: the box knows what comes before.
+                cap = ctx.textBefore(1) != null && ctx.capitalizeNext();
+            }
         }
         if (cap && shift == 0) {
             shift = 1;
@@ -561,6 +569,11 @@ final class KeyboardView extends View {
             autoShift = false;
         }
         invalidate();
+    }
+
+    private static boolean hasText(CharSequence t) {
+        for (int i = 0; i < t.length(); i++) if (!Character.isWhitespace(t.charAt(i))) return true;
+        return false;
     }
 
     /** Whether the text ends with a sentence's end (". ", "!\n"...) and then only spaces. */

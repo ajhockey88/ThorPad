@@ -72,8 +72,8 @@ public class SettingsActivity extends Activity {
                 Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
         toggle("Double-space period (two quick spaces type \". \")",
                 Prefs.KEY_DOUBLE_SPACE, prefs.doubleSpacePeriod(), false);
-        toggle("Auto-capitals (capital letter at the start of each sentence; never in emails, "
-                + "web addresses or passwords)", Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
+        toggle("Auto-capitals (capital letter at the start of each sentence; never in email "
+                + "or password boxes)", Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
         toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
                 + "instant you touch, most responsive)",
                 Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
