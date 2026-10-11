@@ -192,24 +192,45 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
             int candidatesStart, int candidatesEnd) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
         long now = android.os.SystemClock.uptimeMillis();
-        if (newSelStart == 0 && newSelEnd == 0 && (oldSelStart > 0 || oldSelEnd > 0)
-                && now - lastOwnEdit > OWN_EDIT_MS && isEmpty()) {
-            // The text box emptied without ThorPad's keys doing it: the app sent the message
-            // (a Send button on the top screen, say). The keyboard's job is done.
-            KeyboardLog.add("text sent");
-            finished();
-            return;
-        }
         lastTextBoxActivity = now;
+        if (newSelStart == 0 && newSelEnd == 0 && (oldSelStart > 0 || oldSelEnd > 0)
+                && now - lastOwnEdit > OWN_EDIT_MS) {
+            // Maybe the app sent the message (a Send button on the top screen, say). Asking the
+            // box whether it's empty waits on the app, which can stall for seconds (a browser
+            // going to sleep): ask off the main thread so ThorPad never freezes on it.
+            final InputConnection ic = getCurrentInputConnection();
+            if (ic == null) return;
+            background().post(new Runnable() {
+                @Override public void run() {
+                    if (!isEmpty(ic)) return;
+                    handler.post(new Runnable() {
+                        @Override public void run() {
+                            if (ic != getCurrentInputConnection()) return;
+                            KeyboardLog.add("text sent");
+                            finished();
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private static final long OWN_EDIT_MS = 400;
     /** When ThorPad's keys last changed the text box. */
     private long lastOwnEdit;
 
-    private boolean isEmpty() {
-        InputConnection ic = getCurrentInputConnection();
-        if (ic == null) return false;
+    private android.os.HandlerThread worker;
+
+    /** A thread for questions to the text box that may be slow to answer. */
+    private Handler background() {
+        if (worker == null) {
+            worker = new android.os.HandlerThread("ThorPad text box");
+            worker.start();
+        }
+        return new Handler(worker.getLooper());
+    }
+
+    private static boolean isEmpty(InputConnection ic) {
         CharSequence before = ic.getTextBeforeCursor(1, 0), after = ic.getTextAfterCursor(1, 0);
         return before != null && after != null && before.length() == 0 && after.length() == 0;
     }
@@ -262,6 +283,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
     public void onDestroy() {
         if (instance == this) instance = null;
         hideOverlay();
+        if (worker != null) worker.quitSafely();
         super.onDestroy();
     }
 
