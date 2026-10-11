@@ -547,7 +547,12 @@ final class KeyboardView extends View {
         if (!autoCaps || page != LETTERS || shift == 2 || !(output instanceof TextContext)) return;
         int n = typed.length();
         char last = n > 0 ? typed.charAt(n - 1) : '\n';
-        boolean cap = (last == ' ' || last == '\n') && ((TextContext) output).capitalizeNext();
+        boolean cap = false;
+        if (last == ' ' || last == '\n') {
+            TextContext ctx = (TextContext) output;
+            // An Android text box knows best; without one (a game), go by what was typed here.
+            cap = ctx.textBefore(1) != null ? ctx.capitalizeNext() : n > 0 && sentenceEnded(typed);
+        }
         if (cap && shift == 0) {
             shift = 1;
             autoShift = true;
@@ -556,6 +561,17 @@ final class KeyboardView extends View {
             autoShift = false;
         }
         invalidate();
+    }
+
+    /** Whether the text ends with a sentence's end (". ", "!\n"...) and then only spaces. */
+    private static boolean sentenceEnded(CharSequence t) {
+        int i = t.length();
+        while (i > 0 && t.charAt(i - 1) == ' ') i--;
+        if (i < t.length() && i > 0) {
+            char c = t.charAt(i - 1);
+            return c == '.' || c == '!' || c == '?';
+        }
+        return i > 0 && t.charAt(i - 1) == '\n';
     }
 
     private void typeText(String s) {

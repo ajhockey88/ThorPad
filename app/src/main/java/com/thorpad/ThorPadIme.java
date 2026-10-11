@@ -378,7 +378,18 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
     @Override public boolean capitalizeNext() {
         InputConnection ic = getCurrentInputConnection();
         EditorInfo info = getCurrentInputEditorInfo();
-        return ic != null && info != null && ic.getCursorCapsMode(info.inputType) != 0;
+        if (ic == null || info == null || isPassword()) return false;
+        int cls = info.inputType & android.text.InputType.TYPE_MASK_CLASS;
+        int v = info.inputType & android.text.InputType.TYPE_MASK_VARIATION;
+        if (cls != android.text.InputType.TYPE_CLASS_TEXT
+                || v == android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                || v == android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+                || v == android.text.InputType.TYPE_TEXT_VARIATION_URI) return false;
+        // Sentence starts always, plus whatever more the box asks for (every word, all caps).
+        // Many apps' boxes don't ask for sentence capitals at all, which left them lowercase.
+        int modes = android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | (info.inputType
+                & (android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS));
+        return ic.getCursorCapsMode(modes) != 0;
     }
 
     @Override public boolean allowsCorrections() {

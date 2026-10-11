@@ -109,7 +109,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   - 🙅 leaves chat shorthand alone (lol, brb, omw...) and never corrects passwords, emails or web
     addresses
 - ⏺️ **Double-space period:** two quick spaces type ". ".
-- 🔠 **Auto-capitals:** sentences start with a capital letter, in text boxes that ask for one.
+- 🔠 **Auto-capitals:** sentences start with a capital letter (not in emails, web addresses or passwords).
 
 ## ⚙️ Settings
 
