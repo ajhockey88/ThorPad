@@ -266,13 +266,15 @@ public class SettingsActivity extends Activity {
                 final boolean ok = ShizukuClient.runShell(
                         "d=/sdcard/Download; " + copyLog
                         + "dumpsys window windows > $d/thorpad-windows.txt; "
+                        // What ThorPad was stuck on, if it ever showed "not responding".
+                        + "dumpsys dropbox --print data_app_anr > $d/thorpad-anr.txt 2>&1; "
                         + "i=0; for id in $(dumpsys SurfaceFlinger --display-id | sed -n 's/^Display \\([0-9]*\\).*/\\1/p'); do "
                         + "i=$((i+1)); screencap -d $id -p $d/thorpad-screen-$i.png; done; "
                         + "screencap -p $d/thorpad-screen-main.png; true");
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
                         Toast.makeText(SettingsActivity.this, ok
-                                ? "Saved thorpad-screen and thorpad-windows files to Download"
+                                ? "Saved thorpad-screen, thorpad-windows and thorpad-anr files to Download"
                                 : "Couldn't save the screenshots", Toast.LENGTH_LONG).show();
                     }
                 });
