@@ -392,18 +392,20 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
         return ic.getCursorCapsMode(modes) != 0;
     }
 
+    /**
+     * Only passwords and email addresses are typed exactly as pressed. Search and address bars
+     * (often marked as web addresses) and boxes that aren't marked as plain text still get
+     * corrections, as they did before 1.8.
+     */
     @Override public boolean allowsCorrections() {
         EditorInfo info = getCurrentInputEditorInfo();
         if (info == null) return true;
-        int type = info.inputType;
-        if ((type & android.text.InputType.TYPE_MASK_CLASS) != android.text.InputType.TYPE_CLASS_TEXT) return false;
-        int v = type & android.text.InputType.TYPE_MASK_VARIATION;
-        return v != android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-                && v != android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                && v != android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
-                && v != android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                && v != android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
-                && v != android.text.InputType.TYPE_TEXT_VARIATION_URI;
+        if (isPassword()) return false;
+        int cls = info.inputType & android.text.InputType.TYPE_MASK_CLASS;
+        int v = info.inputType & android.text.InputType.TYPE_MASK_VARIATION;
+        return !(cls == android.text.InputType.TYPE_CLASS_TEXT
+                && (v == android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                || v == android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS));
     }
 
     @Override public boolean isPassword() {

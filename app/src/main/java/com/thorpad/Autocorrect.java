@@ -49,9 +49,16 @@ final class Autocorrect {
             // Filled in place. Nothing reads the engine until `loaded` is set, and it never
             // changes after that, so lookups need no lock.
             engine.loadWords(context.getAssets().open("words.txt"));
-            engine.loadPairs(context.getAssets().open("pairs.txt"));
             loaded = true;
-        } catch (Exception ignored) {
+        } catch (Throwable e) {
+            KeyboardLog.add("autocorrect: word list failed " + e);
+            return;
+        }
+        try {
+            // Which words follow which only sharpens corrections: without it they still work.
+            engine.loadPairs(context.getAssets().open("pairs.txt"));
+        } catch (Throwable e) {
+            KeyboardLog.add("autocorrect: word pairs failed " + e);
         }
     }
 

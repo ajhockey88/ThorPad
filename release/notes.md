@@ -7,7 +7,7 @@
 - ✏️ **Contractions and compound words:** more apostrophes added (`shouldve`, `theyd`, `heres`) and run-together pairs fixed (`alot`, `infront`, `atleast`, `everytime`)
 - ⏺️ **Double-space period:** two quick spaces type ". " and the next word starts with a capital
 - 🔠 **Auto-capitals:** sentences start with a capital letter (not in emails, web addresses or passwords)
-- 🙅 Chat shorthand (lol, brb, omw...) is left alone, and passwords, emails and web addresses are never corrected
+- 🙅 Chat shorthand (lol, brb, omw...) is left alone, and passwords and email addresses are never corrected
 - ⚙️ Double-space period and auto-capitals each have their own switch in Settings
 - 🔔 **Update check on start:** ThorPad quietly checks for a new version when it starts and only shows anything if there is one. **Not now** stops it asking about that version
 

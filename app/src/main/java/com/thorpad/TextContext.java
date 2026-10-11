@@ -8,7 +8,7 @@ interface TextContext {
     /** Whether the next letter should be a capital (start of a sentence, a name field...). */
     boolean capitalizeNext();
 
-    /** False for passwords, emails, web addresses and number boxes: type exactly what's pressed. */
+    /** False for passwords and email addresses: type exactly what's pressed there. */
     boolean allowsCorrections();
 
     /** Whether the text box is a password box. */

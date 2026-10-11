@@ -106,7 +106,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   - 🧠 uses the word before to pick the right word (`more then` → `more than`) and to tell `ill`
     from `I'll`
   - ✏️ adds apostrophes and fixes compound words (`dont` → `don't`, `alot` → `a lot`)
-  - 🙅 leaves chat shorthand alone (lol, brb, omw...) and never corrects passwords, emails or web
+  - 🙅 leaves chat shorthand alone (lol, brb, omw...) and never corrects passwords or email
     addresses
 - ⏺️ **Double-space period:** two quick spaces type ". ".
 - 🔠 **Auto-capitals:** sentences start with a capital letter (not in emails, web addresses or passwords).
