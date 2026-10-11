@@ -557,8 +557,12 @@ final class KeyboardView extends View {
                 // in boxes (like a browser's address bar) that never ask for capitals.
                 cap = sentenceEnded(typed);
             } else {
-                // The start of what was typed here: the box knows what comes before.
-                cap = ctx.textBefore(1) != null && ctx.capitalizeNext();
+                // The start of what was typed here: capital at the start of the box, or after a
+                // sentence that was already in it. Going by the text itself, not the app's say,
+                // since many boxes (Chrome's address bar...) never ask for one.
+                // No Android text box at all (a game, or a PC through Moonlight): leave it.
+                CharSequence before = ctx.textBefore(80);
+                cap = before != null && (!hasText(before) || sentenceEnded(before));
             }
         }
         if (cap && shift == 0) {
