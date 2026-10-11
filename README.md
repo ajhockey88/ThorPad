@@ -124,7 +124,8 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's
   new in every version since yours, newest first. Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt
-  (the first time, allow ThorPad to install apps).
+  (the first time, allow ThorPad to install apps). ThorPad also checks quietly each time it starts and
+  only speaks up when there's a newer version; **Not now** stops it asking about that version.
 - 🔁 **Reinstall** (just below): downloads the latest release and installs it again even if it's the version you have, for when a release's APK was replaced
 
 ## 🔀 Two modes
@@ -152,7 +153,8 @@ ThorPad uses mouse mode whenever Shizuku is running and has allowed it, and fall
 4. Optional: in ThorPad's Settings, tap **Use ThorPad keyboard**, so the
    keyboard opens by itself for text boxes on the top screen.
 
-🔄 **Updating:** tap **Check for updates** at the bottom of ThorPad's Settings, or install the
+🔄 **Updating:** ThorPad tells you when it starts if a new version is out. You can also tap
+**Check for updates** at the bottom of ThorPad's Settings, or install the
 newest `ThorPad.apk` from [Releases](https://github.com/ajhockey88/ThorPad/releases) over the old one.
 
 ## 🛠️ How it works
@@ -188,8 +190,8 @@ Check for updates reads `releases/latest` from the GitHub API, compares its tag 
 version, shows the release notes (Markdown headers, bullets and bold), and on **Update** downloads the release's `.apk`, and installs it with `pm install` through Shizuku, or with
 Android's package installer (which asks to confirm) when Shizuku isn't allowed.
 
-🔒 ThorPad only goes online when you tap **Check for updates**, to read its GitHub releases and
-download the new APK. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
+🔒 ThorPad only goes online to check its GitHub releases (once each time it starts, and when you
+tap **Check for updates**) and to download a new APK when you choose to update. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
 
 ## 🙏 Credits
 

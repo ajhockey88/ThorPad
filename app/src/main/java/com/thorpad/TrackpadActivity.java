@@ -538,6 +538,8 @@ public class TrackpadActivity extends Activity
         started = true;
         ThorPadIme.setListener(this);
         refresh();
+        // Opened by a text box: don't interrupt typing with an update.
+        if (!keyboardRequested) quietUpdateCheck();
         if (keyboardRequested) {
             keyboardRequested = false;
             if (keyboard.getVisibility() != View.VISIBLE) {
@@ -547,6 +549,45 @@ public class TrackpadActivity extends Activity
             }
         }
         restartIdleTimer();
+    }
+
+    /** Checked once each time ThorPad starts, not every time the trackpad comes back. */
+    private static boolean updateChecked;
+    private static final String SKIPPED_UPDATE = "skipped_update";
+
+    /**
+     * Looks for a newer release when ThorPad starts and says nothing unless there is one. "Not
+     * now" stops it asking again about that version; Settings > Check for updates still offers it.
+     */
+    private void quietUpdateCheck() {
+        if (updateChecked) return;
+        updateChecked = true;
+        final android.content.SharedPreferences sp = new Prefs(this).raw();
+        final boolean[] installing = {false};
+        final Updater[] updater = new Updater[1];
+        updater[0] = new Updater(this, new Updater.Listener() {
+            @Override public void onUpdateStatus(String status, boolean done) {
+                // Silent while checking (even offline); once the user picked Update, say how it goes.
+                if (!installing[0] && status.startsWith("Downloading")) {
+                    installing[0] = true;
+                    android.widget.Toast.makeText(TrackpadActivity.this, "Downloading the update…",
+                            android.widget.Toast.LENGTH_SHORT).show();
+                } else if (installing[0] && done) {
+                    android.widget.Toast.makeText(TrackpadActivity.this, status,
+                            android.widget.Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override public void onUpdateAvailable(final Updater.Release r) {
+                if (!started || isFinishing() || r.version.equals(sp.getString(SKIPPED_UPDATE, null))) return;
+                UpdateDialog.show(TrackpadActivity.this, r, updater[0], new android.content.DialogInterface.OnClickListener() {
+                    @Override public void onClick(android.content.DialogInterface dialog, int which) {
+                        sp.edit().putString(SKIPPED_UPDATE, r.version).apply();
+                    }
+                });
+            }
+        });
+        updater[0].check();
     }
 
     @Override

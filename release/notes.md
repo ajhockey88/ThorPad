@@ -9,6 +9,7 @@
 - 🔠 **Auto-capitals:** sentences start with a capital letter, in text boxes that ask for one
 - 🙅 Chat shorthand (lol, brb, omw...) is left alone, and passwords, emails and web addresses are never corrected
 - ⚙️ Double-space period and auto-capitals each have their own switch in Settings
+- 🔔 **Update check on start:** ThorPad quietly checks for a new version when it starts and only shows anything if there is one. **Not now** stops it asking about that version
 
 ---
 
