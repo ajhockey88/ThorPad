@@ -667,25 +667,5 @@ final class Lang {
                 "Nelle impostazioni di accessibilità, attiva ThorPad trackpad");
         e("Install failed: %s", "La instalación falló: %s", "Échec de l'installation : %s",
                 "Installation fehlgeschlagen: %s", "A instalação falhou: %s", "Installazione non riuscita: %s");
-        e("Battery saver: 60 Hz", "Ahorro de batería: 60 Hz", "Économie de batterie : 60 Hz", "Akkusparen: 60 Hz",
-                "Poupança de bateria: 60 Hz", "Risparmio batteria: 60 Hz");
-        e("Runs the trackpad screen at 60 Hz while ThorPad is open",
-                "La pantalla del trackpad funciona a 60 Hz mientras ThorPad está abierto",
-                "L'écran du trackpad tourne à 60 Hz tant que ThorPad est ouvert",
-                "Der Trackpad-Bildschirm läuft mit 60 Hz, solange ThorPad offen ist",
-                "O ecrã do trackpad funciona a 60 Hz enquanto o ThorPad está aberto",
-                "Lo schermo del trackpad va a 60 Hz mentre ThorPad è aperto");
-        e("This screen already runs at 60 Hz, so this changes nothing here",
-                "Esta pantalla ya funciona a 60 Hz, así que aquí no cambia nada",
-                "Cet écran tourne déjà à 60 Hz, cela ne change donc rien ici",
-                "Dieser Bildschirm läuft schon mit 60 Hz, hier ändert sich also nichts",
-                "Este ecrã já funciona a 60 Hz, por isso aqui não muda nada",
-                "Questo schermo va già a 60 Hz, quindi qui non cambia nulla");
-        e("Runs this screen at 60 Hz instead of up to %s Hz while ThorPad is open",
-                "Esta pantalla funciona a 60 Hz en vez de hasta %s Hz mientras ThorPad está abierto",
-                "Cet écran tourne à 60 Hz au lieu de jusqu'à %s Hz tant que ThorPad est ouvert",
-                "Dieser Bildschirm läuft mit 60 Hz statt bis zu %s Hz, solange ThorPad offen ist",
-                "Este ecrã funciona a 60 Hz em vez de até %s Hz enquanto o ThorPad está aberto",
-                "Questo schermo va a 60 Hz invece che fino a %s Hz mentre ThorPad è aperto");
     }
 }

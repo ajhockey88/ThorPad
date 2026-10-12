@@ -772,35 +772,6 @@ public class TrackpadActivity extends Activity
         checkTopApp(true);
         refresh();
         pad.invalidate(); // the hints setting may have changed
-        applyRefreshRate();
-    }
-
-    /**
-     * Battery saver: asks for the screen's 60 Hz mode (same resolution) while ThorPad is open.
-     * The trackpad barely redraws, so a faster screen only costs power. Android goes back to its
-     * own choice as soon as ThorPad's window is gone.
-     */
-    private void applyRefreshRate() {
-        Display disp = getDisplay();
-        if (disp == null) return;
-        int want = 0;
-        if (new Prefs(this).lowRefresh()) {
-            Display.Mode cur = disp.getMode();
-            float best = Float.MAX_VALUE;
-            for (Display.Mode m : disp.getSupportedModes()) {
-                if (m.getPhysicalWidth() != cur.getPhysicalWidth()
-                        || m.getPhysicalHeight() != cur.getPhysicalHeight()) continue;
-                float r = m.getRefreshRate();
-                if (r >= 55 && r < best) {
-                    best = r;
-                    want = m.getModeId();
-                }
-            }
-        }
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        if (lp.preferredDisplayModeId == want) return;
-        lp.preferredDisplayModeId = want;
-        getWindow().setAttributes(lp);
     }
 
     @Override
