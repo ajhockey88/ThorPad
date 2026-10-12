@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -160,6 +163,12 @@ public class TrackpadActivity extends Activity
                 (int) (44 * d), (int) (5 * d), Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         hlp.topMargin = (int) (6 * d);
         padArea.addView(handle, hlp);
+        swipeHint = buildSwipeHint(d);
+        FrameLayout.LayoutParams shp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        shp.topMargin = (int) (38 * d);
+        padArea.addView(swipeHint, shp);
         padArea.addView(buildSetupPanel(d), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -266,8 +275,67 @@ public class TrackpadActivity extends Activity
         return menuBar != null && menuBar.getVisibility() == View.VISIBLE;
     }
 
+    // The menu is hidden, so each time ThorPad opens a pill says where it is, for 10 seconds.
+    private static final long SWIPE_HINT_MS = 10000;
+    private View swipeHint;
+
+    private final Runnable fadeSwipeHint = new Runnable() {
+        @Override public void run() { hideSwipeHint(); }
+    };
+
+    private View buildSwipeHint(final float d) {
+        LinearLayout pill = new LinearLayout(this);
+        pill.setGravity(Gravity.CENTER_VERTICAL);
+        pill.setPadding((int) (10 * d), (int) (6 * d), (int) (13 * d), (int) (6 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.argb(23, 120, 200, 255));
+        bg.setStroke(Math.max(1, (int) (0.8f * d)), Color.argb(56, 120, 200, 255));
+        bg.setCornerRadius(20 * d);
+        pill.setBackground(bg);
+        // A double chevron pointing down, the second one fainter.
+        View chevron = new View(this) {
+            private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            @Override protected void onDraw(Canvas c) {
+                p.setStyle(Paint.Style.STROKE);
+                p.setStrokeWidth(1.6f * d);
+                p.setStrokeCap(Paint.Cap.ROUND);
+                p.setStrokeJoin(Paint.Join.ROUND);
+                float w = getWidth(), h = getHeight();
+                for (int i = 0; i < 2; i++) {
+                    p.setColor(Color.argb(i == 0 ? 190 : 95, 120, 200, 255));
+                    float y = h * (0.25f + 0.25f * i);
+                    Path path = new Path();
+                    path.moveTo(w * 0.25f, y);
+                    path.lineTo(w * 0.5f, y + h * 0.25f);
+                    path.lineTo(w * 0.75f, y);
+                    c.drawPath(path, p);
+                }
+            }
+        };
+        pill.addView(chevron, new LinearLayout.LayoutParams((int) (14 * d), (int) (14 * d)));
+        TextView t = new TextView(this);
+        t.setText(Lang.t("Swipe down from the top for the menu"));
+        t.setTextSize(12);
+        t.setTextColor(Color.argb(158, 255, 255, 255));
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tlp.leftMargin = (int) (6 * d);
+        pill.addView(t, tlp);
+        pill.postDelayed(fadeSwipeHint, SWIPE_HINT_MS);
+        return pill;
+    }
+
+    private void hideSwipeHint() {
+        if (swipeHint == null || swipeHint.getVisibility() != View.VISIBLE) return;
+        swipeHint.removeCallbacks(fadeSwipeHint);
+        swipeHint.animate().alpha(0f).setDuration(600).withEndAction(new Runnable() {
+            @Override public void run() { swipeHint.setVisibility(View.GONE); }
+        }).start();
+    }
+
     private void showMenu() {
         if (menuShowing()) return;
+        hideSwipeHint();
         Haptics.play(this, Haptics.BAR);
         menuBar.setVisibility(View.VISIBLE);
         float h = 58 * getResources().getDisplayMetrics().density;

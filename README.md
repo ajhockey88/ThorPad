@@ -42,7 +42,8 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 
 The whole bottom screen is trackpad. **Swipe down from the top edge** (where the small handle is) to
 show the menu buttons: ⌨️ Keyboard, ✨ the mode menu, 🖥️ PC keys, ⚙️ Settings and ✖️ Close. They hide
-again when you touch the trackpad or after 5 seconds. The swipe never moves the pointer.
+again when you touch the trackpad or after 5 seconds. The swipe never moves the pointer. For the first 10 seconds after ThorPad opens, a small
+hint at the top says where the menu is.
 
 Turn on **Show gesture hints** in Settings to list these gestures along the bottom of the trackpad.
 

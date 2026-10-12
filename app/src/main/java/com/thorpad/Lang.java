@@ -165,6 +165,9 @@ final class Lang {
                 "Shizuku läuft. Erlaube ThorPad, es zu nutzen.",
                 "O Shizuku está ativo. Permita que o ThorPad o use.",
                 "Shizuku è attivo. Consenti a ThorPad di usarlo.");
+        e("Swipe down from the top for the menu", "Desliza hacia abajo desde arriba para ver el menú",
+                "Balayez vers le bas depuis le haut pour le menu", "Für das Menü von oben nach unten wischen",
+                "Deslize para baixo a partir do topo para ver o menu", "Scorri in giù dall'alto per il menu");
         e("Ready.", "Listo.", "Prêt.", "Bereit.", "Pronto.", "Pronto.");
 
         // ---- Gesture hints ----
