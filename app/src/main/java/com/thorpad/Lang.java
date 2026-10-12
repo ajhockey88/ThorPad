@@ -688,5 +688,13 @@ final class Lang {
                 "Wischen wählt ein Fenster, Tippen öffnet es, drei Finger nach oben schließen",
                 "Deslize para escolher uma janela, toque para abri-la, três dedos para cima para fechar",
                 "Scorri per scegliere una finestra, tocca per aprirla, tre dita in su per chiudere");
+        e("start menu", "menú Inicio", "menu Démarrer", "Startmenü", "menu Iniciar", "menu Start");
+        e("Ctrl, Alt and Shift stay held for the next key",
+                "Ctrl, Alt y Shift se mantienen para la siguiente tecla",
+                "Ctrl, Alt et Maj restent appuyées pour la touche suivante",
+                "Strg, Alt und Umschalt bleiben für die nächste Taste gedrückt",
+                "Ctrl, Alt e Shift ficam premidas para a tecla seguinte",
+                "Ctrl, Alt e Maiusc restano premuti per il tasto successivo");
+        e("Minimize", "Minimizar", "Réduire", "Minimieren", "Minimizar", "Riduci");
     }
 }

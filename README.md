@@ -24,7 +24,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | ⌨️ Keyboard settings and language | ⌨️ Use ThorPad keyboard |
 | <img src="docs/screenshots/keyboard-settings.png?v=1.9" width="400" alt="Keyboard settings with the language picker"> | <img src="docs/screenshots/choose-keyboard.png?v=1.9" width="400" alt="Choosing ThorPad keyboard"> |
 | ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
-| <img src="docs/screenshots/mode-menu.png?v=1.9" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> |
+| <img src="docs/screenshots/mode-menu.png?v=1.9" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9.3" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt and Shift"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
 | <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
 
@@ -72,9 +72,11 @@ Moonlight; the gestures use shortcuts that get through.
   touching the trackpad, never in the background. It first asks Android whether any app has
   come to the front since the last check (app usage events, allowed through Shizuku and read only
   on the Thor), and only looks up the top-screen app when one has.
-- 🖥️ **PC keys** (third button): Esc, F1 to F12, one-tap Alt+Tab, Win+Tab, Win+D, Alt+F4,
-  Ctrl+Shift+Esc and Print Screen, Home / End / Page Up / Page Down / Delete / Backspace and arrows.
-  Ctrl, Alt, Shift and Win stay held after a tap and go with the next key, for any combo.
+- 🖥️ **PC keys** (in the swipe-down menu): Esc, F1 to F12, Alt+Esc (next window), Ctrl+Alt+Tab
+  (app switcher), Ctrl+Esc (Start menu), Alt+F4, Ctrl+Shift+Esc, Minimize, Enter, Home / End /
+  Page Up / Page Down / Delete / Backspace and arrows. Ctrl, Alt and Shift stay held after a tap and
+  go with the next key, for any combo. Android keeps Alt+Tab, Print Screen and every Windows-key
+  shortcut for itself, so the panel only has shortcuts that reach the PC.
   **ABC** switches to the normal keyboard.
 
 📳 **Haptics:** you feel a buzz for every action: taps, right clicks, the start and end of a drag,

@@ -18,7 +18,7 @@ import static com.thorpad.VirtualKeyboard.*;
 
 /**
  * PC keys for streaming a PC (Moonlight and the like): Esc, F1 to F12, Windows shortcuts,
- * navigation keys and sticky Ctrl / Alt / Shift / Win. Full screen like the keyboard, with
+ * navigation keys and sticky Ctrl / Alt / Shift. Full screen like the keyboard, with
  * keys edge to edge. A tapped modifier stays held until the next key, which fires with it.
  */
 final class PcKeysView extends View {
@@ -49,6 +49,8 @@ final class PcKeysView extends View {
         final float weight;
         final boolean repeats;
         final RectF rect = new RectF();
+        /** A key pressed a moment after the shortcut, for two-step shortcuts (0 = none). */
+        int then;
 
         Key(String label, String sub, int type, float weight, boolean repeats, int... codes) {
             this.label = label;
@@ -95,12 +97,14 @@ final class PcKeysView extends View {
         rows.add(r1);
         rows.add(r2);
         rows.add(row(
-                new Key("Alt+Tab", "switch app", SHORTCUT, 1, false, KEY_LEFTALT, KEY_TAB),
-                new Key("Win+Tab", "task view", SHORTCUT, 1, false, KEY_LEFTMETA, KEY_TAB),
-                new Key("Win+D", "desktop", SHORTCUT, 1, false, KEY_LEFTMETA, KEY_D),
+                // Android keeps Alt+Tab, Print Screen and every Windows-key shortcut for itself,
+                // so they never reach Moonlight. These do.
+                new Key("Alt+Esc", "next window", SHORTCUT, 1, false, KEY_LEFTALT, KEY_ESC),
+                new Key("Ctrl+Alt+Tab", "app switcher", SHORTCUT, 1.3f, false, KEY_LCTRL, KEY_LEFTALT, KEY_TAB),
+                new Key("Ctrl+Esc", "start menu", SHORTCUT, 1, false, KEY_LCTRL, KEY_ESC),
                 new Key("Alt+F4", "close app", SHORTCUT, 1, false, KEY_LEFTALT, KEY_F4),
                 new Key("Ctrl+Shift+Esc", "task manager", SHORTCUT, 1.45f, false, KEY_LCTRL, KEY_LSHIFT, KEY_ESC),
-                new Key("PrtSc", "screenshot", SHORTCUT, 1, false, KEY_SYSRQ)));
+                minimize()));
         rows.add(row(
                 new Key("Home", null, NORMAL, 1, false, KEY_HOME),
                 new Key("End", null, NORMAL, 1, false, KEY_END),
@@ -113,10 +117,17 @@ final class PcKeysView extends View {
                 new Key("Ctrl", null, MODIFIER, 1, false, KEY_LCTRL),
                 new Key("Alt", null, MODIFIER, 1, false, KEY_LEFTALT),
                 new Key("Shift", null, MODIFIER, 1, false, KEY_LSHIFT),
-                new Key("⊞ Win", null, MODIFIER, 1, false, KEY_LEFTMETA),
+                new Key("Enter", null, NORMAL, 1, false, KEY_ENTER),
                 new Key("←", null, NORMAL, 1, true, KEY_LEFT),
                 new Key("↓", null, NORMAL, 1, true, KEY_DOWN),
                 new Key("→", null, NORMAL, 1, true, KEY_RIGHT)));
+    }
+
+    /** Alt+Space opens the window menu, then N picks Minimize. */
+    private static Key minimize() {
+        Key k = new Key("Minimize", "Alt+Space, N", SHORTCUT, 1, false, KEY_LEFTALT, KEY_SPACE);
+        k.then = KEY_N;
+        return k;
     }
 
     private static List<Key> row(Key... keys) {
@@ -182,7 +193,7 @@ final class PcKeysView extends View {
         x += text.measureText(hint) + h * 0.22f;
         if (held.isEmpty()) {
             text.setTextSize(h * 0.3f);
-            canvas.drawText(Lang.t("Ctrl, Alt, Shift and Win stay held for the next key"), x, baseline(y), text);
+            canvas.drawText(Lang.t("Ctrl, Alt and Shift stay held for the next key"), x, baseline(y), text);
         } else {
             StringBuilder combo = new StringBuilder();
             for (Key k : held) combo.append(k.label.replace("⊞ ", "")).append(" + ");
@@ -356,5 +367,11 @@ final class PcKeysView extends View {
             held.clear();
         }
         if (listener != null) listener.onPcKeys(codes);
+        final int then = k.then;
+        if (then != 0) {
+            handler.postDelayed(new Runnable() {
+                @Override public void run() { if (listener != null) listener.onPcKeys(then); }
+            }, 250);
+        }
     }
 }
