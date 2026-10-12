@@ -7,7 +7,7 @@
 - 🔡 **Accents:** hold a letter for its accented versions (hold `e` for é è ê ë), slide to one and lift. Hold `$` for € £ ¥, `?` for ¿ and `!` for ¡
 - 📖 **Spelling in every language:** each language has its own dictionary, which also adds missing accents (`tambien` → `también`, `nao` → `não`, `fur` → `für`) and French and Italian apostrophes (`cest` → `c'est`, `lanno` → `l'anno`)
 - 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
-- 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider
+- 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider. Haptics strength opens a vertical slider, and every Settings page has a Back button at the top right
 
 ---
 

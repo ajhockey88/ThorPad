@@ -505,6 +505,10 @@ final class Lang {
                 "Du kannst zur richtigen Taste gleiten. Aus tippt sofort bei Berührung, am schnellsten",
                 "Permite deslizar até à tecla certa. Desligado escreve ao tocar, o mais rápido",
                 "Puoi scivolare sul tasto giusto. Disattivato scrive al tocco, il più veloce");
+        e("Back", "Atrás", "Retour", "Zurück", "Voltar", "Indietro");
+        e("Pick a feel and strength for each action.", "Elige un tipo y una intensidad para cada acción.",
+                "Choisissez un ressenti et une intensité pour chaque action.", "Wähle Gefühl und Stärke für jede Aktion.",
+                "Escolha um tipo e uma intensidade para cada ação.", "Scegli tipo e intensità per ogni azione.");
         e("Haptics", "Vibración", "Vibrations", "Haptik", "Vibração", "Vibrazione");
         e("Gestures", "Gestos", "Gestes", "Gesten", "Gestos", "Gesti");
         e("What each touch does on the trackpad", "Qué hace cada toque en el trackpad",

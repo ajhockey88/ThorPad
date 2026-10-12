@@ -20,6 +20,10 @@ import java.util.List;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.widget.PopupWindow;
+import android.view.MotionEvent;
+import android.graphics.Paint;
+import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -192,7 +196,7 @@ public class SettingsActivity extends Activity {
                 refreshKeyboardLabel();
                 break;
             case 2:
-                header("Haptics", "Pick a feel and strength for each action. Every change plays a preview.");
+                header("Haptics", "Pick a feel and strength for each action.");
                 hapticsSection();
                 break;
             case 3: {
@@ -224,10 +228,29 @@ public class SettingsActivity extends Activity {
     }
 
     private void header(String title, String lead) {
+        LinearLayout top = new LinearLayout(this);
+        top.setGravity(Gravity.CENTER_VERTICAL);
         TextView h = plain(Lang.t(title), 22, Color.WHITE);
         h.setTypeface(Typeface.DEFAULT_BOLD);
         diagnosticsOnLongPress(h);
-        page.addView(h);
+        top.addView(h, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        // Back, top right: closes Settings.
+        TextView back = chip("←  " + Lang.t("Back"));
+        back.setTextSize(15);
+        back.setTextColor(Color.rgb(0xd8, 0xdc, 0xe3));
+        GradientDrawable bbg = new GradientDrawable();
+        bbg.setColor(Color.rgb(0x1c, 0x1e, 0x24));
+        bbg.setCornerRadius(18 * d);
+        back.setBackground(bbg);
+        back.setPadding((int) (14 * d), (int) (7 * d), (int) (16 * d), (int) (7 * d));
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Haptics.play(SettingsActivity.this, Haptics.BAR);
+                finish();
+            }
+        });
+        top.addView(back);
+        page.addView(top);
         TextView l = plain(Lang.t(lead), 13, Color.rgb(0x7a, 0x80, 0x8b));
         l.setPadding(0, (int) (2 * d), 0, (int) (12 * d));
         page.addView(l);
@@ -581,7 +604,7 @@ public class SettingsActivity extends Activity {
         name.setText(Lang.t(Haptics.ACTION_NAMES[action]));
         name.setTextSize(15);
         name.setTextColor(Color.WHITE);
-        row.addView(name, new LinearLayout.LayoutParams((int) (150 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
+        row.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         final Spinner feel = new Spinner(this, Spinner.MODE_DROPDOWN);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -602,40 +625,100 @@ public class SettingsActivity extends Activity {
         feel.setBackground(bg);
         row.addView(feel, new LinearLayout.LayoutParams((int) (110 * d), (int) (36 * d)));
 
-        final SeekBar strength = new SeekBar(this);
-        strength.setMax(100);
-        strength.setProgress(Haptics.strength(sp, action));
-        tint(strength);
-        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, (int) (40 * d), 1f);
-        slp.leftMargin = (int) (12 * d);
-        row.addView(strength, slp);
-
-        final TextView pct = new TextView(this);
-        pct.setTextSize(14);
-        pct.setTextColor(Color.rgb(0xaa, 0xb3, 0xc0));
-        pct.setGravity(Gravity.END);
-        pct.setText(strength.getProgress() + "%");
-        row.addView(pct, new LinearLayout.LayoutParams((int) (48 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
+        // Strength: a chip showing the %, which opens a vertical slider under it.
+        final int[] strength = {Haptics.strength(sp, action)};
+        final TextView pct = chip(strength[0] + "%  ▾");
+        pct.setTextSize(15);
+        pct.setPadding((int) (10 * d), (int) (7 * d), (int) (10 * d), (int) (7 * d));
+        LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams((int) (76 * d), ViewGroup.LayoutParams.WRAP_CONTENT);
+        plp.leftMargin = (int) (10 * d);
+        row.addView(pct, plp);
+        pct.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                strengthPopup(pct, strength[0], new StrengthListener() {
+                    @Override public void onStrength(int value, boolean done) {
+                        strength[0] = value;
+                        pct.setText(value + "%  ▾");
+                        if (done) {
+                            sp.edit().putInt(Haptics.strengthKey(action), value).apply();
+                            preview(feel.getSelectedItemPosition(), value);
+                        }
+                    }
+                });
+            }
+        });
 
         feel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == Haptics.feel(sp, action)) return; // not a change
                 sp.edit().putInt(Haptics.feelKey(action), position).apply();
-                preview(position, strength.getProgress());
+                preview(position, strength[0]);
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
-        strength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int p, boolean fromUser) {
-                pct.setText(p + "%");
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {
-                sp.edit().putInt(Haptics.strengthKey(action), sb.getProgress()).apply();
-                preview(feel.getSelectedItemPosition(), sb.getProgress());
-            }
-        });
         list.addView(row);
+    }
+
+    private interface StrengthListener {
+        /** done = the finger lifted: save and play a preview. */
+        void onStrength(int value, boolean done);
+    }
+
+    /** A small panel under the chip: the % on top and a tall vertical slider (0 at the bottom). */
+    private void strengthPopup(View anchor, int value, final StrengthListener listener) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER_HORIZONTAL);
+        box.setPadding(0, (int) (10 * d), 0, (int) (12 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(0x16, 0x19, 0x1f));
+        bg.setStroke(Math.max(1, (int) (0.8f * d)), Color.rgb(0x2a, 0x2f, 0x3a));
+        bg.setCornerRadius(14 * d);
+        box.setBackground(bg);
+        final TextView shown = plain(value + "%", 17, Color.rgb(0xbf, 0xe6, 0xff));
+        shown.setTypeface(Typeface.DEFAULT_BOLD);
+        box.addView(shown);
+        final int[] v = {value};
+        View slider = new View(this) {
+            private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            @Override protected void onDraw(Canvas c) {
+                float cx = getWidth() / 2f, r = 12 * d, top = r + 2 * d, bottom = getHeight() - r - 2 * d;
+                float y = bottom - (bottom - top) * v[0] / 100f;
+                paint.setColor(Color.rgb(0x2e, 0x32, 0x3b));
+                c.drawRoundRect(cx - 3.5f * d, top, cx + 3.5f * d, bottom, 3.5f * d, 3.5f * d, paint);
+                paint.setColor(ACCENT);
+                c.drawRoundRect(cx - 3.5f * d, y, cx + 3.5f * d, bottom, 3.5f * d, 3.5f * d, paint);
+                paint.setColor(Color.argb(38, 120, 200, 255));
+                c.drawCircle(cx, y, r + 6 * d, paint);
+                paint.setColor(Color.rgb(0xbf, 0xe6, 0xff));
+                c.drawCircle(cx, y, r, paint);
+            }
+            @Override public boolean onTouchEvent(MotionEvent ev) {
+                float r = 12 * d, top = r + 2 * d, bottom = getHeight() - r - 2 * d;
+                int value = Math.round((bottom - ev.getY()) / (bottom - top) * 100);
+                value = Math.max(0, Math.min(100, value));
+                int action = ev.getActionMasked();
+                if (value != v[0]) {
+                    v[0] = value;
+                    shown.setText(value + "%");
+                    listener.onStrength(value, false);
+                    invalidate();
+                }
+                if (action == MotionEvent.ACTION_UP) listener.onStrength(v[0], true);
+                getParent().requestDisallowInterceptTouchEvent(true);
+                return true;
+            }
+        };
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams((int) (60 * d), (int) (170 * d));
+        slp.topMargin = (int) (6 * d);
+        slp.bottomMargin = (int) (4 * d);
+        box.addView(slider, slp);
+        box.addView(plain("▶", 12, SUB));
+        PopupWindow popup = new PopupWindow(box, Math.max(anchor.getWidth(), (int) (76 * d)),
+                ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popup.setOutsideTouchable(true);
+        popup.setElevation(16 * d);
+        popup.showAsDropDown(anchor, 0, (int) (4 * d));
     }
 
     private void preview(int feel, int strength) {
