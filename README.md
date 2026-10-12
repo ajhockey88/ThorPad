@@ -40,9 +40,11 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | 🤟 Three fingers swiped down | Closes the top-screen app (mouse mode, through Shizuku); Home in touch mode |
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 
-The bottom of the trackpad lists these gestures in three columns: one, two and three fingers.
+The whole bottom screen is trackpad. **Swipe down from the top edge** (where the small handle is) to
+show the menu buttons: ⌨️ Keyboard, ✨ the mode menu, 🖥️ PC keys, ⚙️ Settings and ✖️ Close. They hide
+again when you touch the trackpad or after 5 seconds. The swipe never moves the pointer.
 
-The bar along the top has ⌨️ Keyboard, ✨ the mode menu, 🖥️ PC keys, ⚙️ Settings and ✖️ Close.
+Turn on **Show gesture hints** in Settings to list these gestures along the bottom of the trackpad.
 
 ## 🖥️ PC mode (Moonlight and other PC streaming)
 
@@ -108,6 +110,13 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   - ✏️ adds apostrophes and fixes compound words (`dont` → `don't`, `alot` → `a lot`)
   - 🙅 leaves chat shorthand alone (lol, brb, omw...) and never corrects passwords or email
     addresses
+- 🌐 **Languages:** English, Spanish, French, German, Portuguese and Italian (Settings >
+  **Keyboard language**). Each has its own letters (ñ for Spanish, AZERTY for French, QWERTZ with
+  ü ö ä for German, ç for Portuguese) and its own spelling dictionary, which adds missing accents
+  (`tambien` → `también`, `nao` → `não`) and French and Italian apostrophes (`cest` → `c'est`). The
+  language also changes ThorPad's buttons and settings. Context and contraction fixes are English only.
+- 🔡 **Accents:** hold a letter for its accented versions (hold `e` for é è ê ë), slide to one and
+  lift. Hold `$` for € £ ¥, `?` for ¿ and `!` for ¡.
 - ⏺️ **Double-space period:** two quick spaces type ". ".
 - 🔠 **Auto-capitals:** sentences start with a capital letter (not in email or password boxes).
 
@@ -117,7 +126,9 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 📜 **Scroll speed**, and **classic scroll direction** (fingers down scrolls down, like a mouse wheel)
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
+- 💡 **Show gesture hints** (off by default): the gesture cheat sheet along the bottom of the trackpad
 - 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
+- 🌐 **Keyboard language:** English, Español, Français, Deutsch, Português or Italiano, for the keys, the dictionary and ThorPad's own buttons and settings
 - ✨ **Autocorrect**, **double-space period** and **auto-capitals**, each on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)
@@ -200,7 +211,8 @@ takes its spellings from SCOWL's "huge" American English word list (about 134,00
 [wordfreq](https://github.com/rspeer/wordfreq) (data licensed CC BY-SA 4.0). Which words
 follow which (`app/src/main/assets/pairs.txt`, built by `tools/make_pairs.py`) comes from
 [SymSpell](https://github.com/mammothb/symspellpy)'s bigram list (MIT), drawn from Google Books
-Ngram data (CC BY 3.0).
+Ngram data (CC BY 3.0). The Spanish, French, German, Portuguese and Italian dictionaries
+(`words-xx.txt`, built by `tools/make_lang_words.py`) come from wordfreq too.
 
 ## 🏗️ Building
 

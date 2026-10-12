@@ -1,15 +1,12 @@
-⌨️ ThorPad 1.8: the keyboard understands what you meant to type.
+🌐 ThorPad 1.9: a cleaner trackpad, and a keyboard in six languages.
 
-## ✨ What's new in 1.8
-- 🧩 **Splits run-together words:** a missed space (`helloworld` → `hello world`) or a letter typed by grazing the space bar (`seebyou` → `see you`) is split back into words, even across a whole phrase
-- 🔤 **Stronger spelling fixes:** missing, extra, doubled and swapped letters are caught more often (`definately`, `tommorow`, `accomodate`), and a rare word one slip from a common one is fixed (`adn` → `and`)
-- 🧠 **Context-aware spelling:** the word before helps pick the right fix (`more then` → `more than`), and `its`, `ill`, `id` and `lets` become `it's`, `I'll`, `I'd` and `let's` unless the word before shows the plain word is meant (`of its`, `very ill`, `your id`, `he lets`)
-- ✏️ **Contractions and compound words:** more apostrophes added (`shouldve`, `theyd`, `heres`) and run-together pairs fixed (`alot`, `infront`, `atleast`, `everytime`)
-- ⏺️ **Double-space period:** two quick spaces type ". " and the next word starts with a capital
-- 🔠 **Auto-capitals:** sentences start with a capital letter (not in email or password boxes)
-- 🙅 Chat shorthand (lol, brb, omw...) is left alone, and passwords and email addresses are never corrected
-- ⚙️ Double-space period and auto-capitals each have their own switch in Settings
-- 🔔 **Update check on start:** ThorPad quietly checks for a new version when it starts and only shows anything if there is one. **Not now** stops it asking about that version
+## ✨ What's new in 1.9
+- 👇 **Swipe-down menu:** the menu buttons are hidden so the whole bottom screen is trackpad. Swipe down from the top edge (where the small handle is) to show Keyboard, the mode menu, PC keys, Settings and Close. They hide again when you touch the trackpad or after 5 seconds, and the swipe never moves the pointer
+- 💡 **Gesture hints are now optional:** the cheat sheet along the bottom of the trackpad is off by default. Turn on **Show gesture hints** in Settings to bring it back
+- 🌐 **Keyboard languages:** pick English, Español, Français, Deutsch, Português or Italiano in Settings > **Keyboard language**. Each has its own letters: ñ for Spanish, AZERTY for French, QWERTZ with ü ö ä for German, ç for Portuguese
+- 🔡 **Accents:** hold a letter for its accented versions (hold `e` for é è ê ë), slide to one and lift. Hold `$` for € £ ¥, `?` for ¿ and `!` for ¡
+- 📖 **Spelling in every language:** each language has its own dictionary, which also adds missing accents (`tambien` → `también`, `nao` → `não`, `fur` → `für`) and French and Italian apostrophes (`cest` → `c'est`, `lanno` → `l'anno`)
+- 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
 
 ---
 
@@ -17,14 +14,17 @@
 ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for the top screen.
 - 🖱️ **Real mouse:** with Shizuku, Android and every app see a real USB mouse with a scroll wheel, so GameNative and Winlator games work; touch mode works without it
 - 👆 **Gestures:** tap to click, hold or two-finger tap to right click, tap-and-slide to drag, two fingers to scroll or go back and forward, three fingers for recent apps and closing the top app
+- 👇 **Out of the way:** the whole screen is trackpad, with the menu a swipe down from the top
 - ⌨️ **Full-screen keyboard:** big edge-to-edge keys, hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard, even when ThorPad itself is closed
-- ✨ **Smart typing:** autocorrect with a 134,000-word dictionary that splits run-together words and reads context, double-space period and auto-capitals
+- 🌐 **Six languages:** English, Spanish, French, German, Portuguese and Italian, with accents on a long press
+- ✨ **Smart typing:** autocorrect that splits run-together words, adds accents and reads context (English), double-space period and auto-capitals
 - 🖥️ **PC mode:** PC keys (Esc, F1 to F12, Windows shortcuts, sticky Ctrl / Alt / Shift / Win) and PC gestures that switch on by themselves when Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on top
 - 📳 **Haptics:** pick a feel and strength for every action
 - 🔋 **Easy on the battery:** dims the trackpad when idle and runs nothing in the background
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
+- **1.9:** swipe-down menu, optional gesture hints, six keyboard languages with accents
 - **1.8:** smarter autocorrect, double-space period and auto-capitals
 - **1.7:** the keyboard opens and closes with text boxes
 - **1.6:** PC mode for Moonlight and other PC streaming, PC keys, mode menu, catch-up release notes

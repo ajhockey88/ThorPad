@@ -85,6 +85,8 @@ public class TrackpadActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Lang.init(this);
+        builtLanguage = Lang.code();
         // Never take input focus: the app on the top screen keeps the keyboard and gamepad,
         // and Back / Home / Recents act on the top screen instead of on the trackpad.
         // No FLAG_KEEP_SCREEN_ON: the Thor sleeps on its usual timer, and touching the trackpad
@@ -100,9 +102,17 @@ public class TrackpadActivity extends Activity
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.BLACK);
 
+        // The menu buttons stay hidden; a swipe down from the top edge slides them in.
         LinearLayout bar = new LinearLayout(this);
+        menuBar = bar;
         bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setPadding((int) (6 * d), (int) (6 * d), (int) (6 * d), 0);
+        bar.setPadding((int) (6 * d), (int) (6 * d), (int) (6 * d), (int) (6 * d));
+        GradientDrawable barBg = new GradientDrawable();
+        barBg.setColor(Color.rgb(0x10, 0x11, 0x14));
+        barBg.setCornerRadii(new float[] {0, 0, 0, 0, 14 * d, 14 * d, 14 * d, 14 * d});
+        bar.setBackground(barBg);
+        bar.setElevation(12 * d);
+        bar.setVisibility(View.GONE);
         bar.addView(barButton("Keyboard", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 keyboardForTextBox = false;
@@ -118,12 +128,14 @@ public class TrackpadActivity extends Activity
             @Override public void onClick(View v) { openPcKeys(); }
         }), weight());
         bar.addView(barButton("Settings", new View.OnClickListener() {
-            @Override public void onClick(View v) { startActivity(new Intent(TrackpadActivity.this, SettingsActivity.class)); }
+            @Override public void onClick(View v) {
+                hideMenu();
+                startActivity(new Intent(TrackpadActivity.this, SettingsActivity.class));
+            }
         }), weight());
         bar.addView(barButton("Close", new View.OnClickListener() {
             @Override public void onClick(View v) { finishAndRemoveTask(); }
         }), weight());
-        root.addView(bar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (46 * d)));
 
         FrameLayout padArea = new FrameLayout(this);
         pad = new TrackpadView(this);
@@ -138,6 +150,16 @@ public class TrackpadActivity extends Activity
                 Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         mlp.topMargin = (int) (14 * d);
         padArea.addView(modeLabel, mlp);
+        // A small pill at the top: the hint that the menu is a swipe down away.
+        View handle = new View(this);
+        GradientDrawable pill = new GradientDrawable();
+        pill.setColor(Color.argb(70, 255, 255, 255));
+        pill.setCornerRadius(3 * d);
+        handle.setBackground(pill);
+        FrameLayout.LayoutParams hlp = new FrameLayout.LayoutParams(
+                (int) (44 * d), (int) (5 * d), Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        hlp.topMargin = (int) (6 * d);
+        padArea.addView(handle, hlp);
         padArea.addView(buildSetupPanel(d), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -146,6 +168,8 @@ public class TrackpadActivity extends Activity
         FrameLayout frame = new FrameLayout(this);
         frame.addView(root, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        frame.addView(bar, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, (int) (58 * d), Gravity.TOP));
         keyboard = new KeyboardView(this);
         keyboard.setListener(this);
         keyboard.setVisibility(View.GONE);
@@ -216,7 +240,91 @@ public class TrackpadActivity extends Activity
             lastOwnDownAt = SystemClock.uptimeMillis();
         }
         if (action == MotionEvent.ACTION_DOWN) checkTopApp(false);
+        if (handleMenuTouch(ev)) return true;
         return super.dispatchTouchEvent(ev);
+    }
+
+    // ---- Swipe-down menu --------------------------------------------------------------------
+
+    private static final long MENU_HIDE_MS = 5000;
+    private LinearLayout menuBar;
+    /** A touch that started on the top edge: it opens the menu and never moves the pointer. */
+    private boolean edgeTouch;
+    private float edgeStartY;
+
+    private final Runnable menuTimeout = new Runnable() {
+        @Override public void run() {
+            if (modeMenu != null && modeMenu.isShowing()) {
+                idleHandler.postDelayed(this, MENU_HIDE_MS);
+            } else {
+                hideMenu();
+            }
+        }
+    };
+
+    private boolean menuShowing() {
+        return menuBar != null && menuBar.getVisibility() == View.VISIBLE;
+    }
+
+    private void showMenu() {
+        if (menuShowing()) return;
+        Haptics.play(this, Haptics.BAR);
+        menuBar.setVisibility(View.VISIBLE);
+        float h = 58 * getResources().getDisplayMetrics().density;
+        menuBar.setTranslationY(-h);
+        menuBar.animate().translationY(0).setDuration(160).start();
+        idleHandler.removeCallbacks(menuTimeout);
+        idleHandler.postDelayed(menuTimeout, MENU_HIDE_MS);
+    }
+
+    private void hideMenu() {
+        idleHandler.removeCallbacks(menuTimeout);
+        if (!menuShowing()) return;
+        if (modeMenu != null) modeMenu.dismiss();
+        float h = menuBar.getHeight();
+        menuBar.animate().translationY(-h).setDuration(140).withEndAction(new Runnable() {
+            @Override public void run() { menuBar.setVisibility(View.GONE); }
+        }).start();
+    }
+
+    /** Edge swipes open the menu; a touch on the trackpad while it's open only closes it. */
+    private boolean handleMenuTouch(MotionEvent ev) {
+        if (keyboard.getVisibility() == View.VISIBLE || pcKeys.getVisibility() == View.VISIBLE) return false;
+        float d = getResources().getDisplayMetrics().density;
+        int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            edgeTouch = false;
+            // Touches come in window coordinates; the screen's content may start lower.
+            int[] at = new int[2];
+            ((View) menuBar.getParent()).getLocationInWindow(at);
+            float y = ev.getY() - at[1];
+            if (menuShowing()) {
+                if (y <= menuBar.getHeight()) {
+                    idleHandler.removeCallbacks(menuTimeout);
+                    idleHandler.postDelayed(menuTimeout, MENU_HIDE_MS);
+                    return false; // a menu button
+                }
+                hideMenu();
+                swallowTouch = true; // this touch only closes the menu
+                return true;
+            }
+            if (y < 24 * d) {
+                edgeTouch = true;
+                edgeStartY = ev.getY();
+                return true;
+            }
+            return false;
+        }
+        if (!edgeTouch) return false;
+        if (action == MotionEvent.ACTION_MOVE && ev.getY() - edgeStartY > 30 * d) {
+            showMenu();
+        } else if (action == MotionEvent.ACTION_UP) {
+            showMenu(); // a tap on the edge opens it too
+            edgeTouch = false;
+        } else if (action == MotionEvent.ACTION_CANCEL) {
+            edgeTouch = false;
+        }
+        return true;
     }
 
     @Override
@@ -297,8 +405,9 @@ public class TrackpadActivity extends Activity
     }
 
     private void openPcKeys() {
+        hideMenu();
         if (!mouse.isReady()) {
-            android.widget.Toast.makeText(this, "PC keys need mouse mode (Shizuku)",
+            android.widget.Toast.makeText(this, Lang.t("PC keys need mouse mode (Shizuku)"),
                     android.widget.Toast.LENGTH_SHORT).show();
             return;
         }
@@ -346,8 +455,7 @@ public class TrackpadActivity extends Activity
         list.setBackground(bg);
         list.setClipToOutline(true);
         int mode = prefs.pcMode();
-        list.addView(menuRow("✨ Auto", "PC controls when Moonlight, Steam Link, Parsec or another "
-                + "PC streaming app is on the top screen", mode == Prefs.PC_AUTO, new Runnable() {
+        list.addView(menuRow("✨ Auto", "PC controls when Moonlight, Steam Link, Parsec or another PC streaming app is on the top screen", mode == Prefs.PC_AUTO, new Runnable() {
             @Override public void run() { setPcMode(Prefs.PC_AUTO); }
         }));
         list.addView(menuRow("📱 Android", "Recent apps, close app, Android back", mode == Prefs.PC_NEVER,
@@ -362,7 +470,7 @@ public class TrackpadActivity extends Activity
             final String pkg = topPackage;
             final boolean added = prefs.pcApps().contains(pkg);
             if (added || !topStreamsPc) {
-                list.addView(menuRow(added ? "✕ Stop PC for " + topLabel : "➕ Always PC for " + topLabel,
+                list.addView(menuRow(Lang.f(added ? "✕ Stop PC for %s" : "➕ Always PC for %s", topLabel),
                         added ? "Use Android controls for this app again"
                                 : "Treat this app as a PC streaming app in Auto", false, new Runnable() {
                             @Override public void run() {
@@ -395,12 +503,12 @@ public class TrackpadActivity extends Activity
         row.setPadding(p, (int) (10 * d), p, (int) (10 * d));
         if (selected) row.setBackgroundColor(Color.rgb(0x1f, 0x3a, 0x52));
         TextView t = new TextView(this);
-        t.setText(selected ? title + "   ✓" : title);
+        t.setText(selected ? Lang.t(title) + "   ✓" : Lang.t(title));
         t.setTextSize(16);
         t.setTextColor(selected ? Color.WHITE : Color.rgb(0xe8, 0xe8, 0xe8));
         row.addView(t);
         TextView s = new TextView(this);
-        s.setText(detail);
+        s.setText(Lang.t(detail));
         s.setTextSize(11);
         s.setTextColor(selected ? Color.rgb(0x9f, 0xc3, 0xdd) : Color.rgb(0x8a, 0x90, 0x9b));
         row.addView(s);
@@ -437,7 +545,7 @@ public class TrackpadActivity extends Activity
 
     private Button barButton(String text, final View.OnClickListener listener) {
         Button b = new Button(this);
-        b.setText(text);
+        b.setText(Lang.t(text));
         b.setAllCaps(false);
         b.setTextSize(13);
         b.setTextColor(Color.argb(200, 255, 255, 255));
@@ -457,7 +565,7 @@ public class TrackpadActivity extends Activity
 
     private TextView panelText(String s, int sp, int alpha) {
         TextView t = new TextView(this);
-        t.setText(s);
+        t.setText(Lang.t(s));
         t.setTextSize(sp);
         t.setTextColor(Color.argb(alpha, 255, 255, 255));
         return t;
@@ -465,7 +573,7 @@ public class TrackpadActivity extends Activity
 
     private Button panelButton(String s, View.OnClickListener l) {
         Button b = new Button(this);
-        b.setText(s);
+        b.setText(Lang.t(s));
         b.setAllCaps(false);
         b.setOnClickListener(l);
         return b;
@@ -504,12 +612,9 @@ public class TrackpadActivity extends Activity
         });
         panel.addView(shizukuButton);
 
-        TextView or = panelText("\nOr touch mode (no Shizuku; fine for normal Android apps, "
-                + "but games in GameNative won't get real mouse or scroll-wheel input)", 15, 255);
+        TextView or = panelText("\nOr touch mode (no Shizuku; fine for normal Android apps, but games in GameNative won't get real mouse or scroll-wheel input)", 15, 255);
         panel.addView(or);
-        panel.addView(panelText("Turn on \"ThorPad trackpad\" in Accessibility settings. If Android "
-                + "says the setting is restricted: Settings > Apps > ThorPad > ⋮ > "
-                + "Allow restricted settings, then try again.", 14, 190));
+        panel.addView(panelText("Turn on \"ThorPad trackpad\" in Accessibility settings. If Android says the setting is restricted: Settings > Apps > ThorPad > ⋮ > Allow restricted settings, then try again.", 14, 190));
         LinearLayout row = new LinearLayout(this);
         row.addView(panelButton("Accessibility settings", new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -568,9 +673,9 @@ public class TrackpadActivity extends Activity
         updater[0] = new Updater(this, new Updater.Listener() {
             @Override public void onUpdateStatus(String status, boolean done) {
                 // Silent while checking (even offline); once the user picked Update, say how it goes.
-                if (!installing[0] && status.startsWith("Downloading")) {
+                if (!installing[0] && !done && !status.equals(Lang.t("Checking for updates…"))) {
                     installing[0] = true;
-                    android.widget.Toast.makeText(TrackpadActivity.this, "Downloading the update…",
+                    android.widget.Toast.makeText(TrackpadActivity.this, Lang.t("Downloading the update…"),
                             android.widget.Toast.LENGTH_SHORT).show();
                 } else if (installing[0] && done) {
                     android.widget.Toast.makeText(TrackpadActivity.this, status,
@@ -590,11 +695,19 @@ public class TrackpadActivity extends Activity
         updater[0].check();
     }
 
+    /** The language the buttons were made in; changing it in Settings rebuilds the screen. */
+    private String builtLanguage;
+
     @Override
     protected void onResume() {
         super.onResume();
+        if (!Lang.code().equals(builtLanguage)) {
+            recreate();
+            return;
+        }
         checkTopApp(true);
         refresh();
+        pad.invalidate(); // the hints setting may have changed
     }
 
     @Override
@@ -616,7 +729,7 @@ public class TrackpadActivity extends Activity
         mouse.stop();
         onCloseKeyboard();
         if (pcKeys.getVisibility() == View.VISIBLE) onPcKeysClose();
-        if (modeMenu != null) modeMenu.dismiss();
+        hideMenu();
         keyboardDevice.stop();
         ThorPadService s = ThorPadService.get();
         if (s != null) s.hidePointer();
@@ -644,6 +757,7 @@ public class TrackpadActivity extends Activity
     // ---- On-screen keyboard -----------------------------------------------------------------
 
     private void openKeyboard() {
+        hideMenu();
         Prefs prefs = new Prefs(this);
         keyboard.reset();
         keyboard.setTypeOnRelease(prefs.typeOnRelease());
@@ -778,18 +892,18 @@ public class TrackpadActivity extends Activity
         if (mouse.isReady()) {
             out = mouse;
             if (service != null) service.hidePointer(); // Android draws the real mouse cursor
-            modeLabel.setText("Mouse mode");
+            modeLabel.setText(Lang.t("Mouse mode"));
         } else if (service != null && !shizukuReady) {
             out = service;
             service.showPointer();
-            modeLabel.setText("Touch mode");
+            modeLabel.setText(Lang.t("Touch mode"));
         } else if (service != null && mouseError != null) {
             out = service;
             service.showPointer();
-            modeLabel.setText("Touch mode (virtual mouse failed)");
+            modeLabel.setText(Lang.t("Touch mode (virtual mouse failed)"));
         } else {
             out = null; // waiting for the virtual mouse, or nothing set up yet
-            modeLabel.setText(shizukuReady && mouseError == null ? "Starting mouse…" : "");
+            modeLabel.setText(shizukuReady && mouseError == null ? Lang.t("Starting mouse…") : "");
         }
         boolean covered = keyboard.getVisibility() == View.VISIBLE || pcKeys.getVisibility() == View.VISIBLE;
         pad.setOutput(covered ? null : out);
@@ -797,26 +911,25 @@ public class TrackpadActivity extends Activity
         pad.setPcHints(pc);
         modeButton.setText(modeButtonText());
         if (pc && out == mouse) {
-            modeLabel.setText("Mouse mode · PC controls" + (new Prefs(this).pcMode() == Prefs.PC_AUTO
+            modeLabel.setText(Lang.t("Mouse mode · PC controls") + (new Prefs(this).pcMode() == Prefs.PC_AUTO
                     && topLabel != null ? " (" + topLabel + ")" : ""));
         }
         updateKeyboardDevice();
 
         if (mouseError != null) {
-            mouseStatus.setText("The virtual mouse couldn't start: " + mouseError);
-            shizukuButton.setText("Try again");
+            mouseStatus.setText(Lang.f("The virtual mouse couldn't start: %s", mouseError));
+            shizukuButton.setText(Lang.t("Try again"));
             shizukuButton.setVisibility(View.VISIBLE);
         } else if (!ShizukuClient.isRunning()) {
-            mouseStatus.setText("Install Shizuku, start it (Wireless debugging works without a PC), "
-                    + "then reopen ThorPad.");
-            shizukuButton.setText("Open Shizuku");
+            mouseStatus.setText(Lang.t("Install Shizuku, start it (Wireless debugging works without a PC), then reopen ThorPad."));
+            shizukuButton.setText(Lang.t("Open Shizuku"));
             shizukuButton.setVisibility(View.VISIBLE);
         } else if (!shizukuReady) {
-            mouseStatus.setText("Shizuku is running. Allow ThorPad to use it.");
-            shizukuButton.setText("Allow ThorPad in Shizuku");
+            mouseStatus.setText(Lang.t("Shizuku is running. Allow ThorPad to use it."));
+            shizukuButton.setText(Lang.t("Allow ThorPad in Shizuku"));
             shizukuButton.setVisibility(View.VISIBLE);
         } else {
-            mouseStatus.setText("Ready.");
+            mouseStatus.setText(Lang.t("Ready."));
             shizukuButton.setVisibility(View.GONE);
         }
 

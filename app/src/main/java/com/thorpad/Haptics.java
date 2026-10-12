@@ -30,6 +30,13 @@ final class Haptics {
 
     private Haptics() {}
 
+    /** FEEL_NAMES in the keyboard language. */
+    static String[] feelNames() {
+        String[] out = new String[FEEL_NAMES.length];
+        for (int i = 0; i < out.length; i++) out[i] = Lang.t(FEEL_NAMES[i]);
+        return out;
+    }
+
     static String feelKey(int action) { return "haptic_feel_" + ACTION_KEYS[action]; }
 
     static String strengthKey(int action) { return "haptic_strength_" + ACTION_KEYS[action]; }

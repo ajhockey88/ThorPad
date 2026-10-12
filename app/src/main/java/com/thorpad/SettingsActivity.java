@@ -37,6 +37,7 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Lang.init(this);
         prefs = new Prefs(this);
         d = getResources().getDisplayMetrics().density;
         // Settings has no text boxes: never let a keyboard window cover it.
@@ -64,8 +65,10 @@ public class SettingsActivity extends Activity {
         toggle("Dim the trackpad screen after 30 seconds without a touch, to save battery "
                 + "(the first touch only wakes it)",
                 Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
+        toggle("Show gesture hints on the trackpad", Prefs.KEY_SHOW_HINTS, prefs.showHints(), false);
 
         list.addView(text("\nKeyboard", 17));
+        languagePicker();
         toggle("Autocorrect (fixes a misspelled word when you finish it, splits words that ran "
                 + "together, adds apostrophes, and uses the word before to pick the right one; tap "
                 + "the suggestion to keep what you typed, or press backspace right after to undo)",
@@ -89,7 +92,8 @@ public class SettingsActivity extends Activity {
                 + "• Two fingers up or down: scroll\n"
                 + "• Two fingers swiped right: back; swiped left: forward\n"
                 + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
-                + "• Two-finger tap: back", 14);
+                + "• Two-finger tap: back\n"
+                + "• Swipe down from the top edge: show the menu buttons", 14);
         help.setTextColor(Color.argb(170, 255, 255, 255));
         list.addView(help);
 
@@ -122,6 +126,42 @@ public class SettingsActivity extends Activity {
                 .hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
     }
 
+    // ---- Keyboard language ---------------------------------------------------------------------
+
+    private void languagePicker() {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        TextView label = text("Keyboard language", 15);
+        row.addView(label, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        Button pick = new Button(this);
+        pick.setAllCaps(false);
+        pick.setText("🌐 " + Lang.name() + " ▾");
+        pick.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this)
+                        .setTitle(Lang.t("Keyboard language"))
+                        .setSingleChoiceItems(Lang.NAMES, Lang.indexOf(Lang.code()),
+                                new DialogInterface.OnClickListener() {
+                                    @Override public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        if (Lang.CODES[which].equals(Lang.code())) return;
+                                        prefs.setLanguage(Lang.CODES[which]);
+                                        Autocorrect.release(); // the next keyboard loads the new dictionary
+                                        recreate();
+                                    }
+                                })
+                        .setNegativeButton(Lang.t("Cancel"), null)
+                        .show();
+            }
+        });
+        row.addView(pick);
+        list.addView(row);
+        TextView hint = text(Lang.t("Changes the letters on the keyboard, the spelling dictionary, and "
+                + "ThorPad's buttons and settings.") + " " + Lang.t("Hold a letter for its accents."), 13);
+        hint.setTextColor(Color.argb(170, 255, 255, 255));
+        list.addView(hint);
+    }
+
     // ---- Which keyboard opens for top-screen text boxes ------------------------------------
 
     private TextView keyboardLabel;
@@ -146,7 +186,7 @@ public class SettingsActivity extends Activity {
         });
         row.addView(useThorPad);
         Button choose = new Button(this);
-        choose.setText("Other keyboard");
+        choose.setText(Lang.t("Other keyboard"));
         choose.setAllCaps(false);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { showKeyboardList(); }
@@ -173,15 +213,15 @@ public class SettingsActivity extends Activity {
 
     private void refreshKeyboardLabel() {
         if (keyboardLabel == null) return;
-        String name = "unknown";
+        String name = Lang.t("unknown");
         String current = currentKeyboardId();
         for (InputMethodInfo info : imm().getInputMethodList()) {
             if (info.getId().equals(current)) name = info.loadLabel(getPackageManager()).toString();
         }
         InputMethodInfo mine = thorPadKeyboard();
         boolean inUse = mine != null && mine.getId().equals(current);
-        keyboardLabel.setText("Android keyboard: " + name + (inUse ? " ✅" : ""));
-        useThorPad.setText(inUse ? "ThorPad keyboard in use" : "Use ThorPad keyboard");
+        keyboardLabel.setText(Lang.f("Android keyboard: %s", name) + (inUse ? " ✅" : ""));
+        useThorPad.setText(Lang.t(inUse ? "ThorPad keyboard in use" : "Use ThorPad keyboard"));
         useThorPad.setEnabled(!inUse && mine != null);
     }
 
@@ -195,14 +235,14 @@ public class SettingsActivity extends Activity {
             if (all.get(i).getId().equals(current)) checked = i;
         }
         new AlertDialog.Builder(this)
-                .setTitle("Keyboard for text boxes")
+                .setTitle(Lang.t("Keyboard for text boxes"))
                 .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
                     @Override public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         useKeyboard(all.get(which));
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(Lang.t("Cancel"), null)
                 .show();
     }
 
@@ -224,8 +264,8 @@ public class SettingsActivity extends Activity {
                                 // Still not switched: fall back to Android's own picker.
                                 imm().showInputMethodPicker();
                             } else {
-                                Toast.makeText(SettingsActivity.this, info.loadLabel(getPackageManager())
-                                        + " is now Android's keyboard", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SettingsActivity.this, Lang.f("%s is now Android's keyboard",
+                                        info.loadLabel(getPackageManager())), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -241,8 +281,8 @@ public class SettingsActivity extends Activity {
             // Android only lets the user switch keyboards, through its own picker.
             imm().showInputMethodPicker();
         } else {
-            Toast.makeText(this, "Turn on " + info.loadLabel(getPackageManager())
-                    + " here, then come back and choose it again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Lang.f("Turn on %s here, then come back and choose it again.",
+                    info.loadLabel(getPackageManager())), Toast.LENGTH_LONG).show();
             Intent i = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
@@ -251,10 +291,10 @@ public class SettingsActivity extends Activity {
 
     private void saveDiagnostics() {
         if (!ShizukuClient.hasPermission()) {
-            Toast.makeText(this, "Needs Shizuku", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Lang.t("Needs Shizuku"), Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(this, "Saving screenshots…", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Lang.t("Saving screenshots…"), Toast.LENGTH_SHORT).show();
         String log = "";
         try {
             log = "cp '" + KeyboardLog.save(this).getAbsolutePath() + "' /sdcard/Download/; ";
@@ -274,8 +314,8 @@ public class SettingsActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
                         Toast.makeText(SettingsActivity.this, ok
-                                ? "Saved thorpad-screen, thorpad-windows and thorpad-anr files to Download"
-                                : "Couldn't save the screenshots", Toast.LENGTH_LONG).show();
+                                ? Lang.t("Saved thorpad-screen, thorpad-windows and thorpad-anr files to Download")
+                                : Lang.t("Couldn't save the screenshots"), Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -295,7 +335,7 @@ public class SettingsActivity extends Activity {
         status.setTextColor(Color.argb(190, 255, 255, 255));
         list.addView(status);
         final Button check = new Button(this);
-        check.setText("Check for updates");
+        check.setText(Lang.t("Check for updates"));
         check.setAllCaps(false);
         check.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -320,7 +360,7 @@ public class SettingsActivity extends Activity {
         // Installs the latest release again even if it's this version, e.g. after its APK
         // was replaced on GitHub without a new version number.
         final Button reinstall = new Button(this);
-        reinstall.setText("Reinstall");
+        reinstall.setText(Lang.t("Reinstall"));
         reinstall.setAllCaps(false);
         reinstall.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -375,14 +415,14 @@ public class SettingsActivity extends Activity {
         row.setMinimumHeight((int) (46 * d));
 
         TextView name = new TextView(this);
-        name.setText(Haptics.ACTION_NAMES[action]);
+        name.setText(Lang.t(Haptics.ACTION_NAMES[action]));
         name.setTextSize(15);
         name.setTextColor(Color.WHITE);
         row.addView(name, new LinearLayout.LayoutParams((int) (150 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final Spinner feel = new Spinner(this, Spinner.MODE_DROPDOWN);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, Haptics.FEEL_NAMES) {
+                android.R.layout.simple_spinner_item, Haptics.feelNames()) {
             @Override public View getView(int position, View convertView, ViewGroup parent) {
                 TextView t = (TextView) super.getView(position, convertView, parent);
                 t.setTextColor(Color.rgb(0xcf, 0xe9, 0xff));
@@ -437,7 +477,7 @@ public class SettingsActivity extends Activity {
     private void preview(int feel, int strength) {
         Haptics.play(this, feel, strength);
         previewPill.setText(feel == Haptics.OFF || strength == 0
-                ? "Off" : "▶ Preview: " + Haptics.FEEL_NAMES[feel] + ", " + strength + "%");
+                ? Lang.t("Off") : Lang.f("▶ Preview: %s", Lang.t(Haptics.FEEL_NAMES[feel]) + ", " + strength + "%"));
         previewPill.setVisibility(View.VISIBLE);
         previewPill.removeCallbacks(hidePill);
         previewPill.postDelayed(hidePill, 1500);
@@ -445,7 +485,7 @@ public class SettingsActivity extends Activity {
 
     private TextView text(String s, int sp) {
         TextView t = new TextView(this);
-        t.setText(s);
+        t.setText(Lang.t(s));
         t.setTextSize(sp);
         t.setTextColor(Color.WHITE);
         t.setPadding(0, (int) (10 * d), 0, (int) (4 * d));
@@ -463,7 +503,7 @@ public class SettingsActivity extends Activity {
 
     private void slider(final String label, final String key, float value,
                         final float min, final float max, final boolean reloadPointer) {
-        final TextView t = text(label + ": " + fmt(value), 15);
+        final TextView t = text(Lang.t(label) + ": " + fmt(value), 15);
         list.addView(t);
         SeekBar bar = new SeekBar(this);
         bar.setMax(100);
@@ -471,7 +511,7 @@ public class SettingsActivity extends Activity {
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar sb, int p, boolean fromUser) {
                 float v = min + (max - min) * p / 100f;
-                t.setText(label + ": " + fmt(v));
+                t.setText(Lang.t(label) + ": " + fmt(v));
                 prefs.raw().edit().putFloat(key, v).apply();
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
@@ -485,7 +525,7 @@ public class SettingsActivity extends Activity {
 
     private void toggle(String label, final String key, boolean value, final boolean reloadPointer) {
         Switch sw = new Switch(this);
-        sw.setText(label);
+        sw.setText(Lang.t(label));
         sw.setTextColor(Color.WHITE);
         sw.setTextSize(15);
         sw.setChecked(value);

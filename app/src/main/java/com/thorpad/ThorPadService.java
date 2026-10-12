@@ -53,6 +53,7 @@ public class ThorPadService extends AccessibilityService
 
     @Override
     protected void onServiceConnected() {
+        Lang.init(this);
         instance = this;
         prefs = new Prefs(this);
         streamer = new GestureStreamer(this);

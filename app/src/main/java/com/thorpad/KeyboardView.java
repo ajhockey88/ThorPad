@@ -121,10 +121,57 @@ final class KeyboardView extends View {
         setHapticFeedbackEnabled(true);
         text.setTextAlign(Paint.Align.CENTER);
 
+        buildPages();
+    }
+
+    // ---- Languages ------------------------------------------------------------------------
+
+    /** The keyboard language the keys were last built for. */
+    private String lang;
+    private int lastW, lastH;
+
+    /** Letter rows for each language: QWERTY, with ñ / ç, AZERTY for French, QWERTZ for German. */
+    private static String[] letterRows(String code) {
+        switch (code) {
+            case "es": return new String[] {"qwertyuiop", "asdfghjklñ", "zxcvbnm"};
+            case "fr": return new String[] {"azertyuiop", "qsdfghjklm", "wxcvbn'"};
+            case "de": return new String[] {"qwertzuiopü", "asdfghjklöä", "yxcvbnm"};
+            case "pt": return new String[] {"qwertyuiop", "asdfghjklç", "zxcvbnm"};
+            default: return new String[] {"qwertyuiop", "asdfghjkl", "zxcvbnm"};
+        }
+    }
+
+    /** What holding a key offers, per language; the most used accent comes first. */
+    private static String accentsFor(String code, char c) {
+        switch (c) {
+            case '$': return "€£¥";
+            case '?': return "¿";
+            case '!': return "¡";
+            case '-': return "–—";
+        }
+        String v;
+        switch (code) {
+            case "es": v = "aáà eéè iíï oóò uúü nñ cç"; break;
+            case "fr": v = "aàâæá eéèêë iîïí oôœö uùûü cç yÿ"; break;
+            case "de": v = "aäàá oöóò uüúù sß eéè"; break;
+            case "pt": v = "aãáàâ eéêè ií oõóô uúü cç"; break;
+            case "it": v = "aàá eèé iìí oòó uùú"; break;
+            default: v = "aáàâäã eéèêë iíîï oóôöõ uúûü cç nñ"; break;
+        }
+        for (String group : v.split(" ")) {
+            if (group.charAt(0) == c) return group.substring(1);
+        }
+        return null;
+    }
+
+    private void buildPages() {
+        lang = Lang.code();
+        String[] r = letterRows(lang);
+        pages.clear();
         pages.add(rows(
-                chars("qwertyuiop"),
-                chars("asdfghjkl"),
-                join(mod("⇧", SHIFT, 0), chars("zxcvbnm"), mod("⌫", BACKSPACE, KeyOutput.BACKSPACE)),
+                chars(r[0]),
+                chars(r[1]),
+                join(mod("⇧", SHIFT, 0), chars(r[2]), mod("⌫", BACKSPACE, KeyOutput.BACKSPACE)),
                 bottomRow("?123", SYMBOLS)));
         pages.add(rows(
                 chars("1234567890"),
@@ -141,7 +188,17 @@ final class KeyboardView extends View {
                 bottomRow("ABC", LETTERS)));
     }
 
+    /** Rebuilds the keys if the language changed in Settings since they were built. */
+    private void checkLanguage() {
+        if (Lang.code().equals(lang)) return;
+        cancelTouches();
+        buildPages();
+        if (lastW > 0) layoutKeys(lastW, lastH);
+        invalidate();
+    }
+
     void setOutput(KeyOutput output) {
+        checkLanguage();
         this.output = output;
         if (output != null) autoCapitalize();
     }
@@ -183,6 +240,7 @@ final class KeyboardView extends View {
 
     /** Clears the preview and returns to letters, ready for the next time it opens. */
     void reset() {
+        checkLanguage();
         typed.setLength(0);
         clearSuggestion();
         fixOriginal = null;
@@ -242,6 +300,12 @@ final class KeyboardView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        lastW = w;
+        lastH = h;
+        layoutKeys(w, h);
+    }
+
+    private void layoutKeys(int w, int h) {
         float stripH = h * 100f / 1080f;
         float closeW = w * 260f / 1240f;
         stripRect.set(0, 0, w - closeW, stripH);
@@ -276,6 +340,107 @@ final class KeyboardView extends View {
 
         for (List<Key> row : pages.get(page)) {
             for (Key k : row) drawKey(canvas, k, hair);
+        }
+        drawAccents(canvas);
+    }
+
+    // ---- Accents: hold a key for its accented letters ----------------------------------------
+
+    private static final long ACCENT_HOLD_MS = 350;
+    private Key holdKey;
+    private int holdPointer = -1;
+    /** The options on show, or null while no popup is open. */
+    private String accents;
+    private boolean holdUpper;
+    /** Whether the plain letter was already typed (it is replaced if an accent is picked). */
+    private boolean holdTyped;
+    private int accentSel;
+    private final RectF accentBox = new RectF();
+
+    private final Runnable showAccents = new Runnable() {
+        @Override public void run() {
+            if (holdKey == null || down.get(holdPointer) != holdKey) return;
+            String options = accentsFor(lang, holdKey.ch);
+            if (options == null) return;
+            accents = holdUpper ? options.toUpperCase(Lang.locale()) : options;
+            if (accents.length() != options.length()) accents = options; // ß has no single capital
+            accentSel = 0;
+            float w = holdKey.rect.width(), h = rowHeight * 0.9f;
+            float left = holdKey.rect.left;
+            float total = w * accents.length();
+            if (left + total > getWidth()) left = Math.max(0, getWidth() - total);
+            accentBox.set(left, holdKey.rect.top - h, left + total, holdKey.rect.top);
+            Haptics.play(getContext(), Haptics.KEY);
+            invalidate();
+        }
+    };
+
+    private void startHold(int pointer, Key k) {
+        endHold();
+        if (k.type != CHAR || accentsFor(lang, k.ch) == null) return;
+        holdKey = k;
+        holdPointer = pointer;
+        holdUpper = page == LETTERS && shift > 0;
+        holdTyped = !typeOnRelease;
+        handler.postDelayed(showAccents, ACCENT_HOLD_MS);
+    }
+
+    private void endHold() {
+        handler.removeCallbacks(showAccents);
+        holdKey = null;
+        holdPointer = -1;
+        if (accents != null) {
+            accents = null;
+            invalidate();
+        }
+    }
+
+    private void moveAccent(float x, float y) {
+        int sel = (int) Math.floor((x - accentBox.left) / holdKey.rect.width());
+        sel = Math.max(0, Math.min(accents.length() - 1, sel));
+        // Sliding well below the key backs out: the plain letter stays.
+        if (y > holdKey.rect.bottom + rowHeight * 0.5f) sel = -1;
+        if (sel != accentSel) {
+            accentSel = sel;
+            invalidate();
+        }
+    }
+
+    /** Lifting the finger with the popup open: types the accent picked, if any. */
+    private void finishAccent() {
+        if (accentSel >= 0) {
+            char a = accents.charAt(accentSel);
+            if (holdTyped) {
+                deleteChars(1);
+                typeText(String.valueOf(a));
+                updateSuggestion();
+            } else {
+                // Not typed yet: type the accent as if it had its own key.
+                fire(new Key(String.valueOf(a), CHAR, a, 0, 1f, STYLE_KEY));
+            }
+        } else if (!holdTyped) {
+            fire(holdKey);
+        }
+        endHold();
+    }
+
+    private void drawAccents(Canvas canvas) {
+        if (accents == null) return;
+        float w = holdKey.rect.width();
+        fill.setColor(MOD);
+        canvas.drawRoundRect(accentBox, rowHeight * 0.08f, rowHeight * 0.08f, fill);
+        text.setTextSize(rowHeight * 0.32f);
+        text.setFakeBoldText(false);
+        for (int i = 0; i < accents.length(); i++) {
+            float l = accentBox.left + i * w;
+            if (i == accentSel) {
+                fill.setColor(PRESSED);
+                canvas.drawRoundRect(l, accentBox.top, l + w, accentBox.bottom,
+                        rowHeight * 0.08f, rowHeight * 0.08f, fill);
+            }
+            text.setColor(i == accentSel ? Color.BLACK : Color.WHITE);
+            float cy = accentBox.centerY() - (text.descent() + text.ascent()) / 2f;
+            canvas.drawText(String.valueOf(accents.charAt(i)), l + w / 2f, cy, text);
         }
     }
 
@@ -329,7 +494,9 @@ final class KeyboardView extends View {
         canvas.drawRect(k.rect.left, k.rect.top, k.rect.right - hair, k.rect.bottom - hair, fill);
         text.setColor(fg);
         text.setTextSize(size);
-        String label = k.type == SPACE && repeating != null ? "Clear all" : k.label;
+        String label = k.type == SPACE && repeating != null ? Lang.t("Clear all") : k.label;
+        if (k.type == CLOSE || k.type == ENTER) label = Lang.t(label);
+        if (k.type == SPACE && repeating == null && !"en".equals(lang)) label = Lang.name();
         if (k.type == CHAR && shift > 0 && page == LETTERS) label = label.toUpperCase();
         float cy = k.rect.centerY() - (text.descent() + text.ascent()) / 2f;
         canvas.drawText(label, k.rect.centerX(), cy, text);
@@ -344,7 +511,7 @@ final class KeyboardView extends View {
 
         text.setTextSize(h * 0.28f);
         text.setColor(Color.rgb(0x6e, 0x73, 0x7d));
-        String hint = output == null ? "Not connected to the top screen" : "Typing to top screen";
+        String hint = Lang.t(output == null ? "Not connected to the top screen" : "Typing to top screen");
         canvas.drawText(hint, x, cy - (text.descent() + text.ascent()) / 2f, text);
         x += text.measureText(hint) + h * 0.22f;
 
@@ -438,7 +605,10 @@ final class KeyboardView extends View {
                         handler.removeCallbacks(repeat);
                         handler.postDelayed(repeat, REPEAT_DELAY_MS);
                     } else if (!typeOnRelease && k.type != CLOSE) {
+                        startHold(id, k); // before fire: it notes whether shift was on
                         fire(k);
+                    } else if (typeOnRelease) {
+                        startHold(id, k);
                     }
                 }
                 invalidate();
@@ -447,10 +617,15 @@ final class KeyboardView extends View {
             case MotionEvent.ACTION_MOVE: {
                 for (int i = 0; i < ev.getPointerCount(); i++) {
                     int pid = ev.getPointerId(i);
+                    if (pid == holdPointer && accents != null) {
+                        moveAccent(ev.getX(i), ev.getY(i));
+                        continue;
+                    }
                     Key was = down.get(pid);
                     if (!typeOnRelease || (was != null && was.type == BACKSPACE)) continue; // already typed
                     Key now = keyAt(ev.getX(i), ev.getY(i));
                     if (now != was) {
+                        if (pid == holdPointer) endHold(); // slid off before the popup opened
                         down.put(pid, now);
                         invalidate();
                     }
@@ -461,6 +636,12 @@ final class KeyboardView extends View {
             case MotionEvent.ACTION_POINTER_UP: {
                 Key k = down.get(id);
                 down.remove(id);
+                if (id == holdPointer && accents != null) {
+                    finishAccent();
+                    invalidate();
+                    return true;
+                }
+                if (id == holdPointer) endHold();
                 if (k != null) {
                     if (k.type == BACKSPACE) {
                         if (repeating == k) {
@@ -697,6 +878,7 @@ final class KeyboardView extends View {
     }
 
     private void cancelTouches() {
+        endHold();
         down.clear();
         repeating = null;
         handler.removeCallbacks(repeat);

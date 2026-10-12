@@ -177,12 +177,12 @@ final class PcKeysView extends View {
         text.setFakeBoldText(false);
         text.setTextSize(h * 0.28f);
         text.setColor(Color.rgb(0x6e, 0x73, 0x7d));
-        String hint = "PC keys";
+        String hint = Lang.t("PC keys");
         canvas.drawText(hint, x, baseline(y), text);
         x += text.measureText(hint) + h * 0.22f;
         if (held.isEmpty()) {
             text.setTextSize(h * 0.3f);
-            canvas.drawText("Ctrl, Alt, Shift and Win stay held for the next key", x, baseline(y), text);
+            canvas.drawText(Lang.t("Ctrl, Alt, Shift and Win stay held for the next key"), x, baseline(y), text);
         } else {
             StringBuilder combo = new StringBuilder();
             for (Key k : held) combo.append(k.label.replace("⊞ ", "")).append(" + ");
@@ -194,7 +194,7 @@ final class PcKeysView extends View {
             text.setFakeBoldText(false);
             text.setTextSize(h * 0.28f);
             text.setColor(Color.rgb(0x8a, 0x90, 0x9b));
-            canvas.drawText("tap a key to finish the combo", x, baseline(y), text);
+            canvas.drawText(Lang.t("tap a key to finish the combo"), x, baseline(y), text);
         }
         text.setTextAlign(Paint.Align.CENTER);
     }
@@ -260,11 +260,11 @@ final class PcKeysView extends View {
         canvas.drawRect(k.rect.left, k.rect.top, k.rect.right - hair, k.rect.bottom - hair, fill);
         text.setColor(fg);
         text.setTextSize(size);
-        String sub = k.type == MODIFIER && held.contains(k) ? "held" : k.sub;
+        String sub = Lang.t(k.type == MODIFIER && held.contains(k) ? "held" : k.sub);
         if (sub == null) {
-            canvas.drawText(k.label, k.rect.centerX(), baseline(k.rect.centerY()), text);
+            canvas.drawText(Lang.t(k.label), k.rect.centerX(), baseline(k.rect.centerY()), text);
         } else {
-            canvas.drawText(k.label, k.rect.centerX(), baseline(k.rect.centerY() - rowHeight * 0.09f), text);
+            canvas.drawText(Lang.t(k.label), k.rect.centerX(), baseline(k.rect.centerY() - rowHeight * 0.09f), text);
             text.setColor(subFg);
             text.setTextSize(rowHeight * 0.12f);
             canvas.drawText(sub, k.rect.centerX(), baseline(k.rect.centerY() + rowHeight * 0.14f), text);

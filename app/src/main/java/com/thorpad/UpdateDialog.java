@@ -24,14 +24,15 @@ final class UpdateDialog {
 
         TextView title = new TextView(activity);
         final boolean same = r.version.equals(r.current);
-        title.setText(same ? "🔁 Reinstall ThorPad " + r.version + "?" : "🎉 ThorPad " + r.version + " is available");
+        title.setText(Lang.f(same ? "🔁 Reinstall ThorPad %s?" : "🎉 ThorPad %s is available", r.version));
         title.setTextSize(20);
         title.setTextColor(Color.WHITE);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         box.addView(title);
         TextView sub = new TextView(activity);
-        sub.setText((same ? "Downloads this version again and installs it over the one you have. Settings are kept"
-                : "You have " + r.current) + (r.apkSize > 0 ? " · " + (r.apkSize / 1024) + " KB download" : ""));
+        sub.setText((same ? Lang.t("Downloads this version again and installs it over the one you have. Settings are kept")
+                : Lang.f("You have %s", r.current))
+                + (r.apkSize > 0 ? " · " + Lang.f("%s KB download", r.apkSize / 1024) : ""));
         sub.setTextSize(13);
         sub.setTextColor(Color.rgb(0x8a, 0x90, 0x9b));
         sub.setPadding(0, (int) (4 * d), 0, (int) (10 * d));
@@ -54,8 +55,8 @@ final class UpdateDialog {
 
         new AlertDialog.Builder(activity)
                 .setView(box)
-                .setNegativeButton("Not now", notNow)
-                .setPositiveButton(same ? "Reinstall" : "Update", new DialogInterface.OnClickListener() {
+                .setNegativeButton(Lang.t("Not now"), notNow)
+                .setPositiveButton(Lang.t(same ? "Reinstall" : "Update"), new DialogInterface.OnClickListener() {
                     @Override public void onClick(DialogInterface dialog, int which) { updater.install(r); }
                 })
                 .show();

@@ -16,6 +16,8 @@ final class Prefs {
     static final String KEY_DIM_WHEN_IDLE = "dim_when_idle";
     static final String KEY_DOUBLE_SPACE = "double_space_period";
     static final String KEY_AUTO_CAPS = "auto_caps";
+    static final String KEY_SHOW_HINTS = "show_hints";
+    static final String KEY_LANGUAGE = "keyboard_language";
     static final String KEY_PC_MODE = "pc_mode";
     static final String KEY_PC_APPS = "pc_apps";
     /** PC controls: switch automatically for streaming apps, never, or always. */
@@ -50,6 +52,14 @@ final class Prefs {
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
     /** Turn the trackpad screen's brightness right down after a while without a touch. */
     boolean dimWhenIdle() { return sp.getBoolean(KEY_DIM_WHEN_IDLE, true); }
+    /** Gesture hints drawn along the bottom of the trackpad. */
+    boolean showHints() { return sp.getBoolean(KEY_SHOW_HINTS, false); }
+    /** Keyboard and app language: en, es, fr, de, pt or it. */
+    String language() { return sp.getString(KEY_LANGUAGE, "en"); }
+    void setLanguage(String code) {
+        sp.edit().putString(KEY_LANGUAGE, code).apply();
+        Lang.set(code);
+    }
     int pcMode() { return sp.getInt(KEY_PC_MODE, PC_AUTO); }
     void setPcMode(int mode) { sp.edit().putInt(KEY_PC_MODE, mode).apply(); }
     /** Apps the user marked as PC streaming apps, on top of the ones ThorPad knows. */

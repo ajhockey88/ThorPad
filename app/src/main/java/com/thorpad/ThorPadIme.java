@@ -276,6 +276,7 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
     @Override
     public void onCreate() {
         super.onCreate();
+        Lang.init(this);
         instance = this;
     }
 

@@ -15,12 +15,15 @@ import java.util.Set;
 final class Autocorrect {
     private static Autocorrect instance;
 
-    private final WordEngine engine = new WordEngine();
+    private final String lang;
+    private final WordEngine engine;
     private final Set<String> learned = new HashSet<>();
     private final SharedPreferences store;
     private volatile boolean loaded;
 
-    private Autocorrect(Context context) {
+    private Autocorrect(Context context, String lang) {
+        this.lang = lang;
+        engine = new WordEngine(lang);
         store = context.getSharedPreferences("thorpad_words", Context.MODE_PRIVATE);
         Set<String> saved = store.getStringSet("learned", null);
         if (saved != null) learned.addAll(saved);
@@ -28,8 +31,9 @@ final class Autocorrect {
 
     /** Shared instance; the word lists load in the background the first time. */
     static synchronized Autocorrect get(Context context) {
-        if (instance == null) {
-            final Autocorrect ac = new Autocorrect(context.getApplicationContext());
+        String lang = new Prefs(context).language();
+        if (instance == null || !instance.lang.equals(lang)) {
+            final Autocorrect ac = new Autocorrect(context.getApplicationContext(), lang);
             final Context app = context.getApplicationContext();
             instance = ac;
             new Thread(new Runnable() {
@@ -48,12 +52,13 @@ final class Autocorrect {
         try {
             // Filled in place. Nothing reads the engine until `loaded` is set, and it never
             // changes after that, so lookups need no lock.
-            engine.loadWords(context.getAssets().open("words.txt"));
+            engine.loadWords(context.getAssets().open(lang.equals("en") ? "words.txt" : "words-" + lang + ".txt"));
             loaded = true;
         } catch (Throwable e) {
             KeyboardLog.add("autocorrect: word list failed " + e);
             return;
         }
+        if (!lang.equals("en")) return; // word pairs are English only
         try {
             // Which words follow which only sharpens corrections: without it they still work.
             engine.loadPairs(context.getAssets().open("pairs.txt"));

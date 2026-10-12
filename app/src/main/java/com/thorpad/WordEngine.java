@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * What autocorrect knows about English, kept free of Android so it can be tested on a computer.
+ * What autocorrect knows about a language (English has the most), kept free of Android so it can be tested on a computer.
  *
  * A finished word is swapped for the most likely intended text. Likelihood weighs how common a
  * word is (words.txt), how well it follows the word before it (pairs.txt), and how big a slip
@@ -21,8 +21,41 @@ import java.util.Map;
  * the word before makes the mistake plain ("more then" becomes "more than").
  */
 final class WordEngine {
-    private static final String ROWS = "qwertyuiop|asdfghjkl|zxcvbnm";
-    private static final float[][] KEY_POS = new float[26][];
+    /** Letters beyond a-z that each language's words use. */
+    private static final String[][] LANGS = {
+            // code, extra letters, letter rows, one-letter words
+            {"en", "", "qwertyuiop|asdfghjkl|zxcvbnm", "ai"},
+            {"es", "ñáéíóúü", "qwertyuiop|asdfghjklñ|zxcvbnm", "ayo"},
+            {"fr", "àâæçéèêëîïôœùûüÿ", "azertyuiop|qsdfghjklm|wxcvbn", "aày"},
+            {"de", "äöüß", "qwertzuiopü|asdfghjklöä|yxcvbnm", ""},
+            {"pt", "ãáàâçéêíõóôú", "qwertyuiop|asdfghjklç|zxcvbnm", "aeoà"},
+            {"it", "àèéìíòóù", "qwertyuiop|asdfghjkl|zxcvbnm", "aeoèi"},
+    };
+    private final String lang;
+    private final boolean english;
+    /** Every letter a word may hold, a-z first. */
+    private final String alphabet;
+    private final String oneLetterWords;
+    private final Map<Character, float[]> keyPos = new HashMap<>();
+
+    WordEngine() { this("en"); }
+
+    WordEngine(String lang) {
+        String[] l = LANGS[0];
+        for (String[] x : LANGS) if (x[0].equals(lang)) l = x;
+        this.lang = l[0];
+        english = l[0].equals("en");
+        alphabet = ALPHABET + l[1];
+        oneLetterWords = l[3];
+        String[] rows = l[2].split("\\|");
+        float[] offset = {0f, 0.5f, 1.5f};
+        for (int r = 0; r < rows.length; r++) {
+            for (int i = 0; i < rows[r].length(); i++) {
+                keyPos.put(rows[r].charAt(i), new float[] {i + offset[r], r});
+            }
+        }
+    }
+
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
     /** Letters just above the space bar: hitting one instead of space joins two words. */
     private static final String NEAR_SPACE = "cvbnm";
@@ -61,13 +94,6 @@ final class WordEngine {
     };
 
     static {
-        String[] rows = ROWS.split("\\|");
-        float[] offset = {0f, 0.5f, 1.5f};
-        for (int r = 0; r < rows.length; r++) {
-            for (int i = 0; i < rows[r].length(); i++) {
-                KEY_POS[rows[r].charAt(i) - 'a'] = new float[] {i + offset[r], r};
-            }
-        }
         String[] pairs = {
                 "i", "I", "im", "I'm", "ive", "I've", "dont", "don't", "doesnt", "doesn't",
                 "didnt", "didn't", "cant", "can't", "wont", "won't", "isnt", "isn't", "arent", "aren't",
@@ -190,17 +216,31 @@ final class WordEngine {
         String lw = word.toLowerCase(Locale.US);
         for (int i = 0; i < lw.length(); i++) {
             char c = lw.charAt(i);
-            if ((c < 'a' || c > 'z') && c != '\'') return null;
+            if (alphabet.indexOf(c) < 0 && c != '\'') return null;
         }
         // A capital inside a word (iPhone, McDonald) is on purpose: leave it.
         for (int i = 1; i < word.length(); i++) {
             if (Character.isUpperCase(word.charAt(i)) && Character.isLowerCase(word.charAt(i - 1))) return null;
         }
-        String contraction = CONTRACTIONS.get(lw);
-        if (contraction != null) return fixed(word, contraction);
-        String maybe = MAYBE_CONTRACTIONS.get(lw);
-        if (maybe != null) return contractionInContext(prev, word, lw, maybe);
-        if (lw.length() < 2 || SLANG.contains(lw)) return null;
+        if (english) {
+            String contraction = CONTRACTIONS.get(lw);
+            if (contraction != null) return fixed(word, contraction);
+            String maybe = MAYBE_CONTRACTIONS.get(lw);
+            if (maybe != null) return contractionInContext(prev, word, lw, maybe);
+            if (SLANG.contains(lw)) return null;
+        } else {
+            String accented = accentFix(lw);
+            if (accented != null) return fixed(word, accented);
+            String elided = elision(lw);
+            if (elided != null) return fixed(word, elided);
+            int apo = lw.lastIndexOf('\'');
+            if (apo >= 0 && !known(lw)) {
+                // "l'homme", "dell'anno": only the word after the apostrophe can be fixed.
+                String tail = correct(prev, word.substring(apo + 1));
+                return tail == null ? null : word.substring(0, apo + 1) + tail;
+            }
+        }
+        if (lw.length() < 2) return null;
 
         if (known(lw)) return realWordFix(prev, word, lw);
 
@@ -265,7 +305,7 @@ final class WordEngine {
 
     /** A real word that is probably a slip for another: confused pairs, or a rare near-miss. */
     private String realWordFix(String prev, String word, String lw) {
-        if (prev != null) {
+        if (prev != null && english) {
             for (String[] pairOf : CONFUSED) {
                 if (!pairOf[0].equals(lw)) continue;
                 String alt = pairOf[1];
@@ -368,8 +408,8 @@ final class WordEngine {
         while (i > 0) {
             int j = pieceStart[i];
             String piece = w.substring(j, i);
-            String shown = CONTRACTIONS.containsKey(piece) ? CONTRACTIONS.get(piece) : piece;
-            if (j == 0 && MAYBE_CONTRACTIONS.containsKey(piece) && startish(prev)
+            String shown = english && CONTRACTIONS.containsKey(piece) ? CONTRACTIONS.get(piece) : piece;
+            if (english && j == 0 && MAYBE_CONTRACTIONS.containsKey(piece) && startish(prev)
                     && !piece.equals("well") && !piece.equals("were") && !piece.equals("wed")
                     && !piece.equals("shell")) {
                 shown = MAYBE_CONTRACTIONS.get(piece); // "letsgo" is "let's go"
@@ -395,8 +435,8 @@ final class WordEngine {
 
     /** How common a piece of a split word is (zipf x 10), or -1 if it can't be a piece. */
     private int pieceZ(String piece) {
-        if (piece.length() == 1 && !piece.equals("a") && !piece.equals("i")) return -1;
-        if (CONTRACTIONS.containsKey(piece) && piece.length() > 1) return 55; // "im going"
+        if (piece.length() == 1 && oneLetterWords.indexOf(piece.charAt(0)) < 0) return -1;
+        if (english && CONTRACTIONS.containsKey(piece) && piece.length() > 1) return 55; // "im going"
         int zp = z(piece);
         if (piece.length() == 2 && zp < 45) return -1; // "re", "ow": too easy to land on by chance
         return zp < 30 ? -1 : zp;
@@ -415,16 +455,17 @@ final class WordEngine {
             if (b.length() > 1) {
                 put(out, a + b.charAt(1) + b.charAt(0) + b.substring(2), base + 0.45f, knownOnly); // swapped
             }
-            for (int k = 0; k < 26; k++) {
-                char c = ALPHABET.charAt(k);
+            for (int k = 0; k < alphabet.length(); k++) {
+                char c = alphabet.charAt(k);
                 if (!b.isEmpty() && c != b.charAt(0)) {
-                    float cost = adjacent(b.charAt(0), c) ? 0.5f : 1.0f;
+                    // A missing or wrong accent is the smallest slip of all ("cafe", "esta").
+                    float cost = base(b.charAt(0)) == base(c) ? 0.3f : adjacent(b.charAt(0), c) ? 0.5f : 1.0f;
                     put(out, a + c + b.substring(1), base + cost, knownOnly);
                 }
                 boolean doubling = (!b.isEmpty() && b.charAt(0) == c) || (i > 0 && w.charAt(i - 1) == c);
                 put(out, a + c + b, base + (doubling ? 0.5f : 0.9f), knownOnly); // missed a letter
             }
-            if (!b.isEmpty()) put(out, a + '\'' + b, base + 0.4f, knownOnly); // missed apostrophe
+            if (!b.isEmpty() && english) put(out, a + '\'' + b, base + 0.4f, knownOnly); // missed apostrophe
         }
     }
 
@@ -434,9 +475,69 @@ final class WordEngine {
         if (old == null || cost < old) out.put(s, cost);
     }
 
-    private static boolean adjacent(char a, char b) {
-        if (a < 'a' || a > 'z' || b < 'a' || b > 'z') return false;
-        float[] p = KEY_POS[a - 'a'], q = KEY_POS[b - 'a'];
+    /**
+     * The word with accents added ("tambien" is "también", "nao" is "não"), when that spelling
+     * is clearly the more common one; null to leave it.
+     */
+    private String accentFix(String lw) {
+        int zt = z(lw);
+        String[] best = {null};
+        int[] bestZ = {zt < 0 ? 24 : zt + 4};
+        accentVariants(lw.toCharArray(), 0, 2, false, best, bestZ);
+        return best[0];
+    }
+
+    private void accentVariants(char[] w, int from, int changesLeft, boolean changed, String[] best, int[] bestZ) {
+        if (changed) {
+            String v = new String(w);
+            int zv = z(v);
+            if (zv > bestZ[0]) {
+                bestZ[0] = zv;
+                best[0] = v;
+            }
+        }
+        if (changesLeft == 0) return;
+        for (int i = from; i < w.length; i++) {
+            char c = w[i];
+            if (c >= 128) continue;
+            for (int k = 26; k < alphabet.length(); k++) {
+                char a = alphabet.charAt(k);
+                if (base(a) != c) continue;
+                w[i] = a;
+                accentVariants(w, i + 1, changesLeft - 1, true, best, bestZ);
+                w[i] = c;
+            }
+        }
+    }
+
+    private static final String[] FR_ELISIONS = {"qu", "c", "d", "j", "l", "m", "n", "s", "t"};
+    private static final String[] IT_ELISIONS = {"dell", "all", "nell", "sull", "dall", "quest", "l"};
+
+    /** French and Italian words that lost their apostrophe: "cest" is "c'est", "lanno" "l'anno". */
+    private String elision(String lw) {
+        String[] starts = lang.equals("fr") ? FR_ELISIONS : lang.equals("it") ? IT_ELISIONS : null;
+        if (starts == null || lw.indexOf('\'') >= 0) return null;
+        int zw = z(lw);
+        for (String p : starts) {
+            if (!lw.startsWith(p) || lw.length() <= p.length() + 1) continue;
+            String rest = lw.substring(p.length());
+            if ("aeiouhéèêàâîôûœy".indexOf(rest.charAt(0)) < 0) continue; // elision is before a vowel
+            String fixedRest = z(rest) >= 35 ? rest : accentFix(rest);
+            // Unless the word as typed is a real one about as common ("des", "lent").
+            if (fixedRest != null && z(fixedRest) >= 35 && z(fixedRest) - zw >= 15) return p + "'" + fixedRest;
+        }
+        return null;
+    }
+
+    /** The letter without its accent: é is e. */
+    private static char base(char c) {
+        if (c < 128) return c;
+        return java.text.Normalizer.normalize(String.valueOf(c), java.text.Normalizer.Form.NFD).charAt(0);
+    }
+
+    private boolean adjacent(char a, char b) {
+        float[] p = keyPos.get(a), q = keyPos.get(b);
+        if (p == null || q == null) return false;
         float dx = p[0] - q[0], dy = p[1] - q[1];
         return dx * dx + dy * dy <= 1.6f;
     }

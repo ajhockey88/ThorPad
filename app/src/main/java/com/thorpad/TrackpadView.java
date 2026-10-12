@@ -125,7 +125,7 @@ final class TrackpadView extends View {
         rect.set(inset, inset, getWidth() - inset, getHeight() - inset);
         border.setColor(touching ? Color.argb(90, 120, 200, 255) : Color.argb(40, 255, 255, 255));
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
-        drawHints(canvas);
+        if (prefs.showHints()) drawHints(canvas);
     }
 
     private static final String[] HINT_TITLES = {"☝️ One finger", "✌️ Two fingers", "🤟 Three fingers"};
@@ -159,18 +159,18 @@ final class TrackpadView extends View {
             label.setTextSize(20 * u);
             label.setColor(Color.argb(140, 120, 200, 255));
             float y = top + 20 * u;
-            canvas.drawText(HINT_TITLES[c], x, y, label);
+            canvas.drawText(Lang.t(HINT_TITLES[c]), x, y, label);
             label.setFakeBoldText(false);
             label.setTextSize(19 * u);
             y += titleH - 20 * u + 19 * u;
             String[] hints = (pcHints ? PC_HINTS : HINTS)[c];
             for (int i = 0; i < hints.length; i += 2) {
-                String key = hints[i] + ": ";
+                String key = Lang.t(hints[i]) + ": ";
                 label.setColor(Color.argb(140, 255, 255, 255));
                 canvas.drawText(key, x, y, label);
                 float w = label.measureText(key);
                 label.setColor(Color.argb(97, 255, 255, 255));
-                canvas.drawText(hints[i + 1], x + w, y, label);
+                canvas.drawText(Lang.t(hints[i + 1]), x + w, y, label);
                 y += rowH;
             }
         }

@@ -72,14 +72,14 @@ final class Updater {
     void check(final boolean reinstall) {
         background(new Task() {
             @Override public void run() throws Exception {
-                post("Checking for updates…", false);
+                post(Lang.t("Checking for updates…"), false);
                 JSONObject release = new JSONObject(readAll(open(LATEST)));
                 String tag = release.optString("tag_name", "");
                 String latest = tag.startsWith("v") ? tag.substring(1) : tag;
                 String mine = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
                 int cmp = compareVersions(latest, mine);
                 if (cmp < 0 || (cmp == 0 && !reinstall)) {
-                    post("ThorPad " + mine + " is up to date.", true);
+                    post(Lang.f("ThorPad %s is up to date.", mine), true);
                     return;
                 }
                 String url = null;
@@ -93,7 +93,7 @@ final class Updater {
                     }
                 }
                 if (url == null) {
-                    post("Version " + latest + " is out, but its release has no APK yet.", true);
+                    post(Lang.f("Version %s is out, but its release has no APK yet.", latest), true);
                     return;
                 }
                 String notes = release.optString("body", "");
@@ -105,8 +105,7 @@ final class Updater {
                     }
                 }
                 final Release r = new Release(latest, mine, notes, url, size);
-                post(cmp == 0 ? "Ready to reinstall ThorPad " + latest + "."
-                        : "ThorPad " + latest + " is available.", true);
+                post(Lang.f(cmp == 0 ? "Ready to reinstall ThorPad %s." : "ThorPad %s is available.", latest), true);
                 main.post(new Runnable() {
                     @Override public void run() { listener.onUpdateAvailable(r); }
                 });
@@ -121,10 +120,10 @@ final class Updater {
                 File apk = new File(context.getCacheDir(), "ThorPad-update.apk");
                 download(r.apkUrl, apk, r.version);
                 if (ShizukuClient.hasPermission()) {
-                    post("Installing " + r.version + "… ThorPad will close and can be reopened.", false);
+                    post(Lang.f("Installing %s… ThorPad will close and can be reopened.", r.version), false);
                     if (installWithShizuku(apk)) return; // ThorPad is replaced and restarted
                 }
-                post("Installing " + r.version + "… confirm on the install prompt.", true);
+                post(Lang.f("Installing %s… confirm on the install prompt.", r.version), true);
                 installWithPrompt(apk);
             }
         });
@@ -165,7 +164,7 @@ final class Updater {
                 try {
                     task.run();
                 } catch (Exception e) {
-                    post("Update failed: " + (e.getMessage() != null ? e.getMessage() : e), true);
+                    post(Lang.f("Update failed: %s", e.getMessage() != null ? e.getMessage() : e), true);
                 }
             }
         }, "ThorPad update").start();
@@ -187,7 +186,7 @@ final class Updater {
                 int pct = total > 0 ? (int) (done * 100 / total) : -1;
                 if (pct != lastPct && pct >= 0) {
                     lastPct = pct;
-                    post("Downloading " + version + "… " + pct + "%", false);
+                    post(Lang.f("Downloading %s… %s%%", version, pct), false);
                 }
             }
         } finally {
@@ -212,7 +211,7 @@ final class Updater {
             String result = readAll(new ParcelFileDescriptor.AutoCloseInputStream(p.getInputStream()));
             p.waitFor();
             if (result.contains("Success")) return true;
-            post("Shizuku couldn't install it (" + result.trim() + "), trying Android's installer.", false);
+            post(Lang.f("Shizuku couldn't install it (%s), trying Android's installer.", result.trim()), false);
         } catch (Exception e) {
             // Fall back to the normal install prompt.
         }
