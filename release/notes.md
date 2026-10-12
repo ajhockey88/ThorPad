@@ -8,6 +8,7 @@
 - 📖 **Spelling in every language:** each language has its own dictionary, which also adds missing accents (`tambien` → `también`, `nao` → `não`, `fur` → `für`) and French and Italian apostrophes (`cest` → `c'est`, `lanno` → `l'anno`)
 - 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
 - 🚀 **One-tap setup:** a first-run checklist with four steps, each with a button that does the work. ThorPad downloads and installs Shizuku for you, opens Shizuku and Wireless debugging, asks for Shizuku's permission, and switches Android's keyboard to ThorPad. Each step ticks itself off. No Shizuku? One tap switches the checklist to touch mode
+- 🔋 **Battery saver: 60 Hz:** a new switch in Settings > Trackpad runs the bottom screen at 60 Hz while ThorPad is open, and the PC-app check in Auto mode now only does real work after an app switch
 - 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider. Haptics strength opens a vertical slider, and every Settings page has a Back button at the top right
 
 ---

@@ -177,6 +177,7 @@ public class SettingsActivity extends Activity {
                         Prefs.KEY_SWAP_SCREENS, prefs.swapScreens(), true);
                 toggle("Dim when idle", "After 30 seconds without a touch, to save battery; the first touch only wakes it",
                         Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
+                toggle("Battery saver: 60 Hz", refreshNote(), Prefs.KEY_LOW_REFRESH, prefs.lowRefresh(), false);
                 toggle("Gesture hints", "Show the gesture cheat sheet on the trackpad",
                         Prefs.KEY_SHOW_HINTS, prefs.showHints(), false);
                 break;
@@ -312,6 +313,16 @@ public class SettingsActivity extends Activity {
     }
 
     // ---- Keyboard language ---------------------------------------------------------------------
+
+    /** Says what the 60 Hz switch would change on this screen, which may already run at 60 Hz. */
+    private String refreshNote() {
+        android.view.Display disp = getDisplay();
+        if (disp == null) return Lang.t("Runs the trackpad screen at 60 Hz while ThorPad is open");
+        float max = 0;
+        for (android.view.Display.Mode m : disp.getSupportedModes()) max = Math.max(max, m.getRefreshRate());
+        if (max < 65) return Lang.t("This screen already runs at 60 Hz, so this changes nothing here");
+        return Lang.f("Runs this screen at 60 Hz instead of up to %s Hz while ThorPad is open", Math.round(max));
+    }
 
     private void languagePicker() {
         LinearLayout c = card();
