@@ -974,15 +974,15 @@ public class TrackpadActivity extends Activity
         if (mouse.isReady()) {
             out = mouse;
             if (service != null) service.hidePointer(); // Android draws the real mouse cursor
-            modeLabel.setText(Lang.t("Mouse mode"));
+            modeLabel.setText("Android"); // the real mouse: the usual case, so no need to say so
         } else if (service != null && !shizukuReady) {
             out = service;
             service.showPointer();
-            modeLabel.setText(Lang.t("Touch mode"));
+            modeLabel.setText("Android · " + Lang.t("Touch mode"));
         } else if (service != null && mouseError != null) {
             out = service;
             service.showPointer();
-            modeLabel.setText(Lang.t("Touch mode (virtual mouse failed)"));
+            modeLabel.setText("Android · " + Lang.t("Touch mode (virtual mouse failed)"));
         } else {
             out = null; // waiting for the virtual mouse, or nothing set up yet
             modeLabel.setText(shizukuReady && mouseError == null ? Lang.t("Starting mouse…") : "");
@@ -993,8 +993,8 @@ public class TrackpadActivity extends Activity
         pad.setPcHints(pc);
         modeButton.setText(modeButtonText());
         if (pc && out == mouse) {
-            modeLabel.setText(Lang.t("Mouse mode · PC controls") + (new Prefs(this).pcMode() == Prefs.PC_AUTO
-                    && topLabel != null ? " (" + topLabel + ")" : ""));
+            modeLabel.setText("PC" + (new Prefs(this).pcMode() == Prefs.PC_AUTO
+                    && topLabel != null ? " · " + topLabel : ""));
         }
         updateKeyboardDevice();
 

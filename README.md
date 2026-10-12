@@ -14,7 +14,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 
 | 🖱️ Trackpad, with the menu hint | 👇 Swipe down for the menu |
 |---|---|
-| <img src="docs/screenshots/trackpad.png?v=1.9" width="400" alt="Trackpad screen with the swipe-down hint"> | <img src="docs/screenshots/menu.png?v=1.9" width="400" alt="Floating menu bar at the top of the trackpad"> |
+| <img src="docs/screenshots/trackpad.png?v=1.9.5" width="400" alt="Trackpad screen with the swipe-down hint"> | <img src="docs/screenshots/menu.png?v=1.9.5" width="400" alt="Floating menu bar at the top of the trackpad"> |
 | ⌨️ Keyboard with autocorrect | 🌐 Keyboard in Spanish, hold a letter for accents |
 | <img src="docs/screenshots/keyboard.png?v=1.9" width="400" alt="Keyboard with an autocorrect suggestion"> | <img src="docs/screenshots/keyboard-spanish.png?v=1.9" width="400" alt="Spanish keyboard with the accent popup open"> |
 | 🔣 Numbers and symbols | 🧹 Hold ⌫ for Clear all |
@@ -24,7 +24,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | ⌨️ Keyboard settings and language | ⌨️ Use ThorPad keyboard |
 | <img src="docs/screenshots/keyboard-settings.png?v=1.9" width="400" alt="Keyboard settings with the language picker"> | <img src="docs/screenshots/choose-keyboard.png?v=1.9" width="400" alt="Choosing ThorPad keyboard"> |
 | ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
-| <img src="docs/screenshots/mode-menu.png?v=1.9" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9.3" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt and Shift"> |
+| <img src="docs/screenshots/mode-menu.png?v=1.9.5" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9.3" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt and Shift"> |
 | 👆 Gestures in Settings | 🖥️ Gestures in PC mode |
 | <img src="docs/screenshots/gestures.png?v=1.9.4" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9.4" width="400" alt="Gestures page in Settings, PC tab"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
