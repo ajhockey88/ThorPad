@@ -12,19 +12,21 @@
 
 Everything happens on the Thor's bottom screen (1240 × 1080).
 
-| 🖱️ Trackpad | ⌨️ Keyboard with autocorrect |
+| 🖱️ Trackpad, with the menu hint | 👇 Swipe down for the menu |
 |---|---|
-| <img src="docs/screenshots/trackpad.png" width="400" alt="Trackpad screen"> | <img src="docs/screenshots/keyboard.png" width="400" alt="Keyboard with an autocorrect suggestion"> |
-| 🔣 Numbers and symbols | ⚙️ Settings |
-| <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/settings.png" width="400" alt="Settings screen"> |
-| 🧹 Hold ⌫ for Clear all | 📳 Haptics settings |
-| <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings"> |
-| ⌨️ Use ThorPad keyboard | 🎉 Update available, with what's new |
-| <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> | <img src="docs/screenshots/update-available.png" width="400" alt="Update available screen with the release notes"> |
-| 🖥️ PC keys (for Moonlight) | ✨ Mode menu: Auto, Android or PC |
-| <img src="docs/screenshots/pc-keys.png" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> | <img src="docs/screenshots/mode-menu.png" width="400" alt="Mode menu with Auto, Android, PC and Go home"> |
-| 🚀 First-run setup | |
-| <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> | |
+| <img src="docs/screenshots/trackpad.png" width="400" alt="Trackpad screen with the swipe-down hint"> | <img src="docs/screenshots/menu.png" width="400" alt="Floating menu bar at the top of the trackpad"> |
+| ⌨️ Keyboard with autocorrect | 🌐 Keyboard in Spanish, hold a letter for accents |
+| <img src="docs/screenshots/keyboard.png" width="400" alt="Keyboard with an autocorrect suggestion"> | <img src="docs/screenshots/keyboard-spanish.png" width="400" alt="Spanish keyboard with the accent popup open"> |
+| 🔣 Numbers and symbols | 🧹 Hold ⌫ for Clear all |
+| <img src="docs/screenshots/symbols.png" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/clear-all.png" width="400" alt="Keyboard with backspace held and the red Clear all key"> |
+| ⚙️ Settings | 📳 Haptics, with the strength slider |
+| <img src="docs/screenshots/settings.png" width="400" alt="Settings screen with side tabs"> | <img src="docs/screenshots/haptics.png" width="400" alt="Haptics settings with the strength slider open"> |
+| ⌨️ Keyboard settings and language | ⌨️ Use ThorPad keyboard |
+| <img src="docs/screenshots/keyboard-settings.png" width="400" alt="Keyboard settings with the language picker"> | <img src="docs/screenshots/choose-keyboard.png" width="400" alt="Choosing ThorPad keyboard"> |
+| ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
+| <img src="docs/screenshots/mode-menu.png" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> |
+| 🎉 Update available, with what's new | 🚀 First-run setup |
+| <img src="docs/screenshots/update-available.png" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png" width="400" alt="Setup screen"> |
 
 ## 👆 Gestures
 
