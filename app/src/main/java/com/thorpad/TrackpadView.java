@@ -126,6 +126,18 @@ final class TrackpadView extends View {
         border.setColor(touching ? Color.argb(90, 120, 200, 255) : Color.argb(40, 255, 255, 255));
         canvas.drawRoundRect(rect, 18 * density, 18 * density, border);
         if (prefs.showHints()) drawHints(canvas);
+        if (switcher) {
+            float u = getWidth() / 1240f;
+            label.setTextAlign(Paint.Align.CENTER);
+            label.setFakeBoldText(false);
+            label.setTextSize(30 * u);
+            label.setColor(Color.argb(200, 191, 230, 255));
+            canvas.drawText(Lang.t("App switcher"), getWidth() / 2f, getHeight() / 2f - 24 * u, label);
+            label.setTextSize(24 * u);
+            label.setColor(Color.argb(140, 255, 255, 255));
+            canvas.drawText(Lang.t("Swipe to pick a window, tap to open it, three fingers up to close"),
+                    getWidth() / 2f, getHeight() / 2f + 22 * u, label);
+        }
     }
 
     private static final String[] HINT_TITLES = {"☝️ One finger", "✌️ Two fingers", "🤟 Three fingers"};
@@ -176,8 +188,88 @@ final class TrackpadView extends View {
         }
     }
 
+    // ---- PC app switcher ------------------------------------------------------------------
+    // After three fingers up opens Windows' app switcher (Ctrl+Alt+Tab), the trackpad drives it:
+    // a one-finger swipe moves one app over (arrow keys), a tap opens the selected window
+    // (Enter), and three fingers up again closes it (Esc). It lets go by itself after a while.
+
+    private static final long SWITCHER_TIMEOUT_MS = 20000;
+    private boolean switcher, switcherMoved;
+    private int switcherPointers;
+    private float switcherX, switcherY;
+    private long switcherDownAt;
+    private final Runnable switcherTimeout = new Runnable() {
+        @Override public void run() { setSwitcher(false); }
+    };
+
+    private void setSwitcher(boolean on) {
+        switcher = on;
+        handler.removeCallbacks(switcherTimeout);
+        if (on) handler.postDelayed(switcherTimeout, SWITCHER_TIMEOUT_MS);
+        invalidate();
+    }
+
+    private boolean switcherTouch(MotionEvent ev) {
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                switcherDownAt = SystemClock.uptimeMillis();
+                switcherX = ev.getX();
+                switcherY = ev.getY();
+                switcherMoved = false;
+                switcherPointers = 1;
+                handler.removeCallbacks(switcherTimeout);
+                handler.postDelayed(switcherTimeout, SWITCHER_TIMEOUT_MS);
+                return true;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                switcherPointers = Math.max(switcherPointers, ev.getPointerCount());
+                if (ev.getPointerCount() == 3) {
+                    switcherX = (ev.getX(0) + ev.getX(1) + ev.getX(2)) / 3f;
+                    switcherY = (ev.getY(0) + ev.getY(1) + ev.getY(2)) / 3f;
+                }
+                return true;
+            case MotionEvent.ACTION_MOVE: {
+                if (switcherMoved) return true;
+                int n = ev.getPointerCount();
+                float x = 0, y = 0;
+                for (int i = 0; i < n; i++) {
+                    x += ev.getX(i);
+                    y += ev.getY(i);
+                }
+                float dx = x / n - switcherX, dy = y / n - switcherY;
+                float far = SWIPE_DP * density;
+                if (n == 3 && switcherPointers == 3 && -dy > far && -dy > 1.5f * Math.abs(dx)) {
+                    pc.pcKeys(VirtualKeyboard.KEY_ESC); // three fingers up again: close it
+                    buzz(Haptics.THREE_FINGER);
+                    switcherMoved = true;
+                    setSwitcher(false);
+                } else if (n == 1 && switcherPointers == 1 && (Math.abs(dx) > far * 0.6f || Math.abs(dy) > far * 0.6f)) {
+                    boolean sideways = Math.abs(dx) >= Math.abs(dy);
+                    pc.pcKeys(sideways ? (dx > 0 ? VirtualKeyboard.KEY_RIGHT : VirtualKeyboard.KEY_LEFT)
+                            : (dy > 0 ? VirtualKeyboard.KEY_DOWN : VirtualKeyboard.KEY_UP));
+                    buzz(Haptics.NAVIGATE);
+                    switcherMoved = true;
+                }
+                return true;
+            }
+            case MotionEvent.ACTION_UP:
+                if (!switcherMoved && switcherPointers == 1
+                        && SystemClock.uptimeMillis() - switcherDownAt < 350) {
+                    pc.pcKeys(VirtualKeyboard.KEY_ENTER); // open the selected window
+                    buzz(Haptics.CLICK);
+                    setSwitcher(false);
+                }
+                return true;
+            default:
+                return true;
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (switcher) {
+            if (pc()) return switcherTouch(ev);
+            setSwitcher(false); // left PC mode meanwhile
+        }
         PadOutput s = output;
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -234,8 +326,10 @@ final class TrackpadView extends View {
                     } else if (Math.abs(dy) > SWIPE_DP * density && Math.abs(dy) > 1.5f * Math.abs(dx)) {
                         if (pc()) {
                             if (dy < 0) {
-                                // Windows' app switcher, which stays open to pick from.
+                                // Windows' app switcher, which stays open: one-finger swipes then
+                                // move through it and a tap opens the window (see switcherTouch).
                                 pc.pcKeys(VirtualKeyboard.KEY_LCTRL, VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_TAB);
+                                setSwitcher(true);
                             } else {
                                 // Minimize: Alt+Space opens the window menu, N picks Minimize.
                                 pc.pcKeys(VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_SPACE);

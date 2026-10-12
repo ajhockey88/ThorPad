@@ -58,7 +58,7 @@ only, as the shortcuts go through the virtual keyboard):
 | On the bottom screen | On the PC |
 |---|---|
 | 👉 / 👈 Two fingers swiped right / left | Back / forward (Alt+← / Alt+→, which every PC browser understands) |
-| 🤟 Three fingers swiped up | App switcher that stays open to pick from (Ctrl+Alt+Tab) |
+| 🤟 Three fingers swiped up | Opens the app switcher (Ctrl+Alt+Tab). While it's open, swipe one finger left or right to move between windows and tap to open one; three fingers up again closes it |
 | 🤟 Three fingers swiped down | Minimizes the window (Alt+Space, then N) |
 | 🤟 Three fingers swiped left or right | Next window (Alt+Esc) |
 

@@ -681,5 +681,12 @@ final class Lang {
         e("app switcher", "selector de apps", "sélecteur d'apps", "App-Umschalter", "seletor de apps", "selettore app");
         e("minimize", "minimizar", "réduire", "minimieren", "minimizar", "riduci");
         e("next window", "siguiente ventana", "fenêtre suivante", "nächstes Fenster", "janela seguinte", "finestra successiva");
+        e("App switcher", "Selector de apps", "Sélecteur d'apps", "App-Umschalter", "Seletor de apps", "Selettore app");
+        e("Swipe to pick a window, tap to open it, three fingers up to close",
+                "Desliza para elegir una ventana, toca para abrirla, tres dedos arriba para cerrar",
+                "Balayez pour choisir une fenêtre, touchez pour l'ouvrir, trois doigts vers le haut pour fermer",
+                "Wischen wählt ein Fenster, Tippen öffnet es, drei Finger nach oben schließen",
+                "Deslize para escolher uma janela, toque para abri-la, três dedos para cima para fechar",
+                "Scorri per scegliere una finestra, tocca per aprirla, tre dita in su per chiudere");
     }
 }

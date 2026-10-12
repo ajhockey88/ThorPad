@@ -11,7 +11,7 @@ final class VirtualKeyboard extends UinputDevice implements KeyOutput {
     private static final int KEY_BACKSPACE = 14;
     /** Linux key codes for PC keys and shortcuts. */
     static final int KEY_ESC = 1, KEY_TAB = 15, KEY_D = 32, KEY_LEFTALT = 56, KEY_LEFTMETA = 125,
-            KEY_LCTRL = 29, KEY_LSHIFT = 42, KEY_SPACE = 57, KEY_N = 49, KEY_F4 = 62, KEY_SYSRQ = 99,
+            KEY_LCTRL = 29, KEY_LSHIFT = 42, KEY_SPACE = 57, KEY_N = 49, KEY_ENTER = 28, KEY_F4 = 62, KEY_SYSRQ = 99,
             KEY_HOME = 102, KEY_UP = 103, KEY_PAGEUP = 104, KEY_LEFT = 105, KEY_RIGHT = 106,
             KEY_END = 107, KEY_DOWN = 108, KEY_PAGEDOWN = 109, KEY_INSERT = 110, KEY_DELETE = 111,
             KEY_BKSP = 14;
