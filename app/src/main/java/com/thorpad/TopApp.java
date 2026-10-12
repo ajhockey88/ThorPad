@@ -116,6 +116,53 @@ final class TopApp {
         }, "ThorPad close app").start();
     }
 
+    private static final Pattern RECENT = Pattern.compile("#(\\d+) type=(\\w+) [AI]=\\d+:([\\w.]+)");
+
+    /**
+     * Clears recent apps, like Clear all on the recent apps screen: every app task goes, and its
+     * app is stopped. ThorPad, the home screen, the system UI and Shizuku stay.
+     */
+    static void closeAll(final Context context) {
+        final String home = homePackage(context);
+        final String me = context.getPackageName();
+        new Thread(new Runnable() {
+            @Override public void run() {
+                StringBuilder cmd = new StringBuilder();
+                java.util.Set<String> apps = new java.util.LinkedHashSet<>();
+                // Each "* Recent #n: Task{… #id type=… A=uid:affinity …}" line starts a task; its
+                // realActivity line names the app. The affinity is only a fallback: apps (ThorPad
+                // included) can set their own.
+                java.util.List<String[]> tasks = new java.util.ArrayList<>();
+                for (String line : output("dumpsys activity recents").split("\n")) {
+                    String t = line.trim();
+                    if (t.startsWith("* Recent #")) {
+                        Matcher m = RECENT.matcher(t);
+                        tasks.add(m.find() ? new String[] {m.group(1), m.group(2), m.group(3)} : null);
+                    } else if (t.startsWith("realActivity=") && !tasks.isEmpty() && tasks.get(tasks.size() - 1) != null) {
+                        String c = t.substring(t.indexOf('=') + 1).replace("{", "");
+                        int slash = c.indexOf('/');
+                        if (slash > 0) tasks.get(tasks.size() - 1)[2] = c.substring(0, slash);
+                    }
+                }
+                for (String[] task : tasks) {
+                    if (task == null || !task[1].equals("standard")) continue;
+                    String pkg = task[2];
+                    if (pkg.startsWith(me) || pkg.equals(home) || pkg.equals("com.android.systemui")) continue;
+                    cmd.append("am stack remove ").append(task[0]).append(" ; cmd activity remove-task ")
+                            .append(task[0]).append(" ; ");
+                    if (!pkg.equals(SetupPanel.SHIZUKU)) apps.add(pkg);
+                }
+                for (String pkg : apps) cmd.append("am force-stop ").append(pkg).append(" ; ");
+                if (cmd.length() == 0) {
+                    toast(context, Lang.t("No recent apps to close"));
+                    return;
+                }
+                ShizukuClient.runShell(cmd.toString());
+                toast(context, Lang.t("Closed all recent apps"));
+            }
+        }, "ThorPad close all").start();
+    }
+
     /**
      * The resumed (on-screen) activity of the given display in a dumpsys activity dump. Android
      * versions word this differently, so any "ResumedActivity" line in that display's section

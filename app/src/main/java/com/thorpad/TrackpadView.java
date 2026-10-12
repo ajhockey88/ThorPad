@@ -132,7 +132,7 @@ final class TrackpadView extends View {
     private static final String[][] HINTS = {
             {"Slide", "move", "Tap", "click", "Hold", "right click", "Tap, hold, slide", "drag"},
             {"Up / down", "scroll", "Tap", "right click", "Swipe right", "back", "Swipe left", "forward"},
-            {"Swipe up", "recent apps", "Swipe down", "close app"},
+            {"Swipe up", "recent apps", "Swipe down", "close app", "Tap", "close all apps"},
     };
     private static final String[][] PC_HINTS = {
             HINTS[0],
@@ -344,6 +344,13 @@ final class TrackpadView extends View {
                 if (state == DRAGGING) {
                     if (s != null) s.dragEnd();
                     buzz(Haptics.DRAG_END);
+                } else if (state == THREE_FINGER && maxPointers == 3 && held < 350) {
+                    // Three-finger tap: clear recent apps, like Clear all there. Not in PC mode,
+                    // where it would close the streaming app itself.
+                    if (!pc() && ShizukuClient.hasPermission()) {
+                        TopApp.closeAll(getContext());
+                        buzz(Haptics.THREE_FINGER);
+                    }
                 } else if (state == TWO_FINGER && !scrolling && !swiping && maxPointers == 2 && held < 350) {
                     if (s != null) s.twoFingerTap();
                     buzz(Haptics.RIGHT_CLICK);

@@ -667,5 +667,16 @@ final class Lang {
                 "Nelle impostazioni di accessibilità, attiva ThorPad trackpad");
         e("Install failed: %s", "La instalación falló: %s", "Échec de l'installation : %s",
                 "Installation fehlgeschlagen: %s", "A instalação falhou: %s", "Installazione non riuscita: %s");
+        e("close all apps", "cerrar todas", "tout fermer", "alle schließen", "fechar todas", "chiudi tutte");
+        e("Three-finger tap: close all recent apps",
+                "Toque con tres dedos: cerrar todas las apps recientes",
+                "Appui à trois doigts : fermer toutes les apps récentes",
+                "Mit drei Fingern tippen: alle letzten Apps schließen",
+                "Toque com três dedos: fechar todas as apps recentes",
+                "Tocco con tre dita: chiudi tutte le app recenti");
+        e("No recent apps to close", "No hay apps recientes que cerrar", "Aucune app récente à fermer",
+                "Keine letzten Apps zum Schließen", "Não há apps recentes para fechar", "Nessuna app recente da chiudere");
+        e("Closed all recent apps", "Se cerraron todas las apps recientes", "Toutes les apps récentes sont fermées",
+                "Alle letzten Apps geschlossen", "Todas as apps recentes foram fechadas", "Tutte le app recenti sono state chiuse");
     }
 }

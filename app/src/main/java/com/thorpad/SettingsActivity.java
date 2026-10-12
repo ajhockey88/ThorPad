@@ -213,7 +213,8 @@ public class SettingsActivity extends Activity {
                         + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
                         + "• Two-finger tap: back\n"
                         + "• Swipe down from the top edge: show the menu buttons");
-                help = help.substring(help.indexOf('\n', 1) + 1);
+                help = help.substring(help.indexOf('\n', 1) + 1)
+                        + "\n• " + Lang.t("Three-finger tap: close all recent apps");
                 TextView t = plain(help, 15, Color.rgb(0xd8, 0xdc, 0xe3));
                 t.setLineSpacing(6 * d, 1f);
                 c.addView(t);

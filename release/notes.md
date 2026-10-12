@@ -8,6 +8,7 @@
 - 📖 **Spelling in every language:** each language has its own dictionary, which also adds missing accents (`tambien` → `también`, `nao` → `não`, `fur` → `für`) and French and Italian apostrophes (`cest` → `c'est`, `lanno` → `l'anno`)
 - 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
 - 🚀 **One-tap setup:** a first-run checklist with four steps, each with a button that does the work. ThorPad downloads and installs Shizuku for you, opens Shizuku and Wireless debugging, asks for Shizuku's permission, and switches Android's keyboard to ThorPad. Each step ticks itself off. No Shizuku? One tap switches the checklist to touch mode
+- 🤟 **Three-finger tap closes all apps:** like **Clear all** in recent apps, it closes every app except ThorPad and the home screen (mouse mode; off in PC mode so it never closes your stream)
 - 🔋 **Lighter on the battery in Auto mode:** the check for Moonlight and other PC apps now only does real work after an app switch
 - 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider. Haptics strength opens a vertical slider, and every Settings page has a Back button at the top right
 
@@ -16,7 +17,7 @@
 ## 🖱️ What ThorPad does
 ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for the top screen.
 - 🖱️ **Real mouse:** with Shizuku, Android and every app see a real USB mouse with a scroll wheel, so GameNative and Winlator games work; touch mode works without it
-- 👆 **Gestures:** tap to click, hold or two-finger tap to right click, tap-and-slide to drag, two fingers to scroll or go back and forward, three fingers for recent apps and closing the top app
+- 👆 **Gestures:** tap to click, hold or two-finger tap to right click, tap-and-slide to drag, two fingers to scroll or go back and forward, three fingers for recent apps, closing the top app, or a tap to close them all
 - 👇 **Out of the way:** the whole screen is trackpad, with the menu a swipe down from the top
 - ⌨️ **Full-screen keyboard:** big edge-to-edge keys, hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard, even when ThorPad itself is closed
 - 🌐 **Six languages:** English, Spanish, French, German, Portuguese and Italian, with accents on a long press

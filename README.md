@@ -40,6 +40,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | 👈 Two fingers swiped left | Forward (the mouse's forward side button; mouse mode only) |
 | 🤟 Three fingers swiped up | Recent apps |
 | 🤟 Three fingers swiped down | Closes the top-screen app (mouse mode, through Shizuku); Home in touch mode |
+| 🤟 Three-finger tap | Closes all recent apps, like **Clear all** in recent apps (mouse mode, through Shizuku; not in PC mode) |
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 
 The whole bottom screen is trackpad. **Swipe down from the top edge** (where the small handle is) to
