@@ -656,8 +656,14 @@ public class TrackpadActivity extends Activity
         restartIdleTimer();
     }
 
-    /** Checked once each time ThorPad starts, not every time the trackpad comes back. */
-    private static boolean updateChecked;
+    /**
+     * Checked each time ThorPad opens (a new screen after Close), and when it comes back after an
+     * hour or more. Android keeps ThorPad's process around after Close, so this can't be once
+     * per process.
+     */
+    private boolean updateChecked;
+    private static long lastUpdateCheckAt;
+    private static final long UPDATE_RECHECK_MS = 60 * 60 * 1000;
     private static final String SKIPPED_UPDATE = "skipped_update";
 
     /**
@@ -665,8 +671,10 @@ public class TrackpadActivity extends Activity
      * now" stops it asking again about that version; Settings > Check for updates still offers it.
      */
     private void quietUpdateCheck() {
-        if (updateChecked) return;
+        long now = SystemClock.elapsedRealtime();
+        if (updateChecked && lastUpdateCheckAt != 0 && now - lastUpdateCheckAt < UPDATE_RECHECK_MS) return;
         updateChecked = true;
+        lastUpdateCheckAt = now;
         final android.content.SharedPreferences sp = new Prefs(this).raw();
         final boolean[] installing = {false};
         final Updater[] updater = new Updater[1];
