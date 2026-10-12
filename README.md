@@ -6,7 +6,7 @@
 
 🎮 A simple trackpad with bonus features designed for the AYN Thor.
 
-🖱️ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse pointer on the top screen, plus a full-screen keyboard ⌨️ for typing.
+🖱️ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse pointer on the top screen, plus a full-screen smart keyboard ⌨️ for typing.
 
 ## 📸 Screens
 
