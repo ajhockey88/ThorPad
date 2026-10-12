@@ -696,5 +696,28 @@ final class Lang {
                 "Ctrl, Alt e Shift ficam premidas para a tecla seguinte",
                 "Ctrl, Alt e Maiusc restano premuti per il tasto successivo");
         e("Minimize", "Minimizar", "Réduire", "Minimieren", "Minimizar", "Riduci");
+        e("PC (Moonlight)", "PC (Moonlight)", "PC (Moonlight)", "PC (Moonlight)", "PC (Moonlight)", "PC (Moonlight)");
+        e("One finger", "Un dedo", "Un doigt", "Ein Finger", "Um dedo", "Un dito");
+        e("Top edge", "Borde superior", "Bord du haut", "Oberer Rand", "Borda superior", "Bordo superiore");
+        e("Two fingers", "Dos dedos", "Deux doigts", "Zwei Finger", "Dois dedos", "Due dita");
+        e("Three fingers", "Tres dedos", "Trois doigts", "Drei Finger", "Três dedos", "Tre dita");
+        e("Move", "Mover", "Déplacer", "Bewegen", "Mover", "Muovi");
+        e("Long press", "Pulsación larga", "Appui long", "Langes Drücken", "Toque longo", "Pressione lunga");
+        e("Tap, then slide", "Toca y desliza", "Touchez puis glissez", "Tippen, dann ziehen", "Toque e deslize", "Tocca e scorri");
+        e("touch again, then slide", "vuelve a tocar y desliza", "retouchez puis glissez", "erneut berühren, dann ziehen", "toque de novo e deslize", "tocca di nuovo e scorri");
+        e("Drag", "Arrastrar", "Glisser", "Ziehen", "Arrastar", "Trascina");
+        e("from the top edge", "desde el borde superior", "depuis le bord du haut", "vom oberen Rand", "a partir da borda superior", "dal bordo superiore");
+        e("Menu", "Menú", "Menu", "Menü", "Menu", "Menu");
+        e("Scroll", "Desplazar", "Défiler", "Scrollen", "Deslocar", "Scorri");
+        e("Forward", "Adelante", "Suivant", "Vorwärts", "Avançar", "Avanti");
+        e("sends %s", "envía %s", "envoie %s", "sendet %s", "envia %s", "invia %s");
+        e("then swipe to pick, tap to open", "luego desliza para elegir, toca para abrir", "puis balayez pour choisir, touchez pour ouvrir", "dann wischen zum Wählen, tippen zum Öffnen", "depois deslize para escolher, toque para abrir", "poi scorri per scegliere, tocca per aprire");
+        e("Sideways", "De lado", "Sur le côté", "Seitlich", "Para o lado", "Di lato");
+        e("Next window", "Siguiente ventana", "Fenêtre suivante", "Nächstes Fenster", "Janela seguinte", "Finestra successiva");
+        e("Recents", "Recientes", "Récentes", "Letzte Apps", "Recentes", "Recenti");
+        e("Home screen", "Pantalla de inicio", "Écran d'accueil", "Startbildschirm", "Ecrã inicial", "Schermata Home");
+        e("Close app", "Cerrar app", "Fermer l'app", "App schließen", "Fechar app", "Chiudi app");
+        e("Close all", "Cerrar todas", "Tout fermer", "Alle schließen", "Fechar todas", "Chiudi tutte");
+        e("PC gestures need mouse mode (Shizuku)", "Los gestos de PC necesitan el modo ratón (Shizuku)", "Les gestes PC nécessitent le mode souris (Shizuku)", "PC-Gesten brauchen den Mausmodus (Shizuku)", "Os gestos de PC precisam do modo rato (Shizuku)", "I gesti PC richiedono la modalità mouse (Shizuku)");
     }
 }

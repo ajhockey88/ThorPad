@@ -199,27 +199,10 @@ public class SettingsActivity extends Activity {
                 header("Haptics", "Pick a feel and strength for each action.");
                 hapticsSection();
                 break;
-            case 3: {
+            case 3:
                 header("Gestures", "What each touch does on the trackpad");
-                LinearLayout c = card();
-                // The help text's first lines are its own heading, which the tab already shows.
-                String help = Lang.t("\nGestures\n"
-                        + "• One finger: move the pointer\n"
-                        + "• Tap: click\n"
-                        + "• Tap, then quickly touch again, pause a moment, and slide: drag\n"
-                        + "• Press and hold: long press\n"
-                        + "• Two fingers up or down: scroll\n"
-                        + "• Two fingers swiped right: back; swiped left: forward\n"
-                        + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
-                        + "• Two-finger tap: back\n"
-                        + "• Swipe down from the top edge: show the menu buttons");
-                help = help.substring(help.indexOf('\n', 1) + 1)
-                        + "\n• " + Lang.t("Three-finger tap: close all recent apps");
-                TextView t = plain(help, 15, Color.rgb(0xd8, 0xdc, 0xe3));
-                t.setLineSpacing(6 * d, 1f);
-                c.addView(t);
+                gesturesSection();
                 break;
-            }
             default:
                 header("Updates", "Get the newest ThorPad from GitHub");
                 updateSection();
@@ -313,6 +296,143 @@ public class SettingsActivity extends Activity {
     }
 
     // ---- Keyboard language ---------------------------------------------------------------------
+
+    // ---- Gestures ---------------------------------------------------------------------------
+    // An Android / PC switch, then the gestures in two columns of cards: one finger and the top
+    // edge on the left, two and three fingers on the right.
+
+    /** The Gestures page's tab: 0 = Android, 1 = PC. Opens on PC when PC mode is always on. */
+    private static int gestureTab = -1;
+
+    private void gesturesSection() {
+        if (gestureTab < 0) gestureTab = prefs.pcMode() == Prefs.PC_ALWAYS ? 1 : 0;
+        final boolean pc = gestureTab == 1;
+        boolean touch = !ShizukuClient.hasPermission(); // touch mode: a few gestures differ
+
+        LinearLayout seg = new LinearLayout(this);
+        seg.setPadding((int) (3 * d), (int) (3 * d), (int) (3 * d), (int) (3 * d));
+        GradientDrawable sbg = new GradientDrawable();
+        sbg.setColor(SIDE);
+        sbg.setStroke(Math.max(1, (int) d), Color.rgb(0x1b, 0x1e, 0x25));
+        sbg.setCornerRadius(18 * d);
+        seg.setBackground(sbg);
+        String[] names = {"📱 Android", "🖥️ " + Lang.t("PC (Moonlight)")};
+        for (int i = 0; i < 2; i++) {
+            final int which = i;
+            TextView t = plain(names[i], 14, i == gestureTab ? Color.WHITE : SUB);
+            t.setPadding((int) (16 * d), (int) (6 * d), (int) (16 * d), (int) (6 * d));
+            if (i == gestureTab) {
+                GradientDrawable on = new GradientDrawable();
+                on.setColor(Color.rgb(0x16, 0x28, 0x3a));
+                on.setCornerRadius(15 * d);
+                t.setBackground(on);
+            }
+            t.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    if (gestureTab == which) return;
+                    Haptics.play(SettingsActivity.this, Haptics.BAR);
+                    gestureTab = which;
+                    showTab(3);
+                }
+            });
+            seg.addView(t);
+        }
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        slp.bottomMargin = (int) (10 * d);
+        page.addView(seg, slp);
+
+        LinearLayout cols = new LinearLayout(this);
+        LinearLayout left = gestureCard(), right = gestureCard();
+        LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+        l.rightMargin = (int) (4 * d);
+        LinearLayout.LayoutParams r = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+        r.leftMargin = (int) (4 * d);
+        cols.addView(left, l);
+        cols.addView(right, r);
+        page.addView(cols);
+
+        gestureGroup(left, "One finger");
+        gestureRow(left, "☝️", "Slide", null, "Move");
+        gestureRow(left, "👆", "Tap", null, "Click");
+        gestureRow(left, "✋", "Hold", null, touch && !pc ? "Long press" : "Right click");
+        gestureRow(left, "✊", "Tap, then slide", "touch again, then slide", "Drag");
+        gestureGroup(left, "Top edge");
+        gestureRow(left, "👇", "Swipe down", "from the top edge", "Menu");
+
+        gestureGroup(right, "Two fingers");
+        gestureRow(right, "↕️", "Up / down", null, "Scroll");
+        gestureRow(right, "✌️", "Tap", null, touch && !pc ? "Back" : "Right click");
+        gestureRow(right, "👉", "Swipe right", pc ? Lang.f("sends %s", "Alt+←") : null, "Back");
+        gestureRow(right, "👈", "Swipe left", pc ? Lang.f("sends %s", "Alt+→") : null, "Forward");
+        gestureGroup(right, "Three fingers");
+        if (pc) {
+            gestureRow(right, "⬆️", "Swipe up", "then swipe to pick, tap to open", "App switcher");
+            gestureRow(right, "⬇️", "Swipe down", Lang.f("sends %s", "Alt+Space, N"), "Minimize");
+            gestureRow(right, "↔️", "Sideways", Lang.f("sends %s", "Alt+Esc"), "Next window");
+        } else {
+            gestureRow(right, "⬆️", "Swipe up", null, "Recents");
+            gestureRow(right, "⬇️", "Swipe down", null, touch ? "Home screen" : "Close app");
+            if (!touch) gestureRow(right, "🤟", "Tap", null, "Close all");
+        }
+        if (pc && touch) {
+            TextView note = plain(Lang.t("PC gestures need mouse mode (Shizuku)"), 12, SUB);
+            note.setPadding((int) (4 * d), (int) (8 * d), 0, 0);
+            page.addView(note);
+        }
+    }
+
+    private LinearLayout gestureCard() {
+        LinearLayout c = new LinearLayout(this);
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setPadding((int) (11 * d), (int) (2 * d), (int) (11 * d), (int) (6 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(CARD);
+        bg.setCornerRadius(12 * d);
+        c.setBackground(bg);
+        return c;
+    }
+
+    private void gestureGroup(LinearLayout card, String title) {
+        TextView t = plain(Lang.t(title).toUpperCase(Lang.locale()), 11, Color.rgb(0x5d, 0x63, 0x6e));
+        t.setLetterSpacing(0.1f);
+        t.setPadding((int) (2 * d), (int) (9 * d), 0, (int) (3 * d));
+        card.addView(t);
+    }
+
+    private void gestureRow(LinearLayout card, String icon, String name, String sub, String action) {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, (int) (6 * d), 0, (int) (6 * d));
+        TextView ic = plain(icon, 15, Color.WHITE);
+        ic.setGravity(Gravity.CENTER);
+        GradientDrawable ibg = new GradientDrawable();
+        ibg.setColor(Color.rgb(0x16, 0x19, 0x1f));
+        ibg.setCornerRadius(8 * d);
+        ic.setBackground(ibg);
+        row.addView(ic, new LinearLayout.LayoutParams((int) (26 * d), (int) (26 * d)));
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        TextView n = plain(Lang.t(name), 14, Color.WHITE);
+        n.setSingleLine();
+        n.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        words.addView(n);
+        if (sub != null) {
+            TextView s = plain(Lang.t(sub), 11, Color.rgb(0x7a, 0x80, 0x8b));
+            s.setSingleLine();
+            s.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            words.addView(s);
+        }
+        LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        wlp.leftMargin = (int) (8 * d);
+        wlp.rightMargin = (int) (6 * d);
+        row.addView(words, wlp);
+        TextView a = chip(Lang.t(action));
+        a.setTextSize(12);
+        a.setSingleLine();
+        row.addView(a);
+        card.addView(row);
+    }
 
     private void languagePicker() {
         LinearLayout c = card();
