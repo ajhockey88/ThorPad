@@ -435,6 +435,86 @@ final class Lang {
         e("Double", "Doble", "Double", "Doppelt", "Duplo", "Doppio");
         e("Buzz", "Zumbido", "Bourdon", "Brummen", "Zumbido", "Ronzio");
 
+        // ---- Settings tabs ----
+        e("Trackpad", "Trackpad", "Trackpad", "Trackpad", "Trackpad", "Trackpad");
+        e("How the pointer moves and scrolls on the top screen",
+                "Cómo se mueve y desplaza el puntero en la pantalla de arriba",
+                "Comment le pointeur se déplace et défile sur l'écran du haut",
+                "Wie sich der Zeiger auf dem oberen Bildschirm bewegt und scrollt",
+                "Como o ponteiro se move e desloca no ecrã de cima",
+                "Come il puntatore si muove e scorre sullo schermo in alto");
+        e("Classic scroll direction", "Desplazamiento clásico", "Défilement classique", "Klassische Scrollrichtung",
+                "Deslocamento clássico", "Scorrimento classico");
+        e("Fingers down scrolls down, like a mouse wheel", "Dedos hacia abajo bajan, como una rueda de ratón",
+                "Doigts vers le bas = défiler vers le bas, comme une molette",
+                "Finger nach unten scrollt nach unten, wie ein Mausrad",
+                "Dedos para baixo descem, como a roda do rato", "Dita in giù scorre in giù, come la rotellina");
+        e("Swap screens", "Intercambiar pantallas", "Inverser les écrans", "Bildschirme tauschen", "Trocar ecrãs",
+                "Scambia schermi");
+        e("Pointer on the bottom, trackpad on top. Reopen ThorPad after changing.",
+                "Puntero abajo, trackpad arriba. Vuelve a abrir ThorPad tras cambiarlo.",
+                "Pointeur en bas, trackpad en haut. Rouvrez ThorPad après le changement.",
+                "Zeiger unten, Trackpad oben. Danach ThorPad neu öffnen.",
+                "Ponteiro em baixo, trackpad em cima. Volte a abrir o ThorPad depois de mudar.",
+                "Puntatore in basso, trackpad in alto. Riapri ThorPad dopo la modifica.");
+        e("Dim when idle", "Oscurecer en reposo", "Assombrir au repos", "Im Leerlauf abdunkeln", "Escurecer em repouso",
+                "Oscura quando inattivo");
+        e("After 30 seconds without a touch, to save battery; the first touch only wakes it",
+                "Tras 30 segundos sin tocar, para ahorrar batería; el primer toque solo la despierta",
+                "Après 30 secondes sans contact, pour économiser la batterie ; le premier contact le réveille seulement",
+                "Nach 30 Sekunden ohne Berührung, um Akku zu sparen; die erste Berührung weckt ihn nur",
+                "Após 30 segundos sem toque, para poupar bateria; o primeiro toque só o acorda",
+                "Dopo 30 secondi senza tocchi, per risparmiare batteria; il primo tocco lo risveglia soltanto");
+        e("Gesture hints", "Ayudas de gestos", "Aide des gestes", "Gestenhinweise", "Dicas de gestos", "Suggerimenti gesti");
+        e("Show the gesture cheat sheet on the trackpad", "Muestra la chuleta de gestos en el trackpad",
+                "Affiche l'aide-mémoire des gestes sur le trackpad", "Zeigt die Gestenübersicht auf dem Trackpad",
+                "Mostra o resumo de gestos no trackpad", "Mostra il promemoria dei gesti sul trackpad");
+        e("Typing, spelling and which keyboard Android uses",
+                "Escritura, ortografía y qué teclado usa Android",
+                "Saisie, orthographe et clavier utilisé par Android",
+                "Tippen, Rechtschreibung und welche Tastatur Android nutzt",
+                "Escrita, ortografia e que teclado o Android usa",
+                "Scrittura, ortografia e quale tastiera usa Android");
+        e("Language", "Idioma", "Langue", "Sprache", "Idioma", "Lingua");
+        e("Autocorrect", "Autocorrección", "Correction automatique", "Autokorrektur", "Correção automática",
+                "Correzione automatica");
+        e("Fixes misspelled and run-together words when you finish them. Tap the suggestion to keep what you typed, or press backspace right after to undo.",
+                "Corrige palabras mal escritas o juntas al terminarlas. Toca la sugerencia para conservar lo que escribiste, o pulsa borrar justo después para deshacer.",
+                "Corrige les mots mal écrits ou collés quand vous les terminez. Touchez la suggestion pour garder ce que vous avez tapé, ou effacez juste après pour annuler.",
+                "Korrigiert falsch oder zusammengeschriebene Wörter, wenn du sie beendest. Tippe auf den Vorschlag, um deine Eingabe zu behalten, oder lösche direkt danach, um es rückgängig zu machen.",
+                "Corrige palavras mal escritas ou juntas quando as termina. Toque na sugestão para manter o que escreveu, ou apague logo a seguir para anular.",
+                "Corregge le parole sbagliate o attaccate quando le finisci. Tocca il suggerimento per tenere ciò che hai scritto, o premi cancella subito dopo per annullare.");
+        e("Double-space period", "Punto con doble espacio", "Point avec double espace", "Punkt per Doppel-Leertaste",
+                "Ponto com espaço duplo", "Punto con doppio spazio");
+        e("Two quick spaces type \". \"", "Dos espacios rápidos escriben \". \"", "Deux espaces rapides tapent « . »",
+                "Zwei schnelle Leerzeichen tippen „. “", "Dois espaços rápidos escrevem \". \"",
+                "Due spazi veloci scrivono \". \"");
+        e("Auto-capitals", "Mayúsculas automáticas", "Majuscules automatiques", "Automatische Großschreibung",
+                "Maiúsculas automáticas", "Maiuscole automatiche");
+        e("A capital letter at the start of each sentence, never in email or password boxes",
+                "Mayúscula al empezar cada frase, nunca en campos de correo o contraseña",
+                "Majuscule au début de chaque phrase, jamais dans les champs e-mail ou mot de passe",
+                "Großbuchstabe am Satzanfang, nie in E-Mail- oder Passwortfeldern",
+                "Maiúscula no início de cada frase, nunca em campos de email ou palavra-passe",
+                "Maiuscola all'inizio di ogni frase, mai nei campi email o password");
+        e("Type when the finger lifts", "Escribir al levantar el dedo", "Taper quand le doigt se lève",
+                "Beim Loslassen tippen", "Escrever ao levantar o dedo", "Scrivi quando sollevi il dito");
+        e("Lets you slide to the right key. Off types the instant you touch, which is quickest",
+                "Permite deslizar hasta la tecla correcta. Desactivado escribe al tocar, que es lo más rápido",
+                "Permet de glisser vers la bonne touche. Désactivé tape dès le contact, le plus rapide",
+                "Du kannst zur richtigen Taste gleiten. Aus tippt sofort bei Berührung, am schnellsten",
+                "Permite deslizar até à tecla certa. Desligado escreve ao tocar, o mais rápido",
+                "Puoi scivolare sul tasto giusto. Disattivato scrive al tocco, il più veloce");
+        e("Haptics", "Vibración", "Vibrations", "Haptik", "Vibração", "Vibrazione");
+        e("Gestures", "Gestos", "Gestes", "Gesten", "Gestos", "Gesti");
+        e("What each touch does on the trackpad", "Qué hace cada toque en el trackpad",
+                "Ce que fait chaque geste sur le trackpad", "Was jede Berührung auf dem Trackpad bewirkt",
+                "O que cada toque faz no trackpad", "Cosa fa ogni tocco sul trackpad");
+        e("Updates", "Actualizaciones", "Mises à jour", "Updates", "Atualizações", "Aggiornamenti");
+        e("Get the newest ThorPad from GitHub", "Consigue el ThorPad más reciente de GitHub",
+                "Obtenez le dernier ThorPad sur GitHub", "Hol dir das neueste ThorPad von GitHub",
+                "Obtenha o ThorPad mais recente do GitHub", "Scarica l'ultimo ThorPad da GitHub");
+
         // ---- Updates ----
         e("🔁 Reinstall ThorPad %s?", "🔁 ¿Reinstalar ThorPad %s?", "🔁 Réinstaller ThorPad %s ?",
                 "🔁 ThorPad %s neu installieren?", "🔁 Reinstalar o ThorPad %s?", "🔁 Reinstallare ThorPad %s?");

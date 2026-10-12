@@ -18,7 +18,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import java.util.List;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -28,11 +30,21 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-/** Sliders and switches for pointer speed, scrolling and screen layout. */
+/** ThorPad settings: section tabs on the left, the chosen section's settings on the right. */
 public class SettingsActivity extends Activity {
     private Prefs prefs;
     private LinearLayout list;
     private float d;
+
+    // Tabs down the left; the chosen section's settings on the right, as cards.
+    private static final String[] TABS = {"🖱️ Trackpad", "⌨️ Keyboard", "📳 Haptics", "👆 Gestures", "🔄 Updates"};
+    private static final int BG = Color.BLACK, SIDE = Color.rgb(0x0c, 0x0d, 0x11), CARD = Color.rgb(0x11, 0x13, 0x18),
+            ACCENT = Color.rgb(0x78, 0xc8, 0xff), SUB = Color.rgb(0x8a, 0x90, 0x9b);
+    /** The tab on show, kept when Settings rebuilds itself after a language change. */
+    private static int tab;
+    private LinearLayout page;
+    private ScrollView scroll;
+    private final TextView[] tabViews = new TextView[TABS.length];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,65 +54,68 @@ public class SettingsActivity extends Activity {
         d = getResources().getDisplayMetrics().density;
         // Settings has no text boxes: never let a keyboard window cover it.
         getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getWindow().getDecorView().setBackgroundColor(BG);
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Color.BLACK);
-        list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) (16 * d);
-        list.setPadding(pad, pad, pad, pad);
-        scroll.addView(list);
+        LinearLayout split = new LinearLayout(this);
+        split.setBackgroundColor(BG);
 
-        TextView title = text("ThorPad settings", 20);
-        list.addView(title);
+        LinearLayout side = new LinearLayout(this);
+        side.setOrientation(LinearLayout.VERTICAL);
+        side.setBackgroundColor(SIDE);
+        side.setPadding((int) (8 * d), (int) (14 * d), (int) (8 * d), (int) (12 * d));
+        TextView title = new TextView(this);
+        title.setText(Lang.t("Settings"));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setTextColor(Color.WHITE);
+        title.setPadding((int) (8 * d), 0, 0, (int) (14 * d));
+        diagnosticsOnLongPress(title);
+        side.addView(title);
+        for (int i = 0; i < TABS.length; i++) {
+            final int which = i;
+            TextView t = new TextView(this);
+            String label = TABS[i];
+            int space = label.indexOf(' ');
+            t.setText(label.substring(0, space + 1) + Lang.t(label.substring(space + 1)));
+            t.setTextSize(16);
+            t.setSingleLine(true);
+            t.setPadding((int) (12 * d), (int) (11 * d), (int) (8 * d), (int) (11 * d));
+            t.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    if (tab == which) return;
+                    Haptics.play(SettingsActivity.this, Haptics.BAR);
+                    showTab(which);
+                }
+            });
+            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            tlp.bottomMargin = (int) (4 * d);
+            side.addView(t, tlp);
+            tabViews[i] = t;
+        }
+        side.addView(new View(this), new LinearLayout.LayoutParams(1, 0, 1f));
+        TextView version = new TextView(this);
+        version.setText("ThorPad " + versionName());
+        version.setTextSize(12);
+        version.setTextColor(Color.rgb(0x5d, 0x63, 0x6e));
+        version.setPadding((int) (8 * d), 0, 0, 0);
+        side.addView(version);
+        int sideW = (int) (getResources().getDisplayMetrics().widthPixels * 0.27f);
+        split.addView(side, new LinearLayout.LayoutParams(sideW, ViewGroup.LayoutParams.MATCH_PARENT));
+        View line = new View(this);
+        line.setBackgroundColor(Color.rgb(0x1a, 0x1d, 0x24));
+        split.addView(line, new LinearLayout.LayoutParams(Math.max(1, (int) (0.8f * d)), ViewGroup.LayoutParams.MATCH_PARENT));
 
-        slider("Pointer speed", Prefs.KEY_SENSITIVITY, prefs.sensitivity(), 0.5f, 5f, false);
-        slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
-        slider("Scroll speed", Prefs.KEY_SCROLL_SPEED, prefs.scrollSpeed(), 0.5f, 5f, false);
-        slider("Pointer size", Prefs.KEY_POINTER_SIZE, prefs.pointerSize(), 0.6f, 2.5f, true);
-        toggle("Classic scroll direction (fingers down scrolls down, like a mouse wheel)",
-                Prefs.KEY_INVERT_SCROLL, prefs.invertScroll(), false);
-        toggle("Swap screens (pointer on bottom, trackpad on top). Reopen ThorPad after changing.",
-                Prefs.KEY_SWAP_SCREENS, prefs.swapScreens(), true);
-        toggle("Dim the trackpad screen after 30 seconds without a touch, to save battery "
-                + "(the first touch only wakes it)",
-                Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
-        toggle("Show gesture hints on the trackpad", Prefs.KEY_SHOW_HINTS, prefs.showHints(), false);
-
-        list.addView(text("\nKeyboard", 17));
-        languagePicker();
-        toggle("Autocorrect (fixes a misspelled word when you finish it, splits words that ran "
-                + "together, adds apostrophes, and uses the word before to pick the right one; tap "
-                + "the suggestion to keep what you typed, or press backspace right after to undo)",
-                Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
-        toggle("Double-space period (two quick spaces type \". \")",
-                Prefs.KEY_DOUBLE_SPACE, prefs.doubleSpacePeriod(), false);
-        toggle("Auto-capitals (capital letter at the start of each sentence; never in email "
-                + "or password boxes)", Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
-        toggle("Type when the finger lifts (lets you slide to the right key; off = types the "
-                + "instant you touch, most responsive)",
-                Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
-        keyboardChooser();
-
-        hapticsSection();
-
-        TextView help = text("\nGestures\n"
-                + "• One finger: move the pointer\n"
-                + "• Tap: click\n"
-                + "• Tap, then quickly touch again, pause a moment, and slide: drag\n"
-                + "• Press and hold: long press\n"
-                + "• Two fingers up or down: scroll\n"
-                + "• Two fingers swiped right: back; swiped left: forward\n"
-                + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
-                + "• Two-finger tap: back\n"
-                + "• Swipe down from the top edge: show the menu buttons", 14);
-        help.setTextColor(Color.argb(170, 255, 255, 255));
-        list.addView(help);
-
-        updateSection();
+        scroll = new ScrollView(this);
+        scroll.setBackgroundColor(BG);
+        page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        page.setPadding((int) (18 * d), (int) (16 * d), (int) (18 * d), (int) (16 * d));
+        scroll.addView(page);
+        split.addView(scroll, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
 
         FrameLayout root = new FrameLayout(this);
-        root.addView(scroll);
+        root.addView(split);
         previewPill = new TextView(this);
         previewPill.setTextSize(15);
         previewPill.setTextColor(Color.rgb(0xbf, 0xe6, 0xff));
@@ -116,6 +131,153 @@ public class SettingsActivity extends Activity {
         plp.bottomMargin = (int) (14 * d);
         root.addView(previewPill, plp);
         setContentView(root);
+        showTab(tab);
+    }
+
+    private String versionName() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private void showTab(int which) {
+        tab = which;
+        for (int i = 0; i < tabViews.length; i++) {
+            boolean sel = i == which;
+            TextView t = tabViews[i];
+            t.setTextColor(sel ? Color.WHITE : Color.rgb(0xaa, 0xb0, 0xbb));
+            if (sel) {
+                GradientDrawable bg = new GradientDrawable();
+                bg.setColor(Color.rgb(0x16, 0x28, 0x3a));
+                bg.setCornerRadius(10 * d);
+                t.setBackground(bg);
+            } else {
+                t.setBackground(null);
+            }
+        }
+        page.removeAllViews();
+        list = page;
+        keyboardLabel = null;
+        switch (which) {
+            case 0:
+                header("Trackpad", "How the pointer moves and scrolls on the top screen");
+                slider("Pointer speed", Prefs.KEY_SENSITIVITY, prefs.sensitivity(), 0.5f, 5f, false);
+                slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
+                slider("Scroll speed", Prefs.KEY_SCROLL_SPEED, prefs.scrollSpeed(), 0.5f, 5f, false);
+                slider("Pointer size", Prefs.KEY_POINTER_SIZE, prefs.pointerSize(), 0.6f, 2.5f, true);
+                toggle("Classic scroll direction", "Fingers down scrolls down, like a mouse wheel",
+                        Prefs.KEY_INVERT_SCROLL, prefs.invertScroll(), false);
+                toggle("Swap screens", "Pointer on the bottom, trackpad on top. Reopen ThorPad after changing.",
+                        Prefs.KEY_SWAP_SCREENS, prefs.swapScreens(), true);
+                toggle("Dim when idle", "After 30 seconds without a touch, to save battery; the first touch only wakes it",
+                        Prefs.KEY_DIM_WHEN_IDLE, prefs.dimWhenIdle(), false);
+                toggle("Gesture hints", "Show the gesture cheat sheet on the trackpad",
+                        Prefs.KEY_SHOW_HINTS, prefs.showHints(), false);
+                break;
+            case 1:
+                header("Keyboard", "Typing, spelling and which keyboard Android uses");
+                languagePicker();
+                toggle("Autocorrect", "Fixes misspelled and run-together words when you finish them. Tap the "
+                        + "suggestion to keep what you typed, or press backspace right after to undo.",
+                        Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
+                toggle("Double-space period", "Two quick spaces type \". \"",
+                        Prefs.KEY_DOUBLE_SPACE, prefs.doubleSpacePeriod(), false);
+                toggle("Auto-capitals", "A capital letter at the start of each sentence, never in email or password boxes",
+                        Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
+                toggle("Type when the finger lifts", "Lets you slide to the right key. Off types the instant you "
+                        + "touch, which is quickest", Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
+                keyboardChooser();
+                refreshKeyboardLabel();
+                break;
+            case 2:
+                header("Haptics", "Pick a feel and strength for each action. Every change plays a preview.");
+                hapticsSection();
+                break;
+            case 3: {
+                header("Gestures", "What each touch does on the trackpad");
+                LinearLayout c = card();
+                // The help text's first lines are its own heading, which the tab already shows.
+                String help = Lang.t("\nGestures\n"
+                        + "• One finger: move the pointer\n"
+                        + "• Tap: click\n"
+                        + "• Tap, then quickly touch again, pause a moment, and slide: drag\n"
+                        + "• Press and hold: long press\n"
+                        + "• Two fingers up or down: scroll\n"
+                        + "• Two fingers swiped right: back; swiped left: forward\n"
+                        + "• Three fingers swiped up: recent apps; swiped down: close the top-screen app\n"
+                        + "• Two-finger tap: back\n"
+                        + "• Swipe down from the top edge: show the menu buttons");
+                help = help.substring(help.indexOf('\n', 1) + 1);
+                TextView t = plain(help, 15, Color.rgb(0xd8, 0xdc, 0xe3));
+                t.setLineSpacing(6 * d, 1f);
+                c.addView(t);
+                break;
+            }
+            default:
+                header("Updates", "Get the newest ThorPad from GitHub");
+                updateSection();
+                break;
+        }
+        scroll.scrollTo(0, 0);
+    }
+
+    private void header(String title, String lead) {
+        TextView h = plain(Lang.t(title), 22, Color.WHITE);
+        h.setTypeface(Typeface.DEFAULT_BOLD);
+        diagnosticsOnLongPress(h);
+        page.addView(h);
+        TextView l = plain(Lang.t(lead), 13, Color.rgb(0x7a, 0x80, 0x8b));
+        l.setPadding(0, (int) (2 * d), 0, (int) (12 * d));
+        page.addView(l);
+    }
+
+    /** A rounded card on the page; returned so a section can fill it. */
+    private LinearLayout card() {
+        LinearLayout c = new LinearLayout(this);
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setPadding((int) (14 * d), (int) (12 * d), (int) (14 * d), (int) (12 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(CARD);
+        bg.setCornerRadius(12 * d);
+        c.setBackground(bg);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = (int) (7 * d);
+        page.addView(c, lp);
+        return c;
+    }
+
+    private TextView plain(String s, int sp, int color) {
+        TextView t = new TextView(this);
+        t.setText(s);
+        t.setTextSize(sp);
+        t.setTextColor(color);
+        return t;
+    }
+
+    /** The value chip at the end of a slider row. */
+    private TextView chip(String s) {
+        TextView t = plain(s, 14, Color.rgb(0x9f, 0xd2, 0xf5));
+        t.setGravity(Gravity.CENTER);
+        t.setMinWidth((int) (42 * d));
+        t.setPadding((int) (8 * d), (int) (4 * d), (int) (8 * d), (int) (4 * d));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(0x16, 0x22, 0x2d));
+        bg.setCornerRadius(9 * d);
+        t.setBackground(bg);
+        return t;
+    }
+
+    private void diagnosticsOnLongPress(View v) {
+        // Long-press a heading: saves screenshots and the window list for bug reports.
+        v.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override public boolean onLongClick(View view) {
+                saveDiagnostics();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -129,13 +291,18 @@ public class SettingsActivity extends Activity {
     // ---- Keyboard language ---------------------------------------------------------------------
 
     private void languagePicker() {
+        LinearLayout c = card();
         LinearLayout row = new LinearLayout(this);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        TextView label = text("Keyboard language", 15);
-        row.addView(label, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        Button pick = new Button(this);
-        pick.setAllCaps(false);
-        pick.setText("🌐 " + Lang.name() + " ▾");
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(plain(Lang.t("Language"), 16, Color.WHITE));
+        words.addView(plain(Lang.t("Changes the letters on the keyboard, the spelling dictionary, and "
+                + "ThorPad's buttons and settings.") + " " + Lang.t("Hold a letter for its accents."), 12, SUB));
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView pick = chip("🌐 " + Lang.name() + " ▾");
+        pick.setTextSize(15);
+        pick.setPadding((int) (12 * d), (int) (7 * d), (int) (12 * d), (int) (7 * d));
         pick.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 new AlertDialog.Builder(SettingsActivity.this)
@@ -154,12 +321,11 @@ public class SettingsActivity extends Activity {
                         .show();
             }
         });
-        row.addView(pick);
-        list.addView(row);
-        TextView hint = text(Lang.t("Changes the letters on the keyboard, the spelling dictionary, and "
-                + "ThorPad's buttons and settings.") + " " + Lang.t("Hold a letter for its accents."), 13);
-        hint.setTextColor(Color.argb(170, 255, 255, 255));
-        list.addView(hint);
+        LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        plp.leftMargin = (int) (12 * d);
+        row.addView(pick, plp);
+        c.addView(row);
     }
 
     // ---- Which keyboard opens for top-screen text boxes ------------------------------------
@@ -168,12 +334,14 @@ public class SettingsActivity extends Activity {
     private Button useThorPad;
 
     private void keyboardChooser() {
-        keyboardLabel = text("", 15);
+        list = card();
+        keyboardLabel = plain("", 16, Color.WHITE);
         list.addView(keyboardLabel);
         TextView hint = text("This is Android's own keyboard setting for the whole Thor. With ThorPad "
                 + "keyboard in use, the keyboard on the bottom screen opens by itself whenever a text "
-                + "box is selected on the top screen, with no other keyboard popping up.", 13);
-        hint.setTextColor(Color.argb(170, 255, 255, 255));
+                + "box is selected on the top screen, with no other keyboard popping up.", 12);
+        hint.setTextColor(SUB);
+        hint.setPadding(0, (int) (2 * d), 0, (int) (4 * d));
         list.addView(hint);
         LinearLayout row = new LinearLayout(this);
         useThorPad = new Button(this);
@@ -194,6 +362,7 @@ public class SettingsActivity extends Activity {
         row.addView(choose);
         list.addView(row, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        list = page;
     }
 
     private InputMethodManager imm() {
@@ -325,14 +494,9 @@ public class SettingsActivity extends Activity {
     // ---- Updates -------------------------------------------------------------------------------
 
     private void updateSection() {
-        String version = "";
-        try {
-            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (Exception ignored) {
-        }
-        list.addView(text("\nUpdates", 17));
-        final TextView status = text("ThorPad " + version, 14);
-        status.setTextColor(Color.argb(190, 255, 255, 255));
+        list = card();
+        final TextView status = plain("ThorPad " + versionName(), 16, Color.WHITE);
+        status.setPadding(0, 0, 0, (int) (6 * d));
         list.addView(status);
         final Button check = new Button(this);
         check.setText(Lang.t("Check for updates"));
@@ -381,8 +545,7 @@ public class SettingsActivity extends Activity {
         });
         list.addView(reinstall, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        // Room so the preview pill never covers the button.
-        list.addView(new View(this), new LinearLayout.LayoutParams(1, (int) (50 * d)));
+        list = page;
     }
 
     // ---- Haptics -------------------------------------------------------------------------------
@@ -394,17 +557,17 @@ public class SettingsActivity extends Activity {
     };
 
     private void hapticsSection() {
-        list.addView(text("\nHaptics", 17));
-        TextView hint = text("Pick a feel and strength for each action. Every change plays a preview.", 13);
-        hint.setTextColor(Color.argb(170, 255, 255, 255));
-        list.addView(hint);
         if (!Haptics.hasStrengthControl(this)) {
             TextView motor = text("This device's vibration motor can't buzz softer or harder, so strength "
                     + "changes how long each buzz lasts instead.", 13);
-            motor.setTextColor(Color.argb(170, 255, 255, 255));
+            motor.setTextColor(SUB);
             list.addView(motor);
         }
+        list = card();
         for (int a = 0; a < Haptics.ACTION_NAMES.length; a++) hapticRow(a);
+        list = page;
+        // Room so the preview pill never covers the last row.
+        page.addView(new View(this), new LinearLayout.LayoutParams(1, (int) (50 * d)));
     }
 
     private void hapticRow(final int action) {
@@ -442,6 +605,7 @@ public class SettingsActivity extends Activity {
         final SeekBar strength = new SeekBar(this);
         strength.setMax(100);
         strength.setProgress(Haptics.strength(sp, action));
+        tint(strength);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, (int) (40 * d), 1f);
         slp.leftMargin = (int) (12 * d);
         row.addView(strength, slp);
@@ -488,30 +652,26 @@ public class SettingsActivity extends Activity {
         t.setText(Lang.t(s));
         t.setTextSize(sp);
         t.setTextColor(Color.WHITE);
-        t.setPadding(0, (int) (10 * d), 0, (int) (4 * d));
-        if (sp >= 17) {
-            // Headings: long-press saves screenshots and the window list for bug reports.
-            t.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override public boolean onLongClick(View v) {
-                    saveDiagnostics();
-                    return true;
-                }
-            });
-        }
+        t.setPadding(0, (int) (6 * d), 0, (int) (4 * d));
         return t;
     }
 
     private void slider(final String label, final String key, float value,
                         final float min, final float max, final boolean reloadPointer) {
-        final TextView t = text(Lang.t(label) + ": " + fmt(value), 15);
-        list.addView(t);
+        LinearLayout c = card();
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.addView(plain(Lang.t(label), 16, Color.WHITE),
+                new LinearLayout.LayoutParams((int) (150 * d), ViewGroup.LayoutParams.WRAP_CONTENT));
+        final TextView value_ = chip(fmt(value));
         SeekBar bar = new SeekBar(this);
         bar.setMax(100);
         bar.setProgress(Math.round((value - min) / (max - min) * 100));
+        tint(bar);
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar sb, int p, boolean fromUser) {
                 float v = min + (max - min) * p / 100f;
-                t.setText(Lang.t(label) + ": " + fmt(v));
+                value_.setText(fmt(v));
                 prefs.raw().edit().putFloat(key, v).apply();
             }
             @Override public void onStartTrackingTouch(SeekBar sb) {}
@@ -519,17 +679,34 @@ public class SettingsActivity extends Activity {
                 if (reloadPointer) reload();
             }
         });
-        list.addView(bar, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) (40 * d)));
+        row.addView(bar, new LinearLayout.LayoutParams(0, (int) (36 * d), 1f));
+        row.addView(value_);
+        c.addView(row);
     }
 
-    private void toggle(String label, final String key, boolean value, final boolean reloadPointer) {
-        Switch sw = new Switch(this);
-        sw.setText(Lang.t(label));
-        sw.setTextColor(Color.WHITE);
-        sw.setTextSize(15);
+    private void tint(SeekBar bar) {
+        bar.setProgressTintList(ColorStateList.valueOf(ACCENT));
+        bar.setProgressBackgroundTintList(ColorStateList.valueOf(Color.rgb(0x2e, 0x32, 0x3b)));
+        bar.setThumbTintList(ColorStateList.valueOf(Color.rgb(0xbf, 0xe6, 0xff)));
+    }
+
+    /** A card with a title, a gray line under it, and a switch on the right; the whole card toggles. */
+    private void toggle(String title, String sub, final String key, boolean value, final boolean reloadPointer) {
+        LinearLayout c = card();
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(plain(Lang.t(title), 16, Color.WHITE));
+        TextView s = plain(Lang.t(sub), 12, SUB);
+        s.setPadding(0, (int) (2 * d), 0, 0);
+        words.addView(s);
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final Switch sw = new Switch(this);
         sw.setChecked(value);
-        sw.setPadding(0, (int) (12 * d), 0, (int) (12 * d));
+        int[][] states = {{android.R.attr.state_checked}, {}};
+        sw.setThumbTintList(new ColorStateList(states, new int[] {Color.rgb(0xbf, 0xe6, 0xff), Color.rgb(0x9a, 0xa0, 0xab)}));
+        sw.setTrackTintList(new ColorStateList(states, new int[] {Color.rgb(0x2b, 0x6e, 0x99), Color.rgb(0x3a, 0x3e, 0x48)}));
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override public void onCheckedChanged(CompoundButton b, boolean checked) {
                 SharedPreferences.Editor e = prefs.raw().edit();
@@ -538,7 +715,14 @@ public class SettingsActivity extends Activity {
                 if (reloadPointer) reload();
             }
         });
-        list.addView(sw);
+        LinearLayout.LayoutParams swp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        swp.leftMargin = (int) (12 * d);
+        row.addView(sw, swp);
+        c.addView(row);
+        c.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { sw.toggle(); }
+        });
     }
 
     private static void reload() {
