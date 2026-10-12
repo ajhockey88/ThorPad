@@ -137,7 +137,7 @@ final class TrackpadView extends View {
     private static final String[][] PC_HINTS = {
             HINTS[0],
             {"Up / down", "scroll", "Tap", "right click", "Swipe right", "back (Alt+←)", "Swipe left", "forward (Alt+→)"},
-            {"Swipe up", "task view", "Swipe down", "show desktop", "Swipe left / right", "switch app"},
+            {"Swipe up", "app switcher", "Swipe down", "minimize", "Swipe left / right", "next window"},
     };
 
     /** The gesture cheat sheet along the bottom: one column per number of fingers. */
@@ -225,14 +225,24 @@ final class TrackpadView extends View {
                     if (ev.getPointerCount() < 3) return true;
                     float dx = (ev.getX(0) + ev.getX(1) + ev.getX(2)) / 3f - threeStartX;
                     float dy = (ev.getY(0) + ev.getY(1) + ev.getY(2)) / 3f - threeStartY;
+                    // Android keeps Alt+Tab (its own recent apps) and anything with the Windows
+                    // key for itself, so they never reach Moonlight. These shortcuts get through.
                     if (pc() && Math.abs(dx) > SWIPE_DP * density && Math.abs(dx) > 1.5f * Math.abs(dy)) {
-                        pc.pcKeys(VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_TAB); // switch app
+                        pc.pcKeys(VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_ESC); // next window
                         buzz(Haptics.THREE_FINGER);
                         state = DONE;
                     } else if (Math.abs(dy) > SWIPE_DP * density && Math.abs(dy) > 1.5f * Math.abs(dx)) {
                         if (pc()) {
-                            // Task view, or show the desktop.
-                            pc.pcKeys(VirtualKeyboard.KEY_LEFTMETA, dy < 0 ? VirtualKeyboard.KEY_TAB : VirtualKeyboard.KEY_D);
+                            if (dy < 0) {
+                                // Windows' app switcher, which stays open to pick from.
+                                pc.pcKeys(VirtualKeyboard.KEY_LCTRL, VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_TAB);
+                            } else {
+                                // Minimize: Alt+Space opens the window menu, N picks Minimize.
+                                pc.pcKeys(VirtualKeyboard.KEY_LEFTALT, VirtualKeyboard.KEY_SPACE);
+                                handler.postDelayed(new Runnable() {
+                                    @Override public void run() { pc.pcKeys(VirtualKeyboard.KEY_N); }
+                                }, 250);
+                            }
                         } else if (dy < 0) {
                             if (s != null) s.recents();
                         } else if (ShizukuClient.hasPermission()) {

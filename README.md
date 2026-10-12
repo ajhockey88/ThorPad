@@ -58,9 +58,12 @@ only, as the shortcuts go through the virtual keyboard):
 | On the bottom screen | On the PC |
 |---|---|
 | 👉 / 👈 Two fingers swiped right / left | Back / forward (Alt+← / Alt+→, which every PC browser understands) |
-| 🤟 Three fingers swiped up | Task view (Win+Tab) |
-| 🤟 Three fingers swiped down | Show the desktop (Win+D) |
-| 🤟 Three fingers swiped left or right | Switch app (Alt+Tab) |
+| 🤟 Three fingers swiped up | App switcher that stays open to pick from (Ctrl+Alt+Tab) |
+| 🤟 Three fingers swiped down | Minimizes the window (Alt+Space, then N) |
+| 🤟 Three fingers swiped left or right | Next window (Alt+Esc) |
+
+Android keeps Alt+Tab and every shortcut with the Windows key for itself, so they never reach
+Moonlight; the gestures use shortcuts that get through.
 
 - ✨ **Mode menu** (in the swipe-down menu): **Auto** switches to PC controls whenever
   Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on the top screen;

@@ -9,6 +9,7 @@
 - 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
 - 🚀 **One-tap setup:** a first-run checklist with four steps, each with a button that does the work. ThorPad downloads and installs Shizuku for you, opens Shizuku and Wireless debugging, asks for Shizuku's permission, and switches Android's keyboard to ThorPad. Each step ticks itself off. No Shizuku? One tap switches the checklist to touch mode
 - 🤟 **Three-finger tap closes all apps:** like **Clear all** in recent apps, it closes every app except ThorPad and the home screen (mouse mode; off in PC mode so it never closes your stream)
+- 🖥️ **PC three-finger gestures fixed:** Android kept Alt+Tab and the Windows key for itself, so they never reached Moonlight. Three fingers now send shortcuts that get through: up opens the app switcher (Ctrl+Alt+Tab), down minimizes the window, and sideways goes to the next window (Alt+Esc)
 - 🔋 **Lighter on the battery in Auto mode:** the check for Moonlight and other PC apps now only does real work after an app switch
 - 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider. Haptics strength opens a vertical slider, and every Settings page has a Back button at the top right
 

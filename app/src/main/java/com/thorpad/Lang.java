@@ -678,5 +678,8 @@ final class Lang {
                 "Keine letzten Apps zum Schließen", "Não há apps recentes para fechar", "Nessuna app recente da chiudere");
         e("Closed all recent apps", "Se cerraron todas las apps recientes", "Toutes les apps récentes sont fermées",
                 "Alle letzten Apps geschlossen", "Todas as apps recentes foram fechadas", "Tutte le app recenti sono state chiuse");
+        e("app switcher", "selector de apps", "sélecteur d'apps", "App-Umschalter", "seletor de apps", "selettore app");
+        e("minimize", "minimizar", "réduire", "minimieren", "minimizar", "riduci");
+        e("next window", "siguiente ventana", "fenêtre suivante", "nächstes Fenster", "janela seguinte", "finestra successiva");
     }
 }
