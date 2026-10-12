@@ -9,9 +9,14 @@
     <!-- Lets Shizuku offer ThorPad its shell helper, used to create the virtual mouse. -->
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Only for Settings > Check for updates: reads ThorPad's GitHub releases. -->
+    <!-- Only for GitHub: ThorPad updates, and the Shizuku download in setup. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!-- Setup checks for Shizuku and opens it (Android hides other apps without this). -->
+    <queries>
+        <package android:name="moe.shizuku.privileged.api" />
+    </queries>
     <!-- Shows the keyboard on the bottom screen over other apps when the trackpad is closed. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 

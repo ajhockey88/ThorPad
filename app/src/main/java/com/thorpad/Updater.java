@@ -124,9 +124,33 @@ final class Updater {
                     if (installWithShizuku(apk)) return; // ThorPad is replaced and restarted
                 }
                 post(Lang.f("Installing %s… confirm on the install prompt.", r.version), true);
-                installWithPrompt(apk);
+                installWithPrompt(apk, context.getPackageName());
             }
         });
+    }
+
+    /**
+     * Downloads the APK from another app's latest GitHub release (e.g. Shizuku during setup) and
+     * opens Android's install prompt for it.
+     */
+    void installApp(final String latestApi, final String name, final String pkg) {
+        background(new Task() {
+            @Override public void run() throws Exception {
+                post(Lang.f("Downloading %s… %s%%", name, 0), false);
+                JSONObject release = new JSONObject(readAll(open(latestApi)));
+                String url = null;
+                JSONArray assets = release.optJSONArray("assets");
+                for (int i = 0; assets != null && i < assets.length(); i++) {
+                    JSONObject a = assets.getJSONObject(i);
+                    if (a.optString("name").endsWith(".apk")) url = a.optString("browser_download_url");
+                }
+                if (url == null) throw new IOException("no APK in the latest release");
+                File apk = new File(context.getCacheDir(), name + ".apk");
+                download(url, apk, name);
+                post(Lang.f("Installing %s… confirm on the install prompt.", name), true);
+                installWithPrompt(apk, pkg);
+            }
+        }, "Install failed: %s");
     }
 
     /**
@@ -158,13 +182,15 @@ final class Updater {
 
     private interface Task { void run() throws Exception; }
 
-    private void background(final Task task) {
+    private void background(final Task task) { background(task, "Update failed: %s"); }
+
+    private void background(final Task task, final String failure) {
         new Thread(new Runnable() {
             @Override public void run() {
                 try {
                     task.run();
                 } catch (Exception e) {
-                    post(Lang.f("Update failed: %s", e.getMessage() != null ? e.getMessage() : e), true);
+                    post(Lang.f(failure, e.getMessage() != null ? e.getMessage() : e), true);
                 }
             }
         }, "ThorPad update").start();
@@ -219,15 +245,15 @@ final class Updater {
     }
 
     /** Android's installer: it asks the user to confirm (and, the first time, to allow ThorPad). */
-    private void installWithPrompt(File apk) throws IOException {
+    private void installWithPrompt(File apk, String pkg) throws IOException {
         PackageInstaller installer = context.getPackageManager().getPackageInstaller();
         PackageInstaller.SessionParams params =
                 new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        params.setAppPackageName(context.getPackageName());
+        params.setAppPackageName(pkg);
         int id = installer.createSession(params);
         PackageInstaller.Session session = installer.openSession(id);
         try {
-            OutputStream out = session.openWrite("ThorPad.apk", 0, apk.length());
+            OutputStream out = session.openWrite(apk.getName(), 0, apk.length());
             InputStream in = new FileInputStream(apk);
             try {
                 copy(in, out);

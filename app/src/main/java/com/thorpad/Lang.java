@@ -572,5 +572,100 @@ final class Lang {
                 "Shizuku konnte es nicht installieren (%s), versuche Androids Installer.",
                 "O Shizuku não conseguiu instalar (%s), a tentar o instalador do Android.",
                 "Shizuku non è riuscito a installarlo (%s), provo con il programma di installazione di Android.");
+        // First-run setup
+        e("Welcome to ThorPad 👋", "Te damos la bienvenida a ThorPad 👋", "Bienvenue dans ThorPad 👋",
+                "Willkommen bei ThorPad 👋", "Bem-vindo ao ThorPad 👋", "Benvenuto in ThorPad 👋");
+        e("Four quick steps for the real mouse. Each button does the work for you.",
+                "Cuatro pasos rápidos para el ratón real. Cada botón lo hace por ti.",
+                "Quatre étapes rapides pour la vraie souris. Chaque bouton s'en charge pour vous.",
+                "Vier schnelle Schritte für die echte Maus. Jeder Knopf erledigt das für dich.",
+                "Quatro passos rápidos para o rato real. Cada botão faz o trabalho por si.",
+                "Quattro passaggi rapidi per il mouse vero. Ogni pulsante fa tutto per te.");
+        e("Touch mode works in regular Android apps. Games won't get a real mouse.",
+                "El modo táctil funciona en apps normales de Android. Los juegos no recibirán un ratón real.",
+                "Le mode tactile marche dans les applis Android normales. Les jeux n'auront pas de vraie souris.",
+                "Der Touch-Modus funktioniert in normalen Android-Apps. Spiele bekommen keine echte Maus.",
+                "O modo de toque funciona em apps Android normais. Os jogos não recebem um rato real.",
+                "La modalità touch funziona nelle normali app Android. I giochi non avranno un mouse vero.");
+        e("Get Shizuku", "Obtener Shizuku", "Obtenir Shizuku", "Shizuku holen", "Obter o Shizuku", "Scarica Shizuku");
+        e("Shizuku installed", "Shizuku instalado", "Shizuku installé", "Shizuku installiert", "Shizuku instalado",
+                "Shizuku installato");
+        e("Lets ThorPad act as a real USB mouse and keyboard",
+                "Permite que ThorPad actúe como un ratón y teclado USB reales",
+                "Permet à ThorPad d'agir comme une vraie souris et un vrai clavier USB",
+                "Damit arbeitet ThorPad wie eine echte USB-Maus und -Tastatur",
+                "Permite ao ThorPad funcionar como um rato e teclado USB reais",
+                "Permette a ThorPad di agire come un vero mouse e tastiera USB");
+        e("Download", "Descargar", "Télécharger", "Herunterladen", "Transferir", "Scarica");
+        e("Downloading…", "Descargando…", "Téléchargement…", "Wird geladen…", "A transferir…", "Download…");
+        e("Start Shizuku", "Iniciar Shizuku", "Démarrer Shizuku", "Shizuku starten", "Iniciar o Shizuku", "Avvia Shizuku");
+        e("Shizuku running", "Shizuku en marcha", "Shizuku démarré", "Shizuku läuft", "Shizuku a funcionar",
+                "Shizuku in esecuzione");
+        e("Turn on Wireless debugging, then tap Start in Shizuku. ThorPad notices by itself.",
+                "Activa la depuración inalámbrica y toca Iniciar en Shizuku. ThorPad lo detecta solo.",
+                "Activez le débogage sans fil, puis touchez Démarrer dans Shizuku. ThorPad le remarque tout seul.",
+                "Schalte kabelloses Debugging ein und tippe in Shizuku auf Starten. ThorPad merkt es von selbst.",
+                "Ative a depuração sem fios e toque em Iniciar no Shizuku. O ThorPad deteta sozinho.",
+                "Attiva il debug wireless, poi tocca Avvia in Shizuku. ThorPad se ne accorge da solo.");
+        e("First turn on developer options: tap Build number 7 times. Then start Shizuku with Wireless debugging.",
+                "Primero activa las opciones de desarrollador: toca Número de compilación 7 veces. Luego inicia Shizuku con la depuración inalámbrica.",
+                "Activez d'abord les options pour les développeurs : touchez 7 fois Numéro de build. Puis démarrez Shizuku avec le débogage sans fil.",
+                "Schalte zuerst die Entwickleroptionen ein: tippe 7-mal auf Build-Nummer. Starte dann Shizuku mit kabellosem Debugging.",
+                "Primeiro ative as opções de programador: toque 7 vezes em Número de compilação. Depois inicie o Shizuku com a depuração sem fios.",
+                "Prima attiva le opzioni sviluppatore: tocca 7 volte Numero build. Poi avvia Shizuku con il debug wireless.");
+        e("Wireless debugging", "Depuración inalámbrica", "Débogage sans fil", "Kabelloses Debugging",
+                "Depuração sem fios", "Debug wireless");
+        e("Developer options", "Opciones de desarrollador", "Options pour les développeurs", "Entwickleroptionen",
+                "Opções de programador", "Opzioni sviluppatore");
+        e("Tap Build number 7 times to turn on developer options",
+                "Toca Número de compilación 7 veces para activar las opciones de desarrollador",
+                "Touchez 7 fois Numéro de build pour activer les options pour les développeurs",
+                "Tippe 7-mal auf Build-Nummer, um die Entwickleroptionen einzuschalten",
+                "Toque 7 vezes em Número de compilação para ativar as opções de programador",
+                "Tocca 7 volte Numero build per attivare le opzioni sviluppatore");
+        e("Allow ThorPad", "Permitir ThorPad", "Autoriser ThorPad", "ThorPad erlauben", "Permitir o ThorPad",
+                "Consenti ThorPad");
+        e("ThorPad allowed", "ThorPad permitido", "ThorPad autorisé", "ThorPad erlaubt", "ThorPad permitido",
+                "ThorPad consentito");
+        e("One tap in Shizuku's prompt", "Un toque en el aviso de Shizuku", "Un appui dans la demande de Shizuku",
+                "Ein Tipp in Shizukus Abfrage", "Um toque no aviso do Shizuku", "Un tocco nella richiesta di Shizuku");
+        e("Allow", "Permitir", "Autoriser", "Erlauben", "Permitir", "Consenti");
+        e("Text boxes on the top screen open the keyboard here",
+                "Los cuadros de texto de la pantalla superior abren el teclado aquí",
+                "Les zones de texte de l'écran du haut ouvrent le clavier ici",
+                "Textfelder auf dem oberen Bildschirm öffnen die Tastatur hier",
+                "As caixas de texto do ecrã superior abrem o teclado aqui",
+                "Le caselle di testo dello schermo superiore aprono la tastiera qui");
+        e("Turn on", "Activar", "Activer", "Einschalten", "Ativar", "Attiva");
+        e("No Shizuku?", "¿Sin Shizuku?", "Pas de Shizuku ?", "Kein Shizuku?", "Sem Shizuku?", "Niente Shizuku?");
+        e("Use touch mode instead", "Usa el modo táctil", "Utilisez le mode tactile", "Nimm den Touch-Modus",
+                "Use o modo de toque", "Usa la modalità touch");
+        e("(fine for regular apps, not games)", "(bien para apps normales, no para juegos)",
+                "(bien pour les applis normales, pas les jeux)", "(gut für normale Apps, nicht für Spiele)",
+                "(bom para apps normais, não para jogos)", "(va bene per le app normali, non per i giochi)");
+        e("Use the real mouse instead", "Usar el ratón real", "Utiliser la vraie souris", "Doch die echte Maus nehmen",
+                "Usar o rato real", "Usa il mouse vero");
+        e("Skip for now", "Omitir por ahora", "Passer pour l'instant", "Jetzt überspringen", "Saltar por agora",
+                "Salta per ora");
+        e("Allow restricted settings", "Permitir ajustes restringidos", "Autoriser les paramètres restreints",
+                "Eingeschränkte Einstellungen zulassen", "Permitir definições restritas", "Consenti impostazioni con limitazioni");
+        e("Only if Android says the setting is restricted: tap ⋮ at the top right, then Allow restricted settings",
+                "Solo si Android dice que el ajuste está restringido: toca ⋮ arriba a la derecha y luego Permitir ajustes restringidos",
+                "Seulement si Android dit que le paramètre est restreint : touchez ⋮ en haut à droite, puis Autoriser les paramètres restreints",
+                "Nur wenn Android sagt, die Einstellung sei eingeschränkt: tippe oben rechts auf ⋮, dann auf Eingeschränkte Einstellungen zulassen",
+                "Só se o Android disser que a definição está restrita: toque em ⋮ no canto superior direito e depois em Permitir definições restritas",
+                "Solo se Android dice che l'impostazione è limitata: tocca ⋮ in alto a destra, poi Consenti impostazioni con limitazioni");
+        e("Turn on ThorPad trackpad", "Activa ThorPad trackpad", "Activez ThorPad trackpad", "ThorPad trackpad einschalten",
+                "Ative o ThorPad trackpad", "Attiva ThorPad trackpad");
+        e("Touch mode on", "Modo táctil activado", "Mode tactile activé", "Touch-Modus an", "Modo de toque ativado",
+                "Modalità touch attiva");
+        e("In Accessibility settings, turn on ThorPad trackpad",
+                "En los ajustes de accesibilidad, activa ThorPad trackpad",
+                "Dans les paramètres d'accessibilité, activez ThorPad trackpad",
+                "Schalte in den Bedienungshilfen ThorPad trackpad ein",
+                "Nas definições de acessibilidade, ative o ThorPad trackpad",
+                "Nelle impostazioni di accessibilità, attiva ThorPad trackpad");
+        e("Install failed: %s", "La instalación falló: %s", "Échec de l'installation : %s",
+                "Installation fehlgeschlagen: %s", "A instalação falhou: %s", "Installazione non riuscita: %s");
     }
 }

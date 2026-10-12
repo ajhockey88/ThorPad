@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.widget.Toast;
 
-/** Hears back from Android's installer during an update and shows its confirm prompt. */
+/** Hears back from Android's installer during an update or setup and shows its confirm prompt. */
 public class InstallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -19,7 +19,7 @@ public class InstallReceiver extends BroadcastReceiver {
             }
         } else if (status != PackageInstaller.STATUS_SUCCESS) {
             String msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
-            Toast.makeText(context, "ThorPad update failed" + (msg != null ? ": " + msg : ""),
+            Toast.makeText(context, Lang.f("Install failed: %s", msg != null ? msg : "?"),
                     Toast.LENGTH_LONG).show();
         }
     }

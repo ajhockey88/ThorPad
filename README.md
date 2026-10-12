@@ -26,7 +26,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
 | <img src="docs/screenshots/mode-menu.png?v=1.9" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt, Shift and Win"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
-| <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9" width="400" alt="Setup screen"> |
+| <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
 
 ## 👆 Gestures
 
@@ -160,12 +160,17 @@ ThorPad uses mouse mode whenever Shizuku is running and has allowed it, and fall
 ## 📲 Install
 
 1. Copy `ThorPad.apk` to the Thor and open it to install.
-2. For mouse mode: install Shizuku, start it (Shizuku > Start via Wireless debugging), open
-   ThorPad, tap **Allow ThorPad in Shizuku** and allow it. Shizuku has to be started again after each reboot.
-3. For touch mode: tap **Accessibility settings** in ThorPad and turn on **ThorPad trackpad**.
-   If Android says the setting is restricted: Settings > Apps > ThorPad > ⋮ > **Allow restricted settings**, then try again.
-4. Optional: in ThorPad's Settings, tap **Use ThorPad keyboard**, so the
-   keyboard opens by itself for text boxes on the top screen.
+2. Open ThorPad. The setup checklist walks you through four steps, each with a button that does
+   the work:
+   - **Get Shizuku:** tap **Download** and ThorPad downloads Shizuku from its GitHub releases and opens
+     Android's install prompt.
+   - **Start Shizuku:** turn on Wireless debugging and tap **Start** in Shizuku. The buttons open both
+     for you, and ThorPad ticks the step off by itself. Shizuku has to be started again after each reboot.
+   - **Allow ThorPad:** one tap in Shizuku's prompt.
+   - **Use ThorPad keyboard:** one tap and ThorPad switches Android's keyboard to it, so the keyboard
+     opens by itself for text boxes on the top screen.
+3. No Shizuku? Tap **Use touch mode instead**: the checklist opens Accessibility settings to turn on
+   **ThorPad trackpad**, and App info for **Allow restricted settings** if Android asks for it.
 
 🔄 **Updating:** ThorPad tells you when it starts if a new version is out. You can also tap
 **Check for updates** at the bottom of ThorPad's Settings, or install the
@@ -205,7 +210,7 @@ version, shows the release notes (Markdown headers, bullets and bold), and on **
 Android's package installer (which asks to confirm) when Shizuku isn't allowed.
 
 🔒 ThorPad only goes online to check its GitHub releases (once each time it starts, and when you
-tap **Check for updates**) and to download a new APK when you choose to update. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
+tap **Check for updates**) and to download a new APK when you choose to update, plus Shizuku's GitHub releases when you tap **Download** in setup. Nothing else is sent anywhere. In touch mode it reads only the selected text box, to type into it, and nothing else on screen.
 
 ## 🙏 Credits
 

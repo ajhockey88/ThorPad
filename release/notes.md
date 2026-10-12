@@ -7,6 +7,7 @@
 - 🔡 **Accents:** hold a letter for its accented versions (hold `e` for é è ê ë), slide to one and lift. Hold `$` for € £ ¥, `?` for ¿ and `!` for ¡
 - 📖 **Spelling in every language:** each language has its own dictionary, which also adds missing accents (`tambien` → `también`, `nao` → `não`, `fur` → `für`) and French and Italian apostrophes (`cest` → `c'est`, `lanno` → `l'anno`)
 - 🗣️ **ThorPad speaks your language:** the menu buttons, settings, setup screen and update messages follow the keyboard language
+- 🚀 **One-tap setup:** a first-run checklist with four steps, each with a button that does the work. ThorPad downloads and installs Shizuku for you, opens Shizuku and Wireless debugging, asks for Shizuku's permission, and switches Android's keyboard to ThorPad. Each step ticks itself off. No Shizuku? One tap switches the checklist to touch mode
 - 🎨 **New look:** the menu is a floating pill with an icon on every button. Settings has sections as tabs down the left (Trackpad, Keyboard, Haptics, Gestures, Updates), and each setting is a card with a short title, a line explaining it, and a value chip on every slider. Haptics strength opens a vertical slider, and every Settings page has a Back button at the top right
 
 ---
@@ -25,7 +26,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
-- **1.9:** swipe-down menu, optional gesture hints, six keyboard languages with accents
+- **1.9:** swipe-down menu, six keyboard languages with accents, one-tap setup, a new look
 - **1.8:** smarter autocorrect, double-space period and auto-capitals
 - **1.7:** the keyboard opens and closes with text boxes
 - **1.6:** PC mode for Moonlight and other PC streaming, PC keys, mode menu, catch-up release notes
@@ -37,4 +38,6 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - **1.0:** first release: trackpad, real mouse through Shizuku, and a full-screen keyboard
 
 ## 📲 Install
-In ThorPad, open Settings > **Check for updates**, or download `ThorPad.apk` below and open it on the Thor to install over the old version. Your settings are kept.
+New to ThorPad? Download `ThorPad.apk` below, open it on the Thor to install, then open ThorPad and follow the setup checklist.
+
+Already have it? In ThorPad, open Settings > **Check for updates**, or download `ThorPad.apk` below and open it on the Thor to install over the old version. Your settings are kept.

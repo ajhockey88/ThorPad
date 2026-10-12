@@ -42,9 +42,9 @@ public class TrackpadActivity extends Activity
     static final String EXTRA_OPEN_KEYBOARD = "open_keyboard";
 
     private TrackpadView pad;
-    private View setupPanel;
-    private TextView mouseStatus;
-    private Button shizukuButton;
+    private SetupPanel setupPanel;
+    /** Setup was needed this time, so it stays up for its last step (the keyboard) once the pad works. */
+    private boolean setupShown;
     private TextView modeLabel;
     private VirtualMouse mouse;
     private VirtualKeyboard keyboardDevice;
@@ -660,78 +660,16 @@ public class TrackpadActivity extends Activity
         return b;
     }
 
-    private TextView panelText(String s, int sp, int alpha) {
-        TextView t = new TextView(this);
-        t.setText(Lang.t(s));
-        t.setTextSize(sp);
-        t.setTextColor(Color.argb(alpha, 255, 255, 255));
-        return t;
-    }
-
-    private Button panelButton(String s, View.OnClickListener l) {
-        Button b = new Button(this);
-        b.setText(Lang.t(s));
-        b.setAllCaps(false);
-        b.setOnClickListener(l);
-        return b;
-    }
-
     private View buildSetupPanel(float d) {
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Color.BLACK);
-        scroll.setClickable(true); // swallow touches so the pad underneath stays inert
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) (18 * d);
-        panel.setPadding(pad, pad, pad, pad);
-        scroll.addView(panel);
-
-        panel.addView(panelText("Real mouse mode (needed for GameNative games)", 16, 255));
-        mouseStatus = panelText("", 14, 190);
-        panel.addView(mouseStatus);
-        shizukuButton = panelButton("Allow ThorPad in Shizuku", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (mouseError != null) {
-                    mouseError = null;
-                    refresh();
-                } else if (ShizukuClient.isRunning()) {
-                    ShizukuClient.requestPermission();
-                } else {
-                    Intent i = getPackageManager().getLaunchIntentForPackage("moe.shizuku.privileged.api");
-                    if (i == null) {
-                        i = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/RikkaApps/Shizuku/releases"));
-                    }
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try { startActivity(i); } catch (RuntimeException ignored) { }
-                }
+        setupPanel = new SetupPanel(this, new SetupPanel.Host() {
+            @Override public void retryMouse() {
+                mouseError = null;
+                refresh();
             }
+
+            @Override public void refreshSetup() { refresh(); }
         });
-        panel.addView(shizukuButton);
-
-        TextView or = panelText("\nOr touch mode (no Shizuku; fine for normal Android apps, but games in GameNative won't get real mouse or scroll-wheel input)", 15, 255);
-        panel.addView(or);
-        panel.addView(panelText("Turn on \"ThorPad trackpad\" in Accessibility settings. If Android says the setting is restricted: Settings > Apps > ThorPad > ⋮ > Allow restricted settings, then try again.", 14, 190));
-        LinearLayout row = new LinearLayout(this);
-        row.addView(panelButton("Accessibility settings", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                Intent i = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
-        }));
-        row.addView(panelButton("ThorPad app info", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.parse("package:" + getPackageName()));
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
-        }));
-        panel.addView(row);
-
-        setupPanel = scroll;
-        return scroll;
+        return setupPanel;
     }
 
     @Override
@@ -1021,26 +959,13 @@ public class TrackpadActivity extends Activity
         }
         updateKeyboardDevice();
 
-        if (mouseError != null) {
-            mouseStatus.setText(Lang.f("The virtual mouse couldn't start: %s", mouseError));
-            shizukuButton.setText(Lang.t("Try again"));
-            shizukuButton.setVisibility(View.VISIBLE);
-        } else if (!ShizukuClient.isRunning()) {
-            mouseStatus.setText(Lang.t("Install Shizuku, start it (Wireless debugging works without a PC), then reopen ThorPad."));
-            shizukuButton.setText(Lang.t("Open Shizuku"));
-            shizukuButton.setVisibility(View.VISIBLE);
-        } else if (!shizukuReady) {
-            mouseStatus.setText(Lang.t("Shizuku is running. Allow ThorPad to use it."));
-            shizukuButton.setText(Lang.t("Allow ThorPad in Shizuku"));
-            shizukuButton.setVisibility(View.VISIBLE);
-        } else {
-            mouseStatus.setText(Lang.t("Ready."));
-            shizukuButton.setVisibility(View.GONE);
-        }
-
         boolean waitingForMouse = shizukuReady && mouseError == null && !mouse.isReady();
-        setupPanel.setVisibility(out != null || waitingForMouse ? View.GONE : View.VISIBLE);
-        if (out == null && started) {
+        boolean needed = out == null && !waitingForMouse;
+        if (needed) setupShown = true;
+        boolean show = needed || (setupShown && !setupPanel.skipped() && !setupPanel.keyboardInUse());
+        if (show) setupPanel.update(shizukuReady, mouseError, service != null, out != null);
+        setupPanel.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show && started) {
             // Keep checking while the user sets things up in other apps.
             setupPanel.removeCallbacks(recheck);
             setupPanel.postDelayed(recheck, 1000);
