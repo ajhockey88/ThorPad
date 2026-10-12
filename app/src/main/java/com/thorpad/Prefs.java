@@ -14,6 +14,7 @@ final class Prefs {
     static final String KEY_AUTOCORRECT = "autocorrect";
     static final String KEY_TYPE_ON_RELEASE = "type_on_release";
     static final String KEY_DIM_WHEN_IDLE = "dim_when_idle";
+    static final String KEY_KEYBOARD_BUTTON = "keyboard_button";
     static final String KEY_DOUBLE_SPACE = "double_space_period";
     static final String KEY_AUTO_CAPS = "auto_caps";
     static final String KEY_SHOW_HINTS = "show_hints";
@@ -52,6 +53,8 @@ final class Prefs {
     boolean typeOnRelease() { return sp.getBoolean(KEY_TYPE_ON_RELEASE, false); }
     /** Turn the trackpad screen's brightness right down after a while without a touch. */
     boolean dimWhenIdle() { return sp.getBoolean(KEY_DIM_WHEN_IDLE, true); }
+    /** A small keyboard button in the trackpad's bottom-right corner. */
+    boolean keyboardButton() { return sp.getBoolean(KEY_KEYBOARD_BUTTON, false); }
     /** Gesture hints drawn along the bottom of the trackpad. */
     boolean showHints() { return sp.getBoolean(KEY_SHOW_HINTS, false); }
     /** Keyboard and app language: en, es, fr, de, pt or it. */

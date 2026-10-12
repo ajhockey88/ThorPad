@@ -3,10 +3,12 @@ package com.thorpad;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +45,8 @@ public class TrackpadActivity extends Activity
 
     private TrackpadView pad;
     private SetupPanel setupPanel;
+    /** Settings > Keyboard button: a small shortcut to the keyboard in the trackpad's corner. */
+    private View keyButton;
     /** Setup was needed this time, so it stays up for its last step (the keyboard) once the pad works. */
     private boolean setupShown;
     private TextView modeLabel;
@@ -184,6 +188,19 @@ public class TrackpadActivity extends Activity
                 Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         shp.topMargin = (int) (38 * d);
         padArea.addView(swipeHint, shp);
+        keyButton = new KeyButton(this);
+        keyButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Haptics.play(TrackpadActivity.this, Haptics.BAR);
+                keyboardForTextBox = false;
+                stepAsideAfterKeyboard = false;
+                openKeyboard();
+            }
+        });
+        int kb = (int) (42 * d);
+        FrameLayout.LayoutParams klp = new FrameLayout.LayoutParams(kb, kb, Gravity.BOTTOM | Gravity.END);
+        klp.rightMargin = klp.bottomMargin = (int) (16 * d);
+        padArea.addView(keyButton, klp);
         padArea.addView(buildSetupPanel(d), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -772,6 +789,7 @@ public class TrackpadActivity extends Activity
         checkTopApp(true);
         refresh();
         pad.invalidate(); // the hints setting may have changed
+        keyButton.setVisibility(new Prefs(this).keyboardButton() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -1008,5 +1026,46 @@ public class TrackpadActivity extends Activity
             if (me.equals(ComponentName.unflattenFromString(s))) return true;
         }
         return false;
+    }
+
+    /** A faint round button with a keyboard outline, drawn so it stays quiet on the black pad. */
+    private static final class KeyButton extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final RectF r = new RectF();
+
+        KeyButton(Context c) {
+            super(c);
+            setContentDescription(Lang.t("Keyboard"));
+        }
+
+        @Override protected void onDraw(Canvas canvas) {
+            float w = getWidth(), h = getHeight(), d = getResources().getDisplayMetrics().density;
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(isPressed() ? Color.argb(40, 255, 255, 255) : Color.argb(15, 255, 255, 255));
+            canvas.drawCircle(w / 2, h / 2, w / 2 - d, paint);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(d);
+            paint.setColor(Color.argb(30, 255, 255, 255));
+            canvas.drawCircle(w / 2, h / 2, w / 2 - d, paint);
+            // The keyboard: an outline, two rows of dots and a space bar.
+            float kw = w * 0.5f, kh = h * 0.32f, x0 = (w - kw) / 2, y0 = (h - kh) / 2;
+            paint.setColor(Color.argb(140, 255, 255, 255));
+            paint.setStrokeWidth(1.2f * d);
+            r.set(x0, y0, x0 + kw, y0 + kh);
+            canvas.drawRoundRect(r, 2 * d, 2 * d, paint);
+            paint.setStyle(Paint.Style.FILL);
+            float dot = 0.9f * d;
+            for (int i = 0; i < 5; i++) canvas.drawCircle(x0 + kw * (0.18f + 0.16f * i), y0 + kh * 0.3f, dot, paint);
+            canvas.drawCircle(x0 + kw * 0.18f, y0 + kh * 0.55f, dot, paint);
+            canvas.drawCircle(x0 + kw * 0.82f, y0 + kh * 0.55f, dot, paint);
+            paint.setStrokeWidth(1.2f * d);
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawLine(x0 + kw * 0.32f, y0 + kh * 0.78f, x0 + kw * 0.68f, y0 + kh * 0.78f, paint);
+        }
+
+        @Override protected void drawableStateChanged() {
+            super.drawableStateChanged();
+            invalidate(); // pressed look
+        }
     }
 }

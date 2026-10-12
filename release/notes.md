@@ -2,6 +2,7 @@
 
 ## ✨ What's new in 1.9
 - 👇 **Swipe-down menu:** the menu buttons are hidden so the whole bottom screen is trackpad. Swipe down from the top edge (where the small handle is) to show Keyboard, the mode menu, PC keys, Settings and Close. They hide again when you touch the trackpad or after 5 seconds, and the swipe never moves the pointer. For the first 10 seconds after ThorPad opens, a small hint at the top says where the menu is
+- ⌨️ **Keyboard button:** turn on **Keyboard button** in Settings > Trackpad for a small button in the trackpad's bottom-right corner that opens the keyboard in one tap
 - 💡 **Gesture hints are now optional:** the cheat sheet along the bottom of the trackpad is off by default. Turn on **Show gesture hints** in Settings to bring it back
 - 🌐 **Keyboard languages:** pick English, Español, Français, Deutsch, Português or Italiano in Settings > **Keyboard language**. Each has its own letters: ñ for Spanish, AZERTY for French, QWERTZ with ü ö ä for German, ç for Portuguese
 - 🔡 **Accents:** hold a letter for its accented versions (hold `e` for é è ê ë), slide to one and lift. Hold `$` for € £ ¥, `?` for ¿ and `!` for ¡

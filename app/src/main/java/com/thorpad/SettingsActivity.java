@@ -171,6 +171,8 @@ public class SettingsActivity extends Activity {
                 slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
                 slider("Scroll speed", Prefs.KEY_SCROLL_SPEED, prefs.scrollSpeed(), 0.5f, 5f, false);
                 slider("Pointer size", Prefs.KEY_POINTER_SIZE, prefs.pointerSize(), 0.6f, 2.5f, true);
+                toggle("Keyboard button", "A small button in the bottom-right corner of the trackpad opens the keyboard",
+                        Prefs.KEY_KEYBOARD_BUTTON, prefs.keyboardButton(), false);
                 toggle("Classic scroll direction", "Fingers down scrolls down, like a mouse wheel",
                         Prefs.KEY_INVERT_SCROLL, prefs.invertScroll(), false);
                 toggle("Swap screens", "Pointer on the bottom, trackpad on top. Reopen ThorPad after changing.",

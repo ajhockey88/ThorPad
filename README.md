@@ -141,6 +141,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
 - 💡 **Show gesture hints** (off by default): the gesture cheat sheet along the bottom of the trackpad
 - 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
+- ⌨️ **Keyboard button** (off by default): a small button in the bottom-right corner of the trackpad that opens the keyboard, without the swipe-down menu
 - 🌐 **Keyboard language:** English, Español, Français, Deutsch, Português or Italiano, for the keys, the dictionary and ThorPad's own buttons and settings
 - ✨ **Autocorrect**, **double-space period** and **auto-capitals**, each on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)

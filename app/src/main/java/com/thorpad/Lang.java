@@ -722,5 +722,12 @@ final class Lang {
         e("Recent apps", "Apps recientes", "Apps récentes", "Letzte Apps", "Apps recentes", "App recenti");
         e("Close all apps", "Cerrar todas", "Tout fermer", "Alle schließen", "Fechar todas", "Chiudi tutte");
         e("Show menu", "Mostrar menú", "Afficher le menu", "Menü zeigen", "Mostrar menu", "Mostra menu");
+        e("Keyboard button", "Botón de teclado", "Bouton clavier", "Tastatur-Knopf", "Botão do teclado", "Pulsante tastiera");
+        e("A small button in the bottom-right corner of the trackpad opens the keyboard",
+                "Un botón pequeño en la esquina inferior derecha del trackpad abre el teclado",
+                "Un petit bouton dans le coin inférieur droit du trackpad ouvre le clavier",
+                "Ein kleiner Knopf unten rechts auf dem Trackpad öffnet die Tastatur",
+                "Um pequeno botão no canto inferior direito do trackpad abre o teclado",
+                "Un piccolo pulsante in basso a destra del trackpad apre la tastiera");
     }
 }
