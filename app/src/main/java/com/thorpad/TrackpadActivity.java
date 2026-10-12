@@ -425,16 +425,21 @@ public class TrackpadActivity extends Activity
     // touch starts (at most every few seconds), never in the background.
 
     private static final long TOP_CHECK_EVERY_MS = 3000;
+    /** With usage events to say nothing changed, a check costs almost nothing, so it can run more often. */
+    private static final long TOP_CHECK_GATED_MS = 1000;
     private HandlerThread topThread;
     private Handler topHandler;
     private long lastTopCheck;
+    /** Wall-clock time of the last dumpsys, for asking Android which apps came up since. */
+    private volatile long lastTopDump;
+    private volatile boolean usageEvents, usageAsked;
     private String topPackage, topLabel;
     private boolean topStreamsPc;
 
-    private void checkTopApp(boolean force) {
+    private void checkTopApp(final boolean force) {
         if (!mouse.isReady() || new Prefs(this).pcMode() != Prefs.PC_AUTO) return;
         long now = SystemClock.uptimeMillis();
-        if (!force && now - lastTopCheck < TOP_CHECK_EVERY_MS) return;
+        if (!force && now - lastTopCheck < (usageEvents ? TOP_CHECK_GATED_MS : TOP_CHECK_EVERY_MS)) return;
         lastTopCheck = now;
         if (topThread == null) {
             topThread = new HandlerThread("ThorPad top app");
@@ -445,7 +450,23 @@ public class TrackpadActivity extends Activity
         final int displayId = target != null ? target.getDisplayId() : Display.DEFAULT_DISPLAY;
         topHandler.post(new Runnable() {
             @Override public void run() {
+                // dumpsys makes Android list every activity, which is the costly part of this
+                // check. Usage events say whether any app came up since the last one; when none
+                // did, the answer can't have changed.
+                // The first check has no "since" to ask about, so it just looks.
+                long since = lastTopDump > 0 ? lastTopDump - 1000 : System.currentTimeMillis();
+                Boolean switched = TopApp.switchedSince(TrackpadActivity.this, since);
+                if (switched == null && !usageAsked) {
+                    usageAsked = true;
+                    TopApp.allowUsageEvents(TrackpadActivity.this);
+                    switched = TopApp.switchedSince(TrackpadActivity.this, since);
+                }
+                usageEvents = switched != null;
+                if (!force && lastTopDump > 0 && Boolean.FALSE.equals(switched)) return;
+                lastTopDump = System.currentTimeMillis();
                 final String[] top = TopApp.on(displayId);
+                // No clear answer (mid-switch, or ThorPad itself): look again next time.
+                if (top == null || top[0].equals(getPackageName())) lastTopDump = 0;
                 runOnUiThread(new Runnable() {
                     @Override public void run() { onTopApp(top); }
                 });

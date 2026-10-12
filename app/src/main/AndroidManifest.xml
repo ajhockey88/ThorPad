@@ -12,6 +12,8 @@
     <!-- Only for GitHub: ThorPad updates, and the Shizuku download in setup. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Allowed through Shizuku: lets the PC-app check skip work when no app has switched. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- Setup checks for Shizuku and opens it (Android hides other apps without this). -->
     <queries>

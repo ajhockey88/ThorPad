@@ -61,11 +61,13 @@ only, as the shortcuts go through the virtual keyboard):
 | 🤟 Three fingers swiped down | Show the desktop (Win+D) |
 | 🤟 Three fingers swiped left or right | Switch app (Alt+Tab) |
 
-- ✨ **Mode menu** (second button in the top bar): **Auto** switches to PC controls whenever
+- ✨ **Mode menu** (in the swipe-down menu): **Auto** switches to PC controls whenever
   Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on the top screen;
   **Android** and **PC** fix the mode. **Always PC for (app)** adds any other app. **Go home**
   shows the Android home screen. In Auto, ThorPad checks the top-screen app when you start
-  touching the trackpad (at most every few seconds), never in the background.
+  touching the trackpad, never in the background. It first asks Android whether any app has
+  come to the front since the last check (app usage events, allowed through Shizuku and read only
+  on the Thor), and only looks up the top-screen app when one has.
 - 🖥️ **PC keys** (third button): Esc, F1 to F12, one-tap Alt+Tab, Win+Tab, Win+D, Alt+F4,
   Ctrl+Shift+Esc and Print Screen, Home / End / Page Up / Page Down / Delete / Backspace and arrows.
   Ctrl, Alt, Shift and Win stay held after a tap and go with the next key, for any combo.

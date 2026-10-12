@@ -51,6 +51,33 @@ final class TopApp {
     }
 
     /**
+     * Whether another app came to the front since the given time (System.currentTimeMillis()),
+     * from Android's app usage events: a cheap check that lets ThorPad skip the dumpsys in on()
+     * when nothing changed. null when ThorPad isn't allowed to read usage events.
+     */
+    static Boolean switchedSince(Context context, long since) {
+        android.app.AppOpsManager ops = (android.app.AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        if (ops.unsafeCheckOpNoThrow(android.app.AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(),
+                context.getPackageName()) != android.app.AppOpsManager.MODE_ALLOWED) return null;
+        android.app.usage.UsageStatsManager usm =
+                (android.app.usage.UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        android.app.usage.UsageEvents events = usm.queryEvents(since, System.currentTimeMillis());
+        if (events == null) return null;
+        android.app.usage.UsageEvents.Event e = new android.app.usage.UsageEvents.Event();
+        while (events.hasNextEvent()) {
+            events.getNextEvent(e);
+            if (e.getEventType() == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED
+                    && !context.getPackageName().equals(e.getPackageName())) return true;
+        }
+        return false;
+    }
+
+    /** Lets ThorPad read app usage events (for switchedSince), through Shizuku. Off the main thread. */
+    static void allowUsageEvents(Context context) {
+        ShizukuClient.runShell("appops set " + context.getPackageName() + " GET_USAGE_STATS allow");
+    }
+
+    /**
      * The app on the given display: {package, activity class}, or null. Needs Shizuku and runs
      * a shell command, so call it off the main thread.
      */
