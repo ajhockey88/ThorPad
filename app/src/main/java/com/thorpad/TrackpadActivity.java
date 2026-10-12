@@ -105,40 +105,55 @@ public class TrackpadActivity extends Activity
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.BLACK);
 
-        // The menu buttons stay hidden; a swipe down from the top edge slides them in.
+        // The menu buttons stay hidden; a swipe down from the top edge slides in a floating
+        // pill of them.
         LinearLayout bar = new LinearLayout(this);
         menuBar = bar;
         bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setPadding((int) (6 * d), (int) (6 * d), (int) (6 * d), (int) (6 * d));
+        bar.setGravity(Gravity.CENTER_VERTICAL);
+        bar.setPadding((int) (4 * d), (int) (4 * d), (int) (4 * d), (int) (4 * d));
         GradientDrawable barBg = new GradientDrawable();
-        barBg.setColor(Color.rgb(0x10, 0x11, 0x14));
-        barBg.setCornerRadii(new float[] {0, 0, 0, 0, 14 * d, 14 * d, 14 * d, 14 * d});
+        barBg.setColor(Color.rgb(0x11, 0x13, 0x18));
+        barBg.setStroke(Math.max(1, (int) (0.8f * d)), Color.rgb(0x22, 0x26, 0x2f));
+        barBg.setCornerRadius(26 * d);
         bar.setBackground(barBg);
-        bar.setElevation(12 * d);
+        bar.setElevation(14 * d);
         bar.setVisibility(View.GONE);
-        bar.addView(barButton("Keyboard", new View.OnClickListener() {
+        bar.addView(barButton("⌨️", "Keyboard", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 keyboardForTextBox = false;
                 stepAsideAfterKeyboard = false;
                 openKeyboard();
             }
         }), weight());
-        modeButton = barButton("", new View.OnClickListener() {
+        bar.addView(separator(d));
+        modeButton = barButton(null, "", new View.OnClickListener() {
             @Override public void onClick(View v) { showModeMenu(); }
         });
+        // The mode button stands out: it shows which controls the gestures use.
+        GradientDrawable modeBg = new GradientDrawable();
+        modeBg.setColor(Color.rgb(0x16, 0x28, 0x3a));
+        modeBg.setCornerRadius(22 * d);
+        modeButton.setBackground(modeBg);
+        modeButton.setTextColor(Color.rgb(0xbf, 0xe6, 0xff));
         bar.addView(modeButton, weight());
-        bar.addView(barButton("PC keys", new View.OnClickListener() {
+        bar.addView(separator(d));
+        bar.addView(barButton("🎛️", "PC keys", new View.OnClickListener() {
             @Override public void onClick(View v) { openPcKeys(); }
         }), weight());
-        bar.addView(barButton("Settings", new View.OnClickListener() {
+        bar.addView(separator(d));
+        bar.addView(barButton("⚙️", "Settings", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 hideMenu();
                 startActivity(new Intent(TrackpadActivity.this, SettingsActivity.class));
             }
         }), weight());
-        bar.addView(barButton("Close", new View.OnClickListener() {
+        bar.addView(separator(d));
+        Button close = barButton("✕", "Close", new View.OnClickListener() {
             @Override public void onClick(View v) { finishAndRemoveTask(); }
-        }), weight());
+        });
+        close.setTextColor(Color.rgb(0xff, 0xb3, 0xba));
+        bar.addView(close, weight());
 
         FrameLayout padArea = new FrameLayout(this);
         pad = new TrackpadView(this);
@@ -177,8 +192,10 @@ public class TrackpadActivity extends Activity
         FrameLayout frame = new FrameLayout(this);
         frame.addView(root, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        frame.addView(bar, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) (58 * d), Gravity.TOP));
+        FrameLayout.LayoutParams blp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, (int) (52 * d), Gravity.TOP);
+        blp.setMargins((int) (10 * d), (int) (10 * d), (int) (10 * d), 0);
+        frame.addView(bar, blp);
         keyboard = new KeyboardView(this);
         keyboard.setListener(this);
         keyboard.setVisibility(View.GONE);
@@ -338,7 +355,7 @@ public class TrackpadActivity extends Activity
         hideSwipeHint();
         Haptics.play(this, Haptics.BAR);
         menuBar.setVisibility(View.VISIBLE);
-        float h = 58 * getResources().getDisplayMetrics().density;
+        float h = 70 * getResources().getDisplayMetrics().density;
         menuBar.setTranslationY(-h);
         menuBar.animate().translationY(0).setDuration(160).start();
         idleHandler.removeCallbacks(menuTimeout);
@@ -349,7 +366,7 @@ public class TrackpadActivity extends Activity
         idleHandler.removeCallbacks(menuTimeout);
         if (!menuShowing()) return;
         if (modeMenu != null) modeMenu.dismiss();
-        float h = menuBar.getHeight();
+        float h = menuBar.getBottom() + 8 * getResources().getDisplayMetrics().density;
         menuBar.animate().translationY(-h).setDuration(140).withEndAction(new Runnable() {
             @Override public void run() { menuBar.setVisibility(View.GONE); }
         }).start();
@@ -367,7 +384,7 @@ public class TrackpadActivity extends Activity
             ((View) menuBar.getParent()).getLocationInWindow(at);
             float y = ev.getY() - at[1];
             if (menuShowing()) {
-                if (y <= menuBar.getHeight()) {
+                if (y <= menuBar.getBottom()) {
                     idleHandler.removeCallbacks(menuTimeout);
                     idleHandler.postDelayed(menuTimeout, MENU_HIDE_MS);
                     return false; // a menu button
@@ -607,20 +624,32 @@ public class TrackpadActivity extends Activity
 
     private static LinearLayout.LayoutParams weight() {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-        lp.setMargins(4, 0, 4, 0);
+        lp.setMargins(2, 0, 2, 0);
         return lp;
     }
 
-    private Button barButton(String text, final View.OnClickListener listener) {
+    /** The thin line between two buttons in the menu pill. */
+    private View separator(float d) {
+        View v = new View(this);
+        v.setBackgroundColor(Color.rgb(0x22, 0x26, 0x2f));
+        v.setLayoutParams(new LinearLayout.LayoutParams(Math.max(1, (int) (0.8f * d)), (int) (20 * d)));
+        return v;
+    }
+
+    /** A menu button: an emoji, then its label in the keyboard language. */
+    private Button barButton(String icon, String text, final View.OnClickListener listener) {
         Button b = new Button(this);
-        b.setText(Lang.t(text));
+        b.setText(icon == null ? Lang.t(text) : icon + "  " + Lang.t(text));
         b.setAllCaps(false);
-        b.setTextSize(13);
-        b.setTextColor(Color.argb(200, 255, 255, 255));
+        b.setSingleLine(true);
+        b.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        b.setTextSize(14);
+        b.setTextColor(Color.rgb(0xd8, 0xdc, 0xe3));
         b.setPadding(0, 0, 0, 0);
+        b.setStateListAnimator(null);
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(Color.rgb(28, 28, 32));
-        bg.setCornerRadius(10 * getResources().getDisplayMetrics().density);
+        bg.setColor(Color.TRANSPARENT);
+        bg.setCornerRadius(22 * getResources().getDisplayMetrics().density);
         b.setBackground(bg);
         b.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
