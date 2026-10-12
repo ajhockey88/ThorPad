@@ -719,5 +719,8 @@ final class Lang {
         e("Close app", "Cerrar app", "Fermer l'app", "App schließen", "Fechar app", "Chiudi app");
         e("Close all", "Cerrar todas", "Tout fermer", "Alle schließen", "Fechar todas", "Chiudi tutte");
         e("PC gestures need mouse mode (Shizuku)", "Los gestos de PC necesitan el modo ratón (Shizuku)", "Les gestes PC nécessitent le mode souris (Shizuku)", "PC-Gesten brauchen den Mausmodus (Shizuku)", "Os gestos de PC precisam do modo rato (Shizuku)", "I gesti PC richiedono la modalità mouse (Shizuku)");
+        e("Recent apps", "Apps recientes", "Apps récentes", "Letzte Apps", "Apps recentes", "App recenti");
+        e("Close all apps", "Cerrar todas", "Tout fermer", "Alle schließen", "Fechar todas", "Chiudi tutte");
+        e("Show menu", "Mostrar menú", "Afficher le menu", "Menü zeigen", "Mostrar menu", "Mostra menu");
     }
 }

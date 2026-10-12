@@ -26,7 +26,7 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
 | <img src="docs/screenshots/mode-menu.png?v=1.9" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9.3" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt and Shift"> |
 | 👆 Gestures in Settings | 🖥️ Gestures in PC mode |
-| <img src="docs/screenshots/gestures.png?v=1.9" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9" width="400" alt="Gestures page in Settings, PC tab"> |
+| <img src="docs/screenshots/gestures.png?v=1.9.4" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9.4" width="400" alt="Gestures page in Settings, PC tab"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
 | <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
 

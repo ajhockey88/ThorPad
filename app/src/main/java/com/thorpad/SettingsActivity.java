@@ -298,8 +298,7 @@ public class SettingsActivity extends Activity {
     // ---- Keyboard language ---------------------------------------------------------------------
 
     // ---- Gestures ---------------------------------------------------------------------------
-    // An Android / PC switch, then the gestures in two columns of cards: one finger and the top
-    // edge on the left, two and three fingers on the right.
+    // An Android / PC switch, then a card per section: one, two and three fingers, and the top edge.
 
     /** The Gestures page's tab: 0 = Android, 1 = PC. Opens on PC when PC mode is always on. */
     private static int gestureTab = -1;
@@ -342,38 +341,39 @@ public class SettingsActivity extends Activity {
         slp.bottomMargin = (int) (10 * d);
         page.addView(seg, slp);
 
-        LinearLayout cols = new LinearLayout(this);
-        LinearLayout left = gestureCard(), right = gestureCard();
-        LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-        l.rightMargin = (int) (4 * d);
-        LinearLayout.LayoutParams r = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-        r.leftMargin = (int) (4 * d);
-        cols.addView(left, l);
-        cols.addView(right, r);
-        page.addView(cols);
+        LinearLayout one = gestureCard(), two = gestureCard(), three = gestureCard(), edge = gestureCard();
+        gestureGroup(one, "One finger");
+        gestureRow(one, "☝️", "Slide", null, "Move");
+        gestureRow(one, "👆", "Tap", null, "Click");
+        gestureRow(one, "✋", "Hold", null, touch && !pc ? "Long press" : "Right click");
+        gestureRow(one, "✊", "Tap, then slide", "touch again, then slide", "Drag");
 
-        gestureGroup(left, "One finger");
-        gestureRow(left, "☝️", "Slide", null, "Move");
-        gestureRow(left, "👆", "Tap", null, "Click");
-        gestureRow(left, "✋", "Hold", null, touch && !pc ? "Long press" : "Right click");
-        gestureRow(left, "✊", "Tap, then slide", "touch again, then slide", "Drag");
-        gestureGroup(left, "Top edge");
-        gestureRow(left, "👇", "Swipe down", "from the top edge", "Menu");
+        gestureGroup(two, "Two fingers");
+        gestureRow(two, "↕️", "Up / down", null, "Scroll");
+        gestureRow(two, "✌️", "Tap", null, touch && !pc ? "Back" : "Right click");
+        gestureRow(two, "👉", "Swipe right", pc ? Lang.f("sends %s", "Alt+←") : null, "Back");
+        gestureRow(two, "👈", "Swipe left", pc ? Lang.f("sends %s", "Alt+→") : null, "Forward");
 
-        gestureGroup(right, "Two fingers");
-        gestureRow(right, "↕️", "Up / down", null, "Scroll");
-        gestureRow(right, "✌️", "Tap", null, touch && !pc ? "Back" : "Right click");
-        gestureRow(right, "👉", "Swipe right", pc ? Lang.f("sends %s", "Alt+←") : null, "Back");
-        gestureRow(right, "👈", "Swipe left", pc ? Lang.f("sends %s", "Alt+→") : null, "Forward");
-        gestureGroup(right, "Three fingers");
+        gestureGroup(three, "Three fingers");
         if (pc) {
-            gestureRow(right, "⬆️", "Swipe up", "then swipe to pick, tap to open", "App switcher");
-            gestureRow(right, "⬇️", "Swipe down", Lang.f("sends %s", "Alt+Space, N"), "Minimize");
-            gestureRow(right, "↔️", "Sideways", Lang.f("sends %s", "Alt+Esc"), "Next window");
+            gestureRow(three, "⬆️", "Swipe up", "then swipe to pick, tap to open", "App switcher");
+            gestureRow(three, "⬇️", "Swipe down", Lang.f("sends %s", "Alt+Space, N"), "Minimize");
+            gestureRow(three, "↔️", "Sideways", Lang.f("sends %s", "Alt+Esc"), "Next window");
         } else {
-            gestureRow(right, "⬆️", "Swipe up", null, "Recents");
-            gestureRow(right, "⬇️", "Swipe down", null, touch ? "Home screen" : "Close app");
-            if (!touch) gestureRow(right, "🤟", "Tap", null, "Close all");
+            gestureRow(three, "⬆️", "Swipe up", null, "Recent apps");
+            gestureRow(three, "⬇️", "Swipe down", null, touch ? "Home screen" : "Close app");
+            if (!touch) gestureRow(three, "🤟", "Tap", null, "Close all apps");
+        }
+
+        gestureGroup(edge, "Top edge");
+        gestureRow(edge, "👇", "Swipe down", "from the top edge", "Show menu");
+
+        // One card per section, stacked; the page scrolls.
+        for (LinearLayout c : new LinearLayout[] {one, two, three, edge}) {
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.bottomMargin = (int) (7 * d);
+            page.addView(c, lp);
         }
         if (pc && touch) {
             TextView note = plain(Lang.t("PC gestures need mouse mode (Shizuku)"), 12, SUB);
