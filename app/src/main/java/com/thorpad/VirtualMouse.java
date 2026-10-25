@@ -6,7 +6,7 @@ package com.thorpad;
  * buttons and wheel notches.
  */
 final class VirtualMouse extends UinputDevice implements PadOutput {
-    private static final int REL_X = 0, REL_Y = 1, REL_HWHEEL = 6, REL_WHEEL = 8;
+    private static final int REL_X = 0, REL_Y = 1, REL_HWHEEL = 6, REL_WHEEL = 8, REL_WHEEL_HI_RES = 11;
     private static final int BTN_LEFT = 272, BTN_RIGHT = 273, BTN_MIDDLE = 274, BTN_SIDE = 275, BTN_EXTRA = 276;
     private static final int KEY_BACK = 158, KEY_HOMEPAGE = 172, KEY_APPSELECT = 580;
     /**
@@ -18,18 +18,27 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     private final float density;
     private float remX, remY;
     private float wheelAcc;
+    /** Hi-res wheel units (120 per notch) not sent yet, in smooth mode. */
+    private float hiResAcc;
+    /** Recent scroll speed in pixels per millisecond, for the glide after the finger lifts. */
+    private float velocity;
+    private long lastScrollAt;
+    private final android.os.Handler glide = new android.os.Handler(android.os.Looper.getMainLooper());
+    /** Smooth scrolling: small hi-res wheel steps, and a short glide after the finger lifts. */
+    volatile boolean smooth;
     private boolean leftHeld;
 
     VirtualMouse(float density, StateListener listener) {
         super("ThorPad Mouse", 22137,
                 bits(UI_SET_EVBIT, EV_KEY, EV_REL) + ","
                         + bits(UI_SET_KEYBIT, BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, BTN_SIDE, BTN_EXTRA, KEY_BACK, KEY_HOMEPAGE, KEY_APPSELECT) + ","
-                        + bits(UI_SET_RELBIT, REL_X, REL_Y, REL_WHEEL, REL_HWHEEL),
+                        + bits(UI_SET_RELBIT, REL_X, REL_Y, REL_WHEEL, REL_HWHEEL, REL_WHEEL_HI_RES),
                 listener);
         this.density = density;
     }
 
     @Override void stop() {
+        glide.removeCallbacks(glideStep);
         leftHeld = false;
         super.stop();
     }
@@ -159,7 +168,11 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
     }
 
     @Override public void scrollBegin() {
+        glide.removeCallbacks(glideStep);
         wheelAcc = 0;
+        hiResAcc = 0;
+        velocity = 0;
+        lastScrollAt = 0;
         wiggle(); // wake the pointer so the first notch isn't spent on it
     }
 
@@ -168,17 +181,69 @@ final class VirtualMouse extends UinputDevice implements PadOutput {
      * toward you, which scrolls content down ("natural" trackpad scrolling).
      */
     @Override public void scrollBy(float dy) {
+        long now = android.os.SystemClock.uptimeMillis();
+        if (lastScrollAt != 0) {
+            long dt = Math.max(1, Math.min(100, now - lastScrollAt));
+            velocity = velocity * 0.5f + (dy / dt) * 0.5f;
+        }
+        lastScrollAt = now;
+        turnWheel(dy);
+    }
+
+    private void turnWheel(float dy) {
         float notch = 22f * density;
+        if (smooth) {
+            // Hi-res steps in proportion to the finger's travel. Android reads these instead of
+            // whole notches where it supports them; whole notches still go out for the rest.
+            hiResAcc += dy / notch * 120f;
+            int hi = (int) hiResAcc;
+            if (hi == 0) return;
+            hiResAcc -= hi;
+            wheelAcc += hi;
+            int notches = (int) (wheelAcc / 120f);
+            wheelAcc -= notches * 120f;
+            if (notches != 0) send(EV_REL, REL_WHEEL_HI_RES, hi, EV_REL, REL_WHEEL, notches);
+            else send(EV_REL, REL_WHEEL_HI_RES, hi);
+            return;
+        }
         wheelAcc += dy;
         int notches = (int) (wheelAcc / notch);
         if (notches == 0) return;
         wheelAcc -= notches * notch;
         int step = notches > 0 ? 1 : -1;
         // Send separate notches so apps that read one wheel "click" per event see every one.
-        for (int i = 0; i != notches; i += step) send(EV_REL, REL_WHEEL, step);
+        for (int i = 0; i != notches; i += step) send(EV_REL, REL_WHEEL_HI_RES, step * 120, EV_REL, REL_WHEEL, step);
     }
 
-    @Override public void scrollEnd() { wheelAcc = 0; }
+    @Override public void scrollEnd() {
+        long sinceLast = android.os.SystemClock.uptimeMillis() - lastScrollAt;
+        if (smooth && sinceLast < 60 && Math.abs(velocity) > 0.3f) {
+            glide.postDelayed(glideStep, 16);
+        } else {
+            wheelAcc = 0;
+            hiResAcc = 0;
+        }
+    }
+
+    void stopGlide() {
+        glide.removeCallbacks(glideStep);
+        wheelAcc = 0;
+        hiResAcc = 0;
+    }
+
+    /** Keeps the wheel turning after a flick, slowing down each frame like a trackpad on a laptop. */
+    private final Runnable glideStep = new Runnable() {
+        @Override public void run() {
+            velocity *= 0.92f;
+            if (Math.abs(velocity) < 0.05f || !isReady()) {
+                wheelAcc = 0;
+                hiResAcc = 0;
+                return;
+            }
+            turnWheel(velocity * 16f);
+            glide.postDelayed(this, 16);
+        }
+    };
 
     /** The mouse's back and forward side buttons, which browsers (and Windows) use to go back and forward. */
     @Override public void navigateBack() { tap(BTN_SIDE, CLICK_HOLD_MS); }

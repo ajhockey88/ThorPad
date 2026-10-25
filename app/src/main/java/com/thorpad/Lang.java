@@ -729,5 +729,19 @@ final class Lang {
                 "Ein kleiner Knopf unten rechts auf dem Trackpad öffnet die Tastatur",
                 "Um pequeno botão no canto inferior direito do trackpad abre o teclado",
                 "Un piccolo pulsante in basso a destra del trackpad apre la tastiera");
+        e("Smooth scrolling", "Desplazamiento suave", "Défilement fluide", "Weiches Scrollen", "Rolagem suave", "Scorrimento fluido");
+        e("Scrolls in small steps and glides after a flick. Turn off for games that need real wheel clicks",
+                "Desplaza en pasos pequeños y sigue deslizando tras un gesto rápido. Desactívalo en juegos que necesitan clics reales de la rueda",
+                "Défile par petits pas et continue sur sa lancée après un geste rapide. Désactivez-le pour les jeux qui ont besoin de vrais crans de molette",
+                "Scrollt in kleinen Schritten und gleitet nach einem Wischer weiter. Für Spiele, die echte Mausrad-Rasten brauchen, ausschalten",
+                "Rola em passos pequenos e continua deslizando após um gesto rápido. Desative para jogos que precisam de cliques reais da roda",
+                "Scorre a piccoli passi e continua dopo un gesto rapido. Disattivalo per i giochi che richiedono veri scatti della rotella");
+        e("Stretch to full screen", "Estirar a pantalla completa", "Étirer en plein écran", "Auf ganzen Bildschirm strecken", "Esticar para tela cheia", "Estendi a schermo intero");
+        e("On: the keyboard fills the bottom screen. Off: it takes the bottom half, for thumb typing, and the trackpad stays usable above it",
+                "Activado: el teclado llena la pantalla inferior. Desactivado: ocupa la mitad inferior, para escribir con los pulgares, y el trackpad sigue funcionando encima",
+                "Activé : le clavier remplit l'écran du bas. Désactivé : il occupe la moitié inférieure, pour taper avec les pouces, et le trackpad reste utilisable au-dessus",
+                "An: Die Tastatur füllt den unteren Bildschirm. Aus: Sie nimmt die untere Hälfte ein, zum Tippen mit den Daumen, und das Trackpad darüber bleibt nutzbar",
+                "Ligado: o teclado ocupa a tela de baixo inteira. Desligado: ocupa a metade de baixo, para digitar com os polegares, e o trackpad continua usável acima",
+                "Attivo: la tastiera riempie lo schermo inferiore. Disattivo: occupa la metà inferiore, per scrivere con i pollici, e il trackpad resta utilizzabile sopra");
     }
 }

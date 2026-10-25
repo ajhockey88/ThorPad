@@ -10,8 +10,8 @@ android {
         applicationId "com.thorpad"
         minSdk 31
         targetSdk 33
-        versionCode 10
-        versionName "1.0"
+        versionCode 20
+        versionName "1.9.1"
     }
 
     compileOptions {

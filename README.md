@@ -20,15 +20,17 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | 🔣 Numbers and symbols | 🧹 Hold ⌫ for Clear all |
 | <img src="docs/screenshots/symbols.png?v=1.9" width="400" alt="Symbols keyboard"> | <img src="docs/screenshots/clear-all.png?v=1.9" width="400" alt="Keyboard with backspace held and the red Clear all key"> |
 | ⚙️ Settings | 📳 Haptics, with the strength slider |
-| <img src="docs/screenshots/settings.png?v=1.9" width="400" alt="Settings screen with side tabs"> | <img src="docs/screenshots/haptics.png?v=1.9" width="400" alt="Haptics settings with the strength slider open"> |
+| <img src="docs/screenshots/settings.png?v=1.9.1" width="400" alt="Settings screen with side tabs"> | <img src="docs/screenshots/haptics.png?v=1.9" width="400" alt="Haptics settings with the strength slider open"> |
 | ⌨️ Keyboard settings and language | ⌨️ Use ThorPad keyboard |
-| <img src="docs/screenshots/keyboard-settings.png?v=1.9" width="400" alt="Keyboard settings with the language picker"> | <img src="docs/screenshots/choose-keyboard.png?v=1.9" width="400" alt="Choosing ThorPad keyboard"> |
+| <img src="docs/screenshots/keyboard-settings.png?v=1.9.1" width="400" alt="Keyboard settings with the language picker"> | <img src="docs/screenshots/choose-keyboard.png?v=1.9" width="400" alt="Choosing ThorPad keyboard"> |
 | ✨ Mode menu: Auto, Android or PC | 🖥️ PC keys (for Moonlight) |
 | <img src="docs/screenshots/mode-menu.png?v=1.9.5" width="400" alt="Mode menu with Auto, Android, PC and Go home"> | <img src="docs/screenshots/pc-keys.png?v=1.9.3" width="400" alt="PC keys: Esc, F1 to F12, Windows shortcuts, navigation keys and sticky Ctrl, Alt and Shift"> |
 | 👆 Gestures in Settings | 🖥️ Gestures in PC mode |
 | <img src="docs/screenshots/gestures.png?v=1.9.4" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9.4" width="400" alt="Gestures page in Settings, PC tab"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
 | <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
+| ↕️ Half-screen keyboard, trackpad above it | |
+| <img src="docs/screenshots/keyboard-half.png?v=1.9.1" width="400" alt="Keyboard on the bottom half with the trackpad above it"> | |
 
 ## 👆 Gestures
 
@@ -137,12 +139,14 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 
 - 🏎️ **Pointer speed** and **pointer acceleration**
 - 📜 **Scroll speed**, and **classic scroll direction** (fingers down scrolls down, like a mouse wheel)
+- 🧈 **Smooth scrolling** (off by default): scrolls in small steps instead of whole wheel clicks, and glides for a moment after a flick (a touch stops it). Leave it off for games that need real wheel clicks
 - 🔍 **Pointer size** (touch mode's pointer)
 - 🔁 **Swap screens** (pointer on the bottom, trackpad on the top)
 - 💡 **Show gesture hints** (off by default): the gesture cheat sheet along the bottom of the trackpad
 - 🔅 **Dim when idle** (on by default): after 30 seconds without a touch the trackpad screen dims to save battery; the next touch only wakes it
 - ⌨️ **Keyboard button** (off by default): a small button in the bottom-right corner of the trackpad that opens the keyboard, without the swipe-down menu
 - 🌐 **Keyboard language:** English, Español, Français, Deutsch, Português or Italiano, for the keys, the dictionary and ThorPad's own buttons and settings
+- ↕️ **Stretch to full screen** (on by default): turn it off and the keyboard takes only the bottom half, for thumb typing, with the trackpad still working above it
 - ✨ **Autocorrect**, **double-space period** and **auto-capitals**, each on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)

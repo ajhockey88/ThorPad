@@ -274,6 +274,7 @@ final class TrackpadView extends View {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 long now = SystemClock.uptimeMillis();
+                if (s instanceof VirtualMouse) ((VirtualMouse) s).stopGlide(); // a touch catches a gliding scroll
                 state = IDLE;
                 touching = true;
                 invalidate();

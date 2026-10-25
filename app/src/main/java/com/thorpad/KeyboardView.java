@@ -306,7 +306,8 @@ final class KeyboardView extends View {
     }
 
     private void layoutKeys(int w, int h) {
-        float stripH = h * 100f / 1080f;
+        // A half-height keyboard keeps a strip tall enough to read and tap.
+        float stripH = Math.max(h * 100f / 1080f, 40 * getResources().getDisplayMetrics().density);
         float closeW = w * 260f / 1240f;
         stripRect.set(0, 0, w - closeW, stripH);
         closeKey.rect.set(w - closeW, 0, w, stripH);

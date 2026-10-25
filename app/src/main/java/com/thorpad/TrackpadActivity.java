@@ -205,7 +205,8 @@ public class TrackpadActivity extends Activity
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        // The keyboard covers the whole screen, bar included, while it's open.
+        // The keyboard covers the whole screen, bar included, while it's open (or the bottom
+        // half, with Stretch to full screen off).
         FrameLayout frame = new FrameLayout(this);
         frame.addView(root, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -391,7 +392,7 @@ public class TrackpadActivity extends Activity
 
     /** Edge swipes open the menu; a touch on the trackpad while it's open only closes it. */
     private boolean handleMenuTouch(MotionEvent ev) {
-        if (keyboard.getVisibility() == View.VISIBLE || pcKeys.getVisibility() == View.VISIBLE) return false;
+        if ((keyboard.getVisibility() == View.VISIBLE && keyboardFull) || pcKeys.getVisibility() == View.VISIBLE) return false;
         float d = getResources().getDisplayMetrics().density;
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -790,6 +791,7 @@ public class TrackpadActivity extends Activity
         refresh();
         pad.invalidate(); // the hints setting may have changed
         keyButton.setVisibility(new Prefs(this).keyboardButton() ? View.VISIBLE : View.GONE);
+        mouse.smooth = new Prefs(this).smoothScroll();
     }
 
     @Override
@@ -851,7 +853,16 @@ public class TrackpadActivity extends Activity
         // keyboard (which games need).
         if (ThorPadIme.active() == null && mouse.isReady()) keyboardDevice.start();
         keyboard.setOutput(typing);
-        pad.setOutput(null);
+        // Settings > Keyboard > Stretch to full screen. Off, the keyboard takes the bottom half
+        // and the trackpad above it keeps working.
+        keyboardFull = prefs.stretchKeyboard();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) keyboard.getLayoutParams();
+        View frame = (View) keyboard.getParent();
+        int h = frame.getHeight() > 0 ? frame.getHeight() : getResources().getDisplayMetrics().heightPixels;
+        lp.height = keyboardFull ? ViewGroup.LayoutParams.MATCH_PARENT : Math.round(h * 0.52f);
+        lp.gravity = Gravity.BOTTOM;
+        keyboard.setLayoutParams(lp);
+        if (keyboardFull) pad.setOutput(null);
         keyboard.setVisibility(View.VISIBLE);
     }
 
@@ -887,6 +898,8 @@ public class TrackpadActivity extends Activity
     }
 
     private boolean keyboardDeviceFailed;
+    /** The open keyboard fills the screen; when it only takes the bottom half, the trackpad still works. */
+    private boolean keyboardFull = true;
 
     /** Picks where each key goes, as the selected text box can change while typing. */
     private final KeyOutput typing = new Typing();
@@ -987,7 +1000,8 @@ public class TrackpadActivity extends Activity
             out = null; // waiting for the virtual mouse, or nothing set up yet
             modeLabel.setText(shizukuReady && mouseError == null ? Lang.t("Starting mouse…") : "");
         }
-        boolean covered = keyboard.getVisibility() == View.VISIBLE || pcKeys.getVisibility() == View.VISIBLE;
+        boolean covered = (keyboard.getVisibility() == View.VISIBLE && keyboardFull)
+                || pcKeys.getVisibility() == View.VISIBLE;
         pad.setOutput(covered ? null : out);
         boolean pc = pcActive();
         pad.setPcHints(pc);

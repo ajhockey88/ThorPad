@@ -171,6 +171,8 @@ public class SettingsActivity extends Activity {
                 slider("Pointer acceleration", Prefs.KEY_ACCELERATION, prefs.acceleration(), 0f, 2f, false);
                 slider("Scroll speed", Prefs.KEY_SCROLL_SPEED, prefs.scrollSpeed(), 0.5f, 5f, false);
                 slider("Pointer size", Prefs.KEY_POINTER_SIZE, prefs.pointerSize(), 0.6f, 2.5f, true);
+                toggle("Smooth scrolling", "Scrolls in small steps and glides after a flick. Turn off for games "
+                        + "that need real wheel clicks", Prefs.KEY_SMOOTH_SCROLL, prefs.smoothScroll(), false);
                 toggle("Keyboard button", "A small button in the bottom-right corner of the trackpad opens the keyboard",
                         Prefs.KEY_KEYBOARD_BUTTON, prefs.keyboardButton(), false);
                 toggle("Classic scroll direction", "Fingers down scrolls down, like a mouse wheel",
@@ -185,6 +187,9 @@ public class SettingsActivity extends Activity {
             case 1:
                 header("Keyboard", "Typing, spelling and which keyboard Android uses");
                 languagePicker();
+                toggle("Stretch to full screen", "On: the keyboard fills the bottom screen. Off: it takes the bottom "
+                        + "half, for thumb typing, and the trackpad stays usable above it",
+                        Prefs.KEY_STRETCH_KEYBOARD, prefs.stretchKeyboard(), false);
                 toggle("Autocorrect", "Fixes misspelled and run-together words when you finish them. Tap the "
                         + "suggestion to keep what you typed, or press backspace right after to undo.",
                         Prefs.KEY_AUTOCORRECT, prefs.autocorrect(), false);
