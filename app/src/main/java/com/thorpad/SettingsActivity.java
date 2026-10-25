@@ -697,6 +697,32 @@ public class SettingsActivity extends Activity {
         list.addView(reinstall, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         list = page;
+        releaseNotesSection();
+    }
+
+    /** This version's release notes (bundled with the app by build.sh), under the update buttons. */
+    private void releaseNotesSection() {
+        String notes;
+        try {
+            java.io.InputStream in = getAssets().open("release-notes.md");
+            java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+            byte[] b = new byte[8192];
+            int n;
+            while ((n = in.read(b)) > 0) buf.write(b, 0, n);
+            in.close();
+            notes = buf.toString("UTF-8");
+        } catch (java.io.IOException e) {
+            return; // a build without notes: no section
+        }
+        list = card();
+        TextView title = plain("📄 " + Lang.t("Release notes") + " · ThorPad " + versionName(), 16, Color.WHITE);
+        title.setPadding(0, 0, 0, (int) (6 * d));
+        list.addView(title);
+        TextView body = plain("", 14, SUB);
+        body.setText(ReleaseNotes.format(notes));
+        body.setLineSpacing(0, 1.15f);
+        list.addView(body);
+        list = page;
     }
 
     // ---- Haptics -------------------------------------------------------------------------------

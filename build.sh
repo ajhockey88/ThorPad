@@ -29,7 +29,10 @@ rm -rf "$OUT" && mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/res"
 cp -r "$SRC/res/." "$OUT/res/"
 sed -i 's/android:canPerformGestures=/android:supportsAssist=/' "$OUT/res/xml/accessibility_config.xml"
 
-aapt package -f -m -J "$OUT/gen" -M "$SRC/AndroidManifest.xml" -S "$OUT/res" -A "$SRC/assets" \
+# The app shows this version's release notes in Settings > Updates.
+mkdir -p "$OUT/assets" && cp -r "$SRC/assets/." "$OUT/assets/" && cp release/notes.md "$OUT/assets/release-notes.md"
+
+aapt package -f -m -J "$OUT/gen" -M "$SRC/AndroidManifest.xml" -S "$OUT/res" -A "$OUT/assets" \
     -I "$PLATFORM_JAR" -F "$OUT/base.apk"
 
 javac -nowarn --release 8 -encoding UTF-8 \

@@ -743,5 +743,6 @@ final class Lang {
                 "An: Die Tastatur füllt den unteren Bildschirm. Aus: Sie nimmt die untere Hälfte ein, zum Tippen mit den Daumen, und das Trackpad darüber bleibt nutzbar",
                 "Ligado: o teclado ocupa a tela de baixo inteira. Desligado: ocupa a metade de baixo, para digitar com os polegares, e o trackpad continua usável acima",
                 "Attivo: la tastiera riempie lo schermo inferiore. Disattivo: occupa la metà inferiore, per scrivere con i pollici, e il trackpad resta utilizzabile sopra");
+        e("Release notes", "Notas de la versión", "Notes de version", "Versionshinweise", "Notas da versão", "Note di rilascio");
     }
 }
