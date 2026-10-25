@@ -17,6 +17,8 @@ final class Prefs {
     static final String KEY_KEYBOARD_BUTTON = "keyboard_button";
     static final String KEY_SMOOTH_SCROLL = "smooth_scroll";
     static final String KEY_STRETCH_KEYBOARD = "stretch_keyboard";
+    /** ThorPad Keyboard has a layout, so Android stops asking to configure it. */
+    private static final String KEY_KEYBOARD_LAYOUT_SET = "keyboard_layout_set";
     static final String KEY_DOUBLE_SPACE = "double_space_period";
     static final String KEY_AUTO_CAPS = "auto_caps";
     static final String KEY_SHOW_HINTS = "show_hints";
@@ -59,6 +61,8 @@ final class Prefs {
     boolean keyboardButton() { return sp.getBoolean(KEY_KEYBOARD_BUTTON, false); }
     boolean smoothScroll() { return sp.getBoolean(KEY_SMOOTH_SCROLL, false); }
     boolean stretchKeyboard() { return sp.getBoolean(KEY_STRETCH_KEYBOARD, true); }
+    boolean keyboardLayoutSet() { return sp.getBoolean(KEY_KEYBOARD_LAYOUT_SET, false); }
+    void setKeyboardLayoutSet() { sp.edit().putBoolean(KEY_KEYBOARD_LAYOUT_SET, true).apply(); }
     /** Gesture hints drawn along the bottom of the trackpad. */
     boolean showHints() { return sp.getBoolean(KEY_SHOW_HINTS, false); }
     /** Keyboard and app language: en, es, fr, de, pt or it. */

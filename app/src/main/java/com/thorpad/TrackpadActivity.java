@@ -829,6 +829,12 @@ public class TrackpadActivity extends Activity
 
     @Override
     public void onDeviceStateChanged(UinputDevice device, boolean ready, String error) {
+        if (ready && (device == mouse || device == keyboardDevice) && !new Prefs(this).keyboardLayoutSet()) {
+            final Context app = getApplicationContext();
+            new Thread(new Runnable() {
+                @Override public void run() { KeyboardLayoutTool.setUp(app); }
+            }).start();
+        }
         if (device == mouse) {
             if (!ready && error != null) mouseError = error;
             refresh();

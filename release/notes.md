@@ -3,6 +3,7 @@
 ## ✨ What's new in 1.9.1
 - 🧈 **Smooth scrolling:** turn on **Smooth scrolling** in Settings > Trackpad. Two-finger scrolling then moves in small steps instead of whole mouse-wheel clicks, and keeps gliding for a moment after a quick flick (touch the trackpad to stop it). It's off by default, because some games need real wheel clicks. **Scroll speed** in the same tab sets how far each swipe goes
 - ⌨️ **Half-screen keyboard:** turn off **Stretch to full screen** in Settings > Keyboard and the keyboard takes only the bottom half of the screen, which is easier for thumb typing. The trackpad above it keeps working, so you can move the pointer and click without closing the keyboard. It's on by default, so nothing changes unless you want it to
+- 🔕 **No more "Configure physical keyboard" sound:** ThorPad now gives its keyboard a layout (English US) through Shizuku, so Android stops posting that notification, with its sound, every time the keyboard opens in a game
 
 ---
 
@@ -21,7 +22,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
-- **1.9.1:** smooth scrolling and a half-screen keyboard option
+- **1.9.1:** smooth scrolling, a half-screen keyboard option, and no more keyboard notification sound
 - **1.9:** swipe-down menu, six keyboard languages with accents, one-tap setup, a new look
 - **1.8:** smarter autocorrect, double-space period and auto-capitals
 - **1.7:** the keyboard opens and closes with text boxes
