@@ -246,3 +246,8 @@ also has standard Gradle files, so it can be opened and built in Android Studio.
 The signing key is not in this repository. `build.sh` reads it from `keystore/thorpad.jks`
 (or `$KEYSTORE`) and creates a new one if missing; an APK signed with a different key has to
 be uninstalled before it can replace an older install.
+
+## 📄 License
+
+ThorPad's code is released under the [MIT License](LICENSE). The word lists in
+`app/src/main/assets/` keep the licenses of the data they come from (see 🙏 Credits).
