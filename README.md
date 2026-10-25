@@ -149,6 +149,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ↕️ **Stretch to full screen** (on by default): turn it off and the keyboard takes only the bottom half, for thumb typing, with the trackpad still working above it
 - ✨ **Autocorrect**, **double-space period** and **auto-capitals**, each on or off
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
+- 📌 **Keep ThorPad as the keyboard** (on by default, needs Shizuku): if Android falls back to another keyboard, for example after an update, ThorPad switches it back
 - ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's

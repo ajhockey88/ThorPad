@@ -432,6 +432,7 @@ final class SetupPanel extends ScrollView implements Updater.Listener {
     private void useThorPadKeyboard() {
         final InputMethodInfo mine = thorPadKeyboard();
         if (mine == null) return;
+        KeyboardKeeper.chosen(activity, true);
         if (ShizukuClient.hasPermission()) {
             final String id = mine.getId();
             new Thread(new Runnable() {

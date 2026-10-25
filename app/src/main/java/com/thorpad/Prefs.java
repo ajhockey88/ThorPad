@@ -17,6 +17,9 @@ final class Prefs {
     static final String KEY_KEYBOARD_BUTTON = "keyboard_button";
     static final String KEY_SMOOTH_SCROLL = "smooth_scroll";
     static final String KEY_STRETCH_KEYBOARD = "stretch_keyboard";
+    static final String KEY_KEEP_KEYBOARD = "keep_keyboard";
+    /** The user's last pick of Android keyboard was ThorPad's (or ThorPad's was seen in use). */
+    private static final String KEY_WANTS_THORPAD_KEYBOARD = "wants_thorpad_keyboard";
     /** ThorPad Keyboard has a layout, so Android stops asking to configure it. */
     private static final String KEY_KEYBOARD_LAYOUT_SET = "keyboard_layout_set";
     static final String KEY_DOUBLE_SPACE = "double_space_period";
@@ -61,6 +64,11 @@ final class Prefs {
     boolean keyboardButton() { return sp.getBoolean(KEY_KEYBOARD_BUTTON, false); }
     boolean smoothScroll() { return sp.getBoolean(KEY_SMOOTH_SCROLL, false); }
     boolean stretchKeyboard() { return sp.getBoolean(KEY_STRETCH_KEYBOARD, true); }
+    boolean keepKeyboard() { return sp.getBoolean(KEY_KEEP_KEYBOARD, true); }
+    boolean wantsThorPadKeyboard() { return sp.getBoolean(KEY_WANTS_THORPAD_KEYBOARD, false); }
+    void setWantsThorPadKeyboard(boolean v) {
+        if (wantsThorPadKeyboard() != v) sp.edit().putBoolean(KEY_WANTS_THORPAD_KEYBOARD, v).apply();
+    }
     boolean keyboardLayoutSet() { return sp.getBoolean(KEY_KEYBOARD_LAYOUT_SET, false); }
     void setKeyboardLayoutSet() { sp.edit().putBoolean(KEY_KEYBOARD_LAYOUT_SET, true).apply(); }
     /** Gesture hints drawn along the bottom of the trackpad. */

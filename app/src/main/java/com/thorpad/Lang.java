@@ -744,5 +744,13 @@ final class Lang {
                 "Ligado: o teclado ocupa a tela de baixo inteira. Desligado: ocupa a metade de baixo, para digitar com os polegares, e o trackpad continua usável acima",
                 "Attivo: la tastiera riempie lo schermo inferiore. Disattivo: occupa la metà inferiore, per scrivere con i pollici, e il trackpad resta utilizzabile sopra");
         e("Release notes", "Notas de la versión", "Notes de version", "Versionshinweise", "Notas da versão", "Note di rilascio");
+        e("Keep ThorPad as the keyboard", "Mantener ThorPad como teclado", "Garder ThorPad comme clavier",
+                "ThorPad als Tastatur behalten", "Manter o ThorPad como teclado", "Mantieni ThorPad come tastiera");
+        e("If Android switches back to another keyboard, for example after an update, ThorPad switches it back when it opens. Needs Shizuku",
+                "Si Android vuelve a otro teclado, por ejemplo tras una actualización, ThorPad lo cambia de nuevo al abrirse. Necesita Shizuku",
+                "Si Android repasse à un autre clavier, par exemple après une mise à jour, ThorPad le rétablit à son ouverture. Nécessite Shizuku",
+                "Wechselt Android zu einer anderen Tastatur zurück, etwa nach einem Update, stellt ThorPad sie beim Öffnen wieder um. Braucht Shizuku",
+                "Se o Android voltar para outro teclado, por exemplo após uma atualização, o ThorPad o troca de volta ao abrir. Precisa do Shizuku",
+                "Se Android torna a un'altra tastiera, per esempio dopo un aggiornamento, ThorPad la ripristina all'apertura. Richiede Shizuku");
     }
 }

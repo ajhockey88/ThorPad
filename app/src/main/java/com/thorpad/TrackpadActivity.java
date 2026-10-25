@@ -716,6 +716,10 @@ public class TrackpadActivity extends Activity
         super.onStart();
         started = true;
         ThorPadIme.setListener(this);
+        KeyboardKeeper.check(this);
+        getContentResolver().registerContentObserver(
+                android.provider.Settings.Secure.getUriFor(android.provider.Settings.Secure.DEFAULT_INPUT_METHOD),
+                false, keyboardChanged);
         refresh();
         // Opened by a text box: don't interrupt typing with an update.
         if (!keyboardRequested) quietUpdateCheck();
@@ -804,6 +808,7 @@ public class TrackpadActivity extends Activity
     protected void onStop() {
         super.onStop();
         started = false;
+        getContentResolver().unregisterContentObserver(keyboardChanged);
         stepAsideAfterKeyboard = false;
         ThorPadIme.setListener(null);
         setupPanel.removeCallbacks(recheck);
@@ -822,6 +827,7 @@ public class TrackpadActivity extends Activity
 
     @Override
     public void onShizukuChanged() {
+        KeyboardKeeper.check(this);
         mouseError = null;
         if (!ShizukuClient.hasPermission()) mouse.stop();
         refresh();
@@ -904,6 +910,12 @@ public class TrackpadActivity extends Activity
     }
 
     private boolean keyboardDeviceFailed;
+
+    /** Android's keyboard changed while ThorPad is open: switch back if it dropped ThorPad's. */
+    private final android.database.ContentObserver keyboardChanged =
+            new android.database.ContentObserver(new android.os.Handler(android.os.Looper.getMainLooper())) {
+                @Override public void onChange(boolean selfChange) { KeyboardKeeper.check(TrackpadActivity.this); }
+            };
     /** The open keyboard fills the screen; when it only takes the bottom half, the trackpad still works. */
     private boolean keyboardFull = true;
 

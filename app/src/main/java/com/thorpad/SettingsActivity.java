@@ -199,6 +199,9 @@ public class SettingsActivity extends Activity {
                         Prefs.KEY_AUTO_CAPS, prefs.autoCaps(), false);
                 toggle("Type when the finger lifts", "Lets you slide to the right key. Off types the instant you "
                         + "touch, which is quickest", Prefs.KEY_TYPE_ON_RELEASE, prefs.typeOnRelease(), false);
+                toggle("Keep ThorPad as the keyboard", "If Android switches back to another keyboard, "
+                        + "for example after an update, ThorPad switches it back when it opens. Needs Shizuku",
+                        Prefs.KEY_KEEP_KEYBOARD, prefs.keepKeyboard(), false);
                 keyboardChooser();
                 refreshKeyboardLabel();
                 break;
@@ -567,6 +570,7 @@ public class SettingsActivity extends Activity {
     }
 
     private void useKeyboard(final InputMethodInfo info) {
+        KeyboardKeeper.chosen(this, info.getPackageName().equals(getPackageName()));
         if (ShizukuClient.hasPermission()) {
             // Shizuku can switch keyboards directly.
             final String id = info.getId();
