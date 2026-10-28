@@ -29,8 +29,8 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/gestures.png?v=1.9.4" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9.4" width="400" alt="Gestures page in Settings, PC tab"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
 | <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
-| ↕️ Half-screen keyboard, trackpad above it | |
-| <img src="docs/screenshots/keyboard-half.png?v=1.9.1" width="400" alt="Keyboard on the bottom half with the trackpad above it"> | |
+| ↕️ Half-screen keyboard, trackpad above it | 📥 Keyboard for a bottom-screen app |
+| <img src="docs/screenshots/keyboard-half.png?v=1.9.1" width="400" alt="Keyboard on the bottom half with the trackpad above it"> | <img src="docs/screenshots/keyboard-bottom-app.png?v=1.9.2" width="400" alt="Keyboard docked under a search box in an app on the bottom screen"> |
 
 ## 👆 Gestures
 
@@ -108,6 +108,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
   closes, that app is right where you left it. With Shizuku, ThorPad switches keyboards for you; without it,
   Android asks you to turn the keyboard on and pick it. Text boxes drawn inside a Windows game in
   GameNative aren't Android text boxes, so open the keyboard yourself there.
+- 📥 **Text boxes on the bottom screen too:** with ThorPad as Android's keyboard and Shizuku on, a text box in an app on the bottom screen gets ThorPad's keyboard docked along the bottom half, like a phone keyboard, with the app moved up above it. **⌄ Hide** puts it away until you tap a text box again.
 - 🔌 Where the keys go: with ThorPad keyboard picked, straight into the selected text box. Otherwise, in
   mouse mode, ThorPad plugs in a virtual USB keyboard while the keyboard is open, so keys reach games
   and apps like a real keyboard; in touch mode, text goes into the selected text box.

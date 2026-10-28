@@ -39,8 +39,22 @@ final class KeyboardOverlay implements KeyboardView.Listener {
 
     boolean isShowing() { return keyboard != null; }
 
-    /** Shows the keyboard on the trackpad's screen, typing into output. False if it can't. */
-    boolean show(KeyOutput output) {
+    /** Docked keyboards take this share of the bottom screen's height. */
+    static final float DOCKED_HEIGHT = 0.52f;
+    private boolean docked;
+
+    boolean isDocked() { return keyboard != null && docked; }
+
+    /** Shows the keyboard filling the trackpad's screen, typing into output. False if it can't. */
+    boolean show(KeyOutput output) { return show(output, false); }
+
+    /**
+     * Shows the keyboard on the trackpad's screen, typing into output: filling it for a text box
+     * on the top screen, or docked along its bottom half for a text box in an app on that screen.
+     * False if it can't.
+     */
+    boolean show(KeyOutput output, boolean dock) {
+        if (keyboard != null && docked != dock) hide();
         if (keyboard != null) return true;
         Display display = Displays.trackpadDisplay(context);
         if (display == null || !allowed(context)) return false;
@@ -62,19 +76,25 @@ final class KeyboardOverlay implements KeyboardView.Listener {
             view.setAutocorrect(prefs.autocorrect() ? Autocorrect.get(context) : null);
             view.setListener(this);
             view.setOutput(output);
+            view.setDocked(dock);
+            android.graphics.Point size = new android.graphics.Point();
+            display.getRealSize(size);
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    dock ? Math.round(size.y * DOCKED_HEIGHT) : WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     PixelFormat.OPAQUE);
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            lp.gravity = android.view.Gravity.BOTTOM;
             lp.setTitle("ThorPad keyboard");
             wm.addView(view, lp);
             windows = wm;
             keyboard = view;
-            KeyboardLog.add("overlay: shown on display " + display.getDisplayId());
+            docked = dock;
+            KeyboardLog.add("overlay: shown on display " + display.getDisplayId() + (dock ? ", docked" : ""));
             return true;
         } catch (RuntimeException e) {
             KeyboardLog.add("overlay: failed " + e);

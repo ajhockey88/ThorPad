@@ -1,10 +1,7 @@
-🧈 ThorPad 1.9.1: smoother scrolling and a half-screen keyboard.
+📥 ThorPad 1.9.2: the keyboard now works for text boxes on the bottom screen too.
 
-## ✨ What's new in 1.9.1
-- 🧈 **Smooth scrolling:** turn on **Smooth scrolling** in Settings > Trackpad. Two-finger scrolling then moves in small steps instead of whole mouse-wheel clicks, and keeps gliding for a moment after a quick flick (touch the trackpad to stop it). It's off by default, because some games need real wheel clicks. **Scroll speed** in the same tab sets how far each swipe goes
-- ⌨️ **Half-screen keyboard:** turn off **Stretch to full screen** in Settings > Keyboard and the keyboard takes only the bottom half of the screen, which is easier for thumb typing. The trackpad above it keeps working, so you can move the pointer and click without closing the keyboard. It's on by default, so nothing changes unless you want it to
-- 🔕 **No more "Configure physical keyboard" sound:** ThorPad now gives its keyboard a layout (English US) through Shizuku, so Android stops posting that notification, with its sound, every time the keyboard opens in a game
-- 📌 **ThorPad stays your keyboard:** Android sometimes falls back to Gboard, for example after ThorPad updates. With Shizuku, ThorPad now switches it back by itself. Turn off **Keep ThorPad as the keyboard** in Settings > Keyboard if you'd rather it didn't
+## ✨ What's new in 1.9.2
+- 📥 **Text boxes on the bottom screen:** with ThorPad as Android's keyboard and Shizuku on, tapping a text box in an app on the bottom screen brings up ThorPad's keyboard docked along the bottom half, like a phone keyboard, and the app moves up above it. It has the same keys, languages and autocorrect as always. Tap **⌄ Hide** to put it away, or tap a text box to bring it back. Text boxes on the top screen work just like before
 
 ---
 
@@ -14,7 +11,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🧈 **Smooth scrolling:** optional small-step scrolling that glides after a flick, with adjustable scroll speed
 - 👆 **Gestures:** tap to click, hold or two-finger tap to right click, tap-and-slide to drag, two fingers to scroll or go back and forward, three fingers for recent apps, closing the top app, or a tap to close them all
 - 👇 **Out of the way:** the whole screen is trackpad, with the menu a swipe down from the top
-- ⌨️ **Full-screen keyboard:** big edge-to-edge keys (or a half-screen keyboard with the trackpad still usable above it), hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard, even when ThorPad itself is closed
+- ⌨️ **Full-screen keyboard:** big edge-to-edge keys (or a half-screen keyboard with the trackpad still usable above it, or docked under a text box in an app on the bottom screen), hold ⌫ for **Clear all**, and it opens and closes with text boxes when ThorPad is your Android keyboard, even when ThorPad itself is closed
 - 🌐 **Six languages:** English, Spanish, French, German, Portuguese and Italian, with accents on a long press
 - ✨ **Smart typing:** autocorrect that splits run-together words, adds accents and reads context (English), double-space period and auto-capitals
 - 🖥️ **PC mode:** PC keys (Esc, F1 to F12, Windows shortcuts, sticky Ctrl / Alt / Shift) and PC gestures that switch on by themselves when Moonlight, a Moonlight fork, Steam Link, Parsec or a remote desktop app is on top
@@ -23,6 +20,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
+- **1.9.2:** the keyboard works for text boxes on the bottom screen too
 - **1.9.1:** smooth scrolling, a half-screen keyboard option, ThorPad stays your keyboard, and no more keyboard notification sound
 - **1.9:** swipe-down menu, six keyboard languages with accents, one-tap setup, a new look
 - **1.8:** smarter autocorrect, double-space period and auto-capitals

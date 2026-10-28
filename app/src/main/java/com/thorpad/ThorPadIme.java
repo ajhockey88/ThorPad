@@ -87,25 +87,36 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
         final String pkg = info != null ? info.packageName : null;
         new Thread(new Runnable() {
             @Override public void run() {
-                // Only a text box on the top screen gets the keyboard. One in an app on the bottom
-                // screen would be covered by it, and every tap there turned into a key press.
+                // A text box on the top screen gets the full keyboard. One in an app on the
+                // bottom screen gets it docked along the bottom half, under the app.
                 android.view.Display top = Displays.pointerDisplay(ThorPadIme.this);
                 String[] app = top != null ? TopApp.on(top.getDisplayId()) : null;
                 final boolean onTop = app == null || pkg == null || app[0].equals(pkg);
-                if (onTop && !KeyboardOverlay.allowed(ThorPadIme.this)) {
+                boolean bottom = false;
+                if (!onTop) {
+                    android.view.Display pad = Displays.trackpadDisplay(ThorPadIme.this);
+                    String[] under = pad != null ? TopApp.on(pad.getDisplayId()) : null;
+                    bottom = under != null && under[0].equals(pkg);
+                }
+                final boolean onBottom = bottom;
+                if ((onTop || onBottom) && !KeyboardOverlay.allowed(ThorPadIme.this)) {
                     // Drawing over other apps isn't allowed yet: Shizuku can allow it, once.
                     ShizukuClient.runShell("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow");
                 }
                 handler.post(new Runnable() {
                     @Override public void run() {
                         if (!inputStarted || listener != null || field == null || !field.equals(lastField)) return;
-                        if (!onTop) {
-                            KeyboardLog.add("overlay: " + pkg + " isn't on the top screen");
+                        if (!onTop && !onBottom) {
+                            KeyboardLog.add("overlay: " + pkg + " isn't on either screen's top app");
                             hideOverlay();
                             return;
                         }
-                        if (overlay.isShowing() || overlay.show(overlayKeys)) watchOverlayTaps();
-                        else openTrackpadInstead();
+                        if (overlay.show(overlayKeys, onBottom)) {
+                            watchOverlayTaps();
+                            makeRoom();
+                        } else if (onTop) {
+                            openTrackpadInstead();
+                        }
                     }
                 });
             }
@@ -145,6 +156,37 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
     private void hideOverlay() {
         stopOverlayTaps();
         if (overlay != null) overlay.hide();
+        makeRoom();
+    }
+
+    // ---- Room for the docked keyboard ------------------------------------------------------
+    // The docked keyboard is drawn in ThorPad's overlay window. So that the app above it moves
+    // up out of the way, this (see-through, untouchable) keyboard window takes the same height
+    // and tells Android that's the keyboard's space. Only when Android put this window on the
+    // bottom screen too: on the top screen it would push that screen's app up instead.
+
+    private View spacer;
+    private int roomHeight;
+
+    private void makeRoom() {
+        int h = 0;
+        if (overlay != null && overlay.isDocked() && getWindow() != null && getWindow().getWindow() != null) {
+            View decor = getWindow().getWindow().getDecorView();
+            android.view.Display pad = Displays.trackpadDisplay(this);
+            android.view.Display here = decor.getDisplay();
+            if (pad != null && here != null && here.getDisplayId() == pad.getDisplayId()) {
+                android.graphics.Point size = new android.graphics.Point();
+                pad.getRealSize(size);
+                h = Math.round(size.y * KeyboardOverlay.DOCKED_HEIGHT);
+            } else {
+                KeyboardLog.add("docked: keyboard window is on display "
+                        + (here != null ? here.getDisplayId() : -1) + ", app can't make room");
+            }
+        }
+        if (h == roomHeight || spacer == null) return;
+        roomHeight = h;
+        spacer.setMinimumHeight(h);
+        spacer.requestLayout();
     }
 
     /** A tap on the top screen outside the text box closes the keyboard, as in the trackpad. */
@@ -290,13 +332,16 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
 
     @Override
     public View onCreateInputView() {
-        // Nothing to show on the top screen: the keys are on the bottom screen.
-        return new View(this);
+        // Nothing to show: the keys are in ThorPad's own window on the bottom screen. This only
+        // takes up room while the keyboard is docked under a bottom-screen app.
+        spacer = new View(this);
+        spacer.setMinimumHeight(roomHeight);
+        return spacer;
     }
 
     /**
-     * The keyboard window takes no room and no touches: apps are never pushed up or covered,
-     * on either screen.
+     * The keyboard window takes no touches, and no room unless the keyboard is docked under a
+     * bottom-screen app: apps are otherwise never pushed up or covered, on either screen.
      */
     @Override
     public void onComputeInsets(Insets outInsets) {
@@ -305,8 +350,10 @@ public class ThorPadIme extends InputMethodService implements KeyOutput, TextCon
         if (getWindow() != null && getWindow().getWindow() != null) {
             h = getWindow().getWindow().getDecorView().getHeight();
         }
-        outInsets.contentTopInsets = h;
-        outInsets.visibleTopInsets = h;
+        // Docked: the space above the keyboard's room is the app's.
+        int top = Math.max(0, h - roomHeight);
+        outInsets.contentTopInsets = top;
+        outInsets.visibleTopInsets = top;
         outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_REGION;
         outInsets.touchableRegion.setEmpty();
     }

@@ -69,7 +69,9 @@ final class KeyboardView extends View {
     }
 
     private final List<List<List<Key>>> pages = new ArrayList<>();
-    private final Key closeKey = new Key("✕ Close", CLOSE, (char) 0, 0, 0, STYLE_KEY);
+    private Key closeKey = new Key("✕ Close", CLOSE, (char) 0, 0, 0, STYLE_KEY);
+    /** Docked under an app on this screen: types into it, and Hide instead of Close. */
+    private boolean docked;
     private final RectF stripRect = new RectF();
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -78,6 +80,16 @@ final class KeyboardView extends View {
     private final StringBuilder typed = new StringBuilder();
 
     private int page = LETTERS;
+
+    /** Docked under an app on the bottom screen rather than typing to the top screen. */
+    void setDocked(boolean docked) {
+        if (this.docked == docked) return;
+        this.docked = docked;
+        RectF r = closeKey.rect;
+        closeKey = new Key(docked ? "⌄ Hide" : "✕ Close", CLOSE, (char) 0, 0, 0, STYLE_KEY);
+        closeKey.rect.set(r);
+        invalidate();
+    }
     private int shift; // 0 off, 1 next letter only, 2 caps lock
     private long lastShiftTap;
     private float rowHeight;
@@ -512,7 +524,8 @@ final class KeyboardView extends View {
 
         text.setTextSize(h * 0.28f);
         text.setColor(Color.rgb(0x6e, 0x73, 0x7d));
-        String hint = Lang.t(output == null ? "Not connected to the top screen" : "Typing to top screen");
+        String hint = Lang.t(output == null ? "Not connected to the top screen"
+                : docked ? "Typing on this screen" : "Typing to top screen");
         canvas.drawText(hint, x, cy - (text.descent() + text.ascent()) / 2f, text);
         x += text.measureText(hint) + h * 0.22f;
 

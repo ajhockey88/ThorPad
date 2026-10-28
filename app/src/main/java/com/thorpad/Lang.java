@@ -752,5 +752,8 @@ final class Lang {
                 "Wechselt Android zu einer anderen Tastatur zurück, etwa nach einem Update, stellt ThorPad sie beim Öffnen wieder um. Braucht Shizuku",
                 "Se o Android voltar para outro teclado, por exemplo após uma atualização, o ThorPad o troca de volta ao abrir. Precisa do Shizuku",
                 "Se Android torna a un'altra tastiera, per esempio dopo un aggiornamento, ThorPad la ripristina all'apertura. Richiede Shizuku");
+        e("Typing on this screen", "Escribiendo en esta pantalla", "Saisie sur cet écran",
+                "Tippen auf diesem Bildschirm", "A escrever neste ecrã", "Scrittura su questo schermo");
+        e("⌄ Hide", "⌄ Ocultar", "⌄ Masquer", "⌄ Ausblenden", "⌄ Ocultar", "⌄ Nascondi");
     }
 }
