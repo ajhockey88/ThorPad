@@ -63,8 +63,10 @@ final class KeyboardOverlay implements KeyboardView.Listener {
                     .createWindowContext(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, null);
             WindowManager wm = (WindowManager) screen.getSystemService(Context.WINDOW_SERVICE);
             KeyboardView view = new KeyboardView(screen);
+            final TouchFilter filter = new TouchFilter(context);
             view.setOnTouchListener(new View.OnTouchListener() {
                 @Override public boolean onTouch(View v, MotionEvent ev) {
+                    if (filter.drop(ev)) return true; // a touch from the top screen
                     if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) lastTouchAt = SystemClock.uptimeMillis();
                     return false; // the keyboard still handles the touch
                 }

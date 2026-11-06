@@ -1,7 +1,8 @@
-📥 ThorPad 1.9.2: the keyboard now works for text boxes on the bottom screen too.
+🛠️ ThorPad 1.9.3: touching the top screen no longer sets off the bottom screen.
 
-## ✨ What's new in 1.9.2
-- 📥 **Text boxes on the bottom screen:** with ThorPad as Android's keyboard and Shizuku on, tapping a text box in an app on the bottom screen brings up ThorPad's keyboard docked along the bottom half, like a phone keyboard, and the app moves up above it. It has the same keys, languages and autocorrect as always. Tap **⌄ Hide** to put it away, or tap a text box to bring it back. Text boxes on the top screen work just like before
+## 🐛 Fixed in 1.9.3
+- 👆 **No more ghost touches:** swipes and taps on the top screen could reach ThorPad on the bottom screen as phantom trackpad or keyboard touches. ThorPad now checks which screen's touch panel each touch came from and ignores anything that isn't the bottom screen's, including its own mouse if the cursor ever wanders onto the bottom screen
+- ⌨️ **Keyboard stays open when you swipe:** a quick swipe on the top screen used to count as a tap outside the text box and close the keyboard. Now only a real tap does
 
 ---
 
@@ -20,6 +21,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 
 ## 📜 Release history
+- **1.9.3:** touches on the top screen no longer reach the bottom screen
 - **1.9.2:** the keyboard works for text boxes on the bottom screen too
 - **1.9.1:** smooth scrolling, a half-screen keyboard option, ThorPad stays your keyboard, and no more keyboard notification sound
 - **1.9:** swipe-down menu, six keyboard languages with accents, one-tap setup, a new look

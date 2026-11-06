@@ -26,7 +26,10 @@ final class TouchWatcher {
     private static final long TAP_MAX_MS = 400;
     // struct input_event on 64-bit Android: 16 bytes of time, then type, code and value.
     private static final int EVENT_SIZE = 24;
-    private static final int EV_KEY = 1, EV_ABS = 3, BTN_TOUCH = 0x14a, ABS_MT_TRACKING_ID = 0x39;
+    private static final int EV_KEY = 1, EV_ABS = 3, BTN_TOUCH = 0x14a, ABS_MT_TRACKING_ID = 0x39,
+            ABS_MT_POSITION_X = 0x35, ABS_MT_POSITION_Y = 0x36;
+    /** A touch that moves further than this share of the screen's width is a swipe, not a tap. */
+    private static final float TAP_MAX_MOVE = 0.04f;
 
     private final Listener listener;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -40,9 +43,14 @@ final class TouchWatcher {
         running = true;
         new Thread(new Runnable() {
             @Override public void run() {
-                for (String device : touchscreens()) {
+                for (String[] device : touchscreens()) {
                     if (!running) return;
-                    watch(device);
+                    int maxX = 0;
+                    try {
+                        maxX = Integer.parseInt(device[1]);
+                    } catch (NumberFormatException ignored) {
+                    }
+                    watch(device[0], maxX);
                 }
             }
         }, "ThorPad touch watch").start();
@@ -59,23 +67,27 @@ final class TouchWatcher {
         processes.clear();
     }
 
-    /** The input devices that report multi-touch positions, e.g. /dev/input/event3. */
-    private static List<String> touchscreens() {
-        List<String> out = new ArrayList<>();
+    /**
+     * The input devices that report multi-touch positions, e.g. /dev/input/event3, each with
+     * the largest X position it reports.
+     */
+    private static List<String[]> touchscreens() {
+        List<String[]> out = new ArrayList<>();
         String current = null;
         for (String line : run("getevent -p").split("\n")) {
             if (line.startsWith("add device")) {
                 int at = line.indexOf("/dev/input/");
                 current = at >= 0 ? line.substring(at).trim() : null;
             } else if (current != null && line.contains(" 0035 ")) { // ABS_MT_POSITION_X
-                out.add(current);
+                java.util.regex.Matcher m = java.util.regex.Pattern.compile("max (\\d+)").matcher(line);
+                out.add(new String[] {current, m.find() ? m.group(1) : "0"});
                 current = null;
             }
         }
         return out;
     }
 
-    private void watch(final String device) {
+    private void watch(final String device, final int maxX) {
         final IRemoteProcess p;
         try {
             // cat passes events on as they come; getevent's output can sit in a buffer.
@@ -94,13 +106,18 @@ final class TouchWatcher {
             processes.add(p);
         }
         new Thread(new Runnable() {
-            @Override public void run() { read(device, p); }
+            @Override public void run() { read(device, maxX, p); }
         }, "ThorPad touch " + device).start();
     }
 
-    private void read(final String device, IRemoteProcess p) {
+    private void read(final String device, int maxX, IRemoteProcess p) {
         boolean touching = false;
         long downAt = 0;
+        // Where the first finger went down and how far it has moved since, in the panel's units.
+        // A swipe on the top screen must not count as a tap outside the text box.
+        int startX = -1, startY = -1;
+        boolean moved = false;
+        int maxMove = maxX > 0 ? Math.max(1, Math.round(maxX * TAP_MAX_MOVE)) : Integer.MAX_VALUE;
         try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(p.getInputStream())) {
             byte[] buf = new byte[EVENT_SIZE * 64];
             int have = 0;
@@ -118,13 +135,24 @@ final class TouchWatcher {
                             || (type == EV_ABS && code == ABS_MT_TRACKING_ID && value >= 0 && !touching);
                     boolean up = (type == EV_KEY && code == BTN_TOUCH && value == 0)
                             || (type == EV_ABS && code == ABS_MT_TRACKING_ID && value < 0 && touching);
+                    if (touching && type == EV_ABS && (code == ABS_MT_POSITION_X || code == ABS_MT_POSITION_Y)) {
+                        if (code == ABS_MT_POSITION_X) {
+                            if (startX < 0) startX = value;
+                            else if (Math.abs(value - startX) > maxMove) moved = true;
+                        } else {
+                            if (startY < 0) startY = value;
+                            else if (Math.abs(value - startY) > maxMove) moved = true;
+                        }
+                    }
                     if (down && !touching) {
                         touching = true;
                         downAt = SystemClock.uptimeMillis();
+                        startX = startY = -1;
+                        moved = false;
                     } else if (up && touching) {
                         touching = false;
                         final long at = downAt;
-                        if (SystemClock.uptimeMillis() - at <= TAP_MAX_MS) {
+                        if (!moved && SystemClock.uptimeMillis() - at <= TAP_MAX_MS) {
                             main.post(new Runnable() {
                                 @Override public void run() { if (running) listener.onTap(device, at); }
                             });

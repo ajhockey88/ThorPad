@@ -75,6 +75,7 @@ public class TrackpadActivity extends Activity
 
     private static final long OWN_TOUCH_SLACK_MS = 250, TAP_SETTLE_MS = 350;
     private long lastOwnDownAt;
+    private TouchFilter touchFilter;
     private final TouchWatcher touchWatcher = new TouchWatcher(new TouchWatcher.Listener() {
         @Override public void onTap(String device, final long downAt) {
             if (Math.abs(downAt - lastOwnDownAt) < OWN_TOUCH_SLACK_MS) return; // on ThorPad's screen
@@ -102,6 +103,7 @@ public class TrackpadActivity extends Activity
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
 
         float d = getResources().getDisplayMetrics().density;
+        touchFilter = new TouchFilter(this);
         mouse = new VirtualMouse(d, this);
         keyboardDevice = new VirtualKeyboard(this);
 
@@ -268,6 +270,8 @@ public class TrackpadActivity extends Activity
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        // A touch from the top screen (or a mouse) never reaches the trackpad or its keyboard.
+        if (touchFilter.drop(ev)) return true;
         // Only a timestamp per event; the timer itself is only reset when it fires.
         lastTouchAt = SystemClock.uptimeMillis();
         int action = ev.getActionMasked();
