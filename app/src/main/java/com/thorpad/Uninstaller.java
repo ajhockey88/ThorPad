@@ -147,19 +147,37 @@ final class Uninstaller {
         String previous = new Prefs(c).previousKeyboard();
         List<InputMethodInfo> all = imm.getInputMethodList();
         if (previous != null) {
-            for (InputMethodInfo i : all) if (i.getId().equals(previous)) return i;
+            for (InputMethodInfo i : all) if (i.getId().equals(previous) && isKeyboard(i)) return i;
         }
+        // An on-screen keyboard that's turned on, the device's own (system) one first; never
+        // voice typing, which also counts as a "keyboard" to Android but shows no keys.
+        InputMethodInfo best = null;
         for (InputMethodInfo i : imm.getEnabledInputMethodList()) {
-            if (!i.getPackageName().equals(mine)) return i;
+            if (i.getPackageName().equals(mine) || !isKeyboard(i)) continue;
+            if (isSystem(i)) return i;
+            if (best == null) best = i;
         }
-        InputMethodInfo any = null;
+        if (best != null) return best;
         for (InputMethodInfo i : all) {
-            if (i.getPackageName().equals(mine)) continue;
-            boolean system = (i.getServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            if (system) return i;
-            if (any == null) any = i;
+            if (i.getPackageName().equals(mine) || !isKeyboard(i)) continue;
+            if (isSystem(i)) return i;
+            if (best == null) best = i;
         }
-        return any;
+        return best;
+    }
+
+    /** A keyboard with keys: has a "keyboard" subtype, or no subtypes and isn't a voice service. */
+    static boolean isKeyboard(InputMethodInfo i) {
+        int n = i.getSubtypeCount();
+        if (n == 0) return !i.getId().toLowerCase(java.util.Locale.US).contains("voice");
+        for (int k = 0; k < n; k++) {
+            if ("keyboard".equals(i.getSubtypeAt(k).getMode())) return true;
+        }
+        return false;
+    }
+
+    private static boolean isSystem(InputMethodInfo i) {
+        return (i.getServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     /** The accessibility services list without ThorPad's, or "" if nothing else is left. */

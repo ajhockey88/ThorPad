@@ -136,8 +136,14 @@ public final class UninstallActivity extends Activity {
         }
         setStep(2);
 
-        // 3. Virtual devices: unplugged when the trackpad stopped; forget the saved layout.
-        if (shizuku) log("layout: " + KeyboardLayoutTool.remove(this));
+        // 3. Virtual devices: unplugged when the trackpad stopped, but make sure no ThorPad
+        //    "uinput -" process is left (Android hides on-screen keyboards while a keyboard
+        //    device is plugged in), then forget the saved layout.
+        if (shizuku) {
+            ShizukuClient.runShell("for p in $(pidof uinput); do "
+                    + "[ \"$(tr '\\0' ' ' < /proc/$p/cmdline)\" = 'uinput - ' ] && kill $p; done; true");
+            log("layout: " + KeyboardLayoutTool.remove(this));
+        }
         setStep(3);
 
         // 4. Permissions Shizuku gave (draw over apps, usage access) back to Android's defaults.
