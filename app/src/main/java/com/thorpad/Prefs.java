@@ -22,6 +22,8 @@ final class Prefs {
     private static final String KEY_WANTS_THORPAD_KEYBOARD = "wants_thorpad_keyboard";
     /** ThorPad Keyboard has a layout, so Android stops asking to configure it. */
     private static final String KEY_KEYBOARD_LAYOUT_SET = "keyboard_layout_set";
+    /** The Android keyboard in use before ThorPad's was picked, for Uninstall to switch back to. */
+    private static final String KEY_PREVIOUS_KEYBOARD = "previous_keyboard";
     static final String KEY_DOUBLE_SPACE = "double_space_period";
     static final String KEY_AUTO_CAPS = "auto_caps";
     static final String KEY_SHOW_HINTS = "show_hints";
@@ -69,6 +71,8 @@ final class Prefs {
     void setWantsThorPadKeyboard(boolean v) {
         if (wantsThorPadKeyboard() != v) sp.edit().putBoolean(KEY_WANTS_THORPAD_KEYBOARD, v).apply();
     }
+    String previousKeyboard() { return sp.getString(KEY_PREVIOUS_KEYBOARD, null); }
+    void setPreviousKeyboard(String id) { sp.edit().putString(KEY_PREVIOUS_KEYBOARD, id).apply(); }
     boolean keyboardLayoutSet() { return sp.getBoolean(KEY_KEYBOARD_LAYOUT_SET, false); }
     void setKeyboardLayoutSet() { sp.edit().putBoolean(KEY_KEYBOARD_LAYOUT_SET, true).apply(); }
     /** Gesture hints drawn along the bottom of the trackpad. */

@@ -1,8 +1,14 @@
-🛠️ ThorPad 1.9.3: touching the top screen no longer sets off the bottom screen.
+🗑️ ThorPad 1.9.4: one button to remove ThorPad and everything it changed.
 
-## 🐛 Fixed in 1.9.3
-- 👆 **No more ghost touches:** swipes and taps on the top screen could reach ThorPad on the bottom screen as phantom trackpad or keyboard touches. ThorPad now checks which screen's touch panel each touch came from and ignores anything that isn't the bottom screen's, including its own mouse if the cursor ever wanders onto the bottom screen
-- ⌨️ **Keyboard stays open when you swipe:** a quick swipe on the top screen used to count as a tap outside the text box and close the keyboard. Now only a real tap does
+## ✨ What's new in 1.9.4
+- 🗑️ **Uninstall everything:** a new 🗑️ Uninstall tab in Settings, and an Uninstall button on the setup screen, undo everything ThorPad changed on your Thor and then remove ThorPad:
+  - ⌨️ Android's keyboard goes back to the one you used before ThorPad (or your other keyboard, like Gboard), and ThorPad Keyboard is turned off
+  - ♿ ThorPad's accessibility service (touch mode) is switched off
+  - 🖱️ The virtual mouse and keyboard are unplugged, and Android forgets the keyboard layout it saved for them
+  - 🔐 The permissions Shizuku gave ThorPad (draw over apps, usage access) go back to Android's defaults
+  - 🧹 ThorPad's diagnostic files in Downloads and all its settings are deleted
+- 🧩 **Shizuku is your call:** the confirm screen has an **Also uninstall Shizuku** checkbox, off by default, in case other apps use it
+- ⚡ **One tap with Shizuku:** ThorPad removes itself without any prompts. Without Shizuku, Android shows its usual uninstall prompt
 
 ---
 
@@ -19,8 +25,10 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 📳 **Haptics:** pick a feel and strength for every action
 - 🔋 **Easy on the battery:** dims the trackpad when idle and runs nothing in the background
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
+- 🗑️ **Clean uninstall:** one button undoes every change ThorPad made and removes it
 
 ## 📜 Release history
+- **1.9.4:** an Uninstall button that removes ThorPad and undoes everything it changed
 - **1.9.3:** touches on the top screen no longer reach the bottom screen
 - **1.9.2:** the keyboard works for text boxes on the bottom screen too
 - **1.9.1:** smooth scrolling, a half-screen keyboard option, ThorPad stays your keyboard, and no more keyboard notification sound

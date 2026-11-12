@@ -41,7 +41,8 @@ public class SettingsActivity extends Activity {
     private float d;
 
     // Tabs down the left; the chosen section's settings on the right, as cards.
-    private static final String[] TABS = {"🖱️ Trackpad", "⌨️ Keyboard", "📳 Haptics", "👆 Gestures", "🔄 Updates"};
+    private static final String[] TABS = {"🖱️ Trackpad", "⌨️ Keyboard", "📳 Haptics", "👆 Gestures", "🔄 Updates", "🗑️ Uninstall"};
+    private static final int UNINSTALL_TAB = 5;
     private static final int BG = Color.BLACK, SIDE = Color.rgb(0x0c, 0x0d, 0x11), CARD = Color.rgb(0x11, 0x13, 0x18),
             ACCENT = Color.rgb(0x78, 0xc8, 0xff), SUB = Color.rgb(0x8a, 0x90, 0x9b);
     /** The tab on show, kept when Settings rebuilds itself after a language change. */
@@ -149,12 +150,12 @@ public class SettingsActivity extends Activity {
     private void showTab(int which) {
         tab = which;
         for (int i = 0; i < tabViews.length; i++) {
-            boolean sel = i == which;
+            boolean sel = i == which, red = i == UNINSTALL_TAB;
             TextView t = tabViews[i];
-            t.setTextColor(sel ? Color.WHITE : Color.rgb(0xaa, 0xb0, 0xbb));
+            t.setTextColor(red ? Uninstaller.RED_TEXT : sel ? Color.WHITE : Color.rgb(0xaa, 0xb0, 0xbb));
             if (sel) {
                 GradientDrawable bg = new GradientDrawable();
-                bg.setColor(Color.rgb(0x16, 0x28, 0x3a));
+                bg.setColor(red ? Color.rgb(0x3a, 0x16, 0x16) : Color.rgb(0x16, 0x28, 0x3a));
                 bg.setCornerRadius(10 * d);
                 t.setBackground(bg);
             } else {
@@ -213,9 +214,13 @@ public class SettingsActivity extends Activity {
                 header("Gestures", "What each touch does on the trackpad");
                 gesturesSection();
                 break;
-            default:
+            case 4:
                 header("Updates", "Get the newest ThorPad from GitHub");
                 updateSection();
+                break;
+            default:
+                header("Uninstall", "Undo everything ThorPad changed, then remove it");
+                uninstallSection();
                 break;
         }
         scroll.scrollTo(0, 0);
@@ -644,6 +649,57 @@ public class SettingsActivity extends Activity {
                 });
             }
         }, "ThorPad diagnostics").start();
+    }
+
+    // ---- Uninstall -----------------------------------------------------------------------------
+    // What gets undone, as cards, then the red button (Uninstaller.confirm asks first).
+
+    private void uninstallSection() {
+        InputMethodInfo back = Uninstaller.keyboardToRestore(this);
+        String kb = back != null && Uninstaller.thorPadKeyboardInUse(this)
+                ? Lang.f("Keyboard goes back to %s", back.loadLabel(getPackageManager()))
+                : Lang.t("ThorPad Keyboard turned off");
+        undoCard(kb, Lang.t("ThorPad Keyboard is turned off and removed from your keyboards"));
+        undoCard(Lang.t("Accessibility service turned off"),
+                Lang.t("Touch mode's service is switched off in Android settings"));
+        undoCard(Lang.t("Virtual mouse and keyboard removed"),
+                Lang.t("Plus the keyboard layout Android saved for them"));
+        undoCard(Lang.t("Permissions taken back"), Lang.t("Shizuku access, draw over apps, app usage"));
+        undoCard(Lang.t("Logs and settings deleted"),
+                Lang.t("Diagnostic files in Downloads and all ThorPad settings"));
+        if (!ShizukuClient.hasPermission()) {
+            TextView note = plain(Lang.t("Without Shizuku, Android asks you to confirm the uninstall, and "
+                    + "switches keyboards and turns the service off by itself."), 12, SUB);
+            note.setPadding((int) (4 * d), (int) (4 * d), (int) (4 * d), 0);
+            page.addView(note);
+        }
+        TextView go = Uninstaller.pill(this, "🗑️ " + Lang.t("Uninstall everything"), Uninstaller.RED, Color.WHITE, d);
+        go.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { Uninstaller.confirm(SettingsActivity.this); }
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = (int) (10 * d);
+        page.addView(go, lp);
+    }
+
+    private void undoCard(String title, String sub) {
+        LinearLayout c = card();
+        c.setOrientation(LinearLayout.HORIZONTAL);
+        c.setGravity(Gravity.CENTER_VERTICAL);
+        TextView tick = plain("✓", 13, Color.rgb(0x7f, 0xe0, 0xa0));
+        tick.setGravity(Gravity.CENTER);
+        GradientDrawable circle = new GradientDrawable();
+        circle.setShape(GradientDrawable.OVAL);
+        circle.setColor(Color.rgb(0x1d, 0x3a, 0x28));
+        tick.setBackground(circle);
+        c.addView(tick, new LinearLayout.LayoutParams((int) (24 * d), (int) (24 * d)));
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.setPadding((int) (12 * d), 0, 0, 0);
+        words.addView(plain(title, 15, Color.WHITE));
+        words.addView(plain(sub, 12, SUB));
+        c.addView(words);
     }
 
     // ---- Updates -------------------------------------------------------------------------------

@@ -30,7 +30,14 @@ final class KeyboardKeeper {
 
     /** The user picked a keyboard in ThorPad: keep ThorPad's only if it was ThorPad's. */
     static void chosen(Context c, boolean thorPad) {
+        if (thorPad) rememberPrevious(c);
         new Prefs(c).setWantsThorPadKeyboard(thorPad);
+    }
+
+    /** Saves the keyboard in use, unless it's ThorPad's, so Uninstall can switch back to it. */
+    static void rememberPrevious(Context c) {
+        String cur = current(c), id = thorPadId(c);
+        if (cur != null && !cur.isEmpty() && !cur.equals(id)) new Prefs(c).setPreviousKeyboard(cur);
     }
 
     /** Switches back to ThorPad's keyboard if Android dropped it. Runs in the background. */
@@ -59,6 +66,7 @@ final class KeyboardKeeper {
         }
         if (!prefs.keepKeyboard() || !prefs.wantsThorPadKeyboard() || !ShizukuClient.hasPermission()) return;
         KeyboardLog.add("keeper: keyboard was " + current(c) + ", switching back to ThorPad");
+        rememberPrevious(c);
         ShizukuClient.runShell("ime enable " + id + " && ime set " + id);
         if (!id.equals(current(c))) {
             // Some firmware ignores "ime set": write Android's setting directly.

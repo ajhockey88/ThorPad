@@ -49,8 +49,32 @@ final class KeyboardLayoutTool {
         if (result.startsWith("ok plugged")) prefs.setKeyboardLayoutSet();
     }
 
-    /** Runs as the shell user: sets ThorPad Keyboard's layout and prints "ok ..." or the error. */
+    /** Uninstall: forgets the layout Android saved for ThorPad Keyboard. Call off the main thread. */
+    static String remove(Context context) {
+        if (!ShizukuClient.hasPermission()) return "no shizuku";
+        try {
+            String apk = context.getApplicationInfo().sourceDir;
+            IRemoteProcess p = ShizukuClient.newProcess(new String[] {"sh", "-c",
+                    "CLASSPATH='" + apk + "' app_process /system/bin " + KeyboardLayoutTool.class.getName() + " remove 2>&1"});
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    new ParcelFileDescriptor.AutoCloseInputStream(p.getInputStream())));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) sb.append(line).append('\n');
+            p.waitFor();
+            p.destroy();
+            return sb.toString().trim();
+        } catch (Throwable e) {
+            return "failed: " + e;
+        }
+    }
+
+    /**
+     * Runs as the shell user: sets ThorPad Keyboard's layout and prints "ok ..." or the error.
+     * With "remove": takes the saved layouts off ThorPad Keyboard instead.
+     */
     public static void main(String[] args) {
+        boolean remove = args.length > 0 && "remove".equals(args[0]);
         try {
             IBinder b = (IBinder) Class.forName("android.os.ServiceManager")
                     .getMethod("getService", String.class).invoke(null, "input");
@@ -80,6 +104,22 @@ final class KeyboardLayoutTool {
 
             Method getCurrent = imClass.getMethod("getCurrentKeyboardLayoutForInputDevice", idClass);
             String current = (String) getCurrent.invoke(im, id);
+            if (remove) {
+                int removed = 0;
+                try {
+                    String[] enabled = (String[]) imClass.getMethod("getEnabledKeyboardLayoutsForInputDevice", idClass)
+                            .invoke(im, id);
+                    Method rm = imClass.getMethod("removeKeyboardLayoutForInputDevice", idClass, String.class);
+                    if (enabled != null) for (String l : enabled) { rm.invoke(im, id, l); removed++; }
+                    if (current != null && removed == 0) { rm.invoke(im, id, current); removed++; }
+                } catch (Throwable e) {
+                    Throwable cause = e.getCause() != null ? e.getCause() : e;
+                    System.out.println("remove error " + cause);
+                    return;
+                }
+                System.out.println("ok removed " + removed + ", now " + getCurrent.invoke(im, id));
+                return;
+            }
             if (current != null) {
                 System.out.println("ok " + which + " already " + current);
                 return;

@@ -217,6 +217,20 @@ final class SetupPanel extends ScrollView implements Updater.Listener {
             });
             foot.addView(skip);
         }
+        // Uninstall everything, bottom right: a red outlined pill.
+        TextView uninstall = text("🗑️ " + Lang.t("Uninstall"), 13, Uninstaller.RED_TEXT);
+        uninstall.setPadding(px(12), px(5), px(12), px(5));
+        GradientDrawable ubg = new GradientDrawable();
+        ubg.setCornerRadius(16 * d);
+        ubg.setStroke(px(1), Color.rgb(0x4a, 0x20, 0x20));
+        uninstall.setBackground(ubg);
+        uninstall.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { Uninstaller.confirm(activity); }
+        });
+        LinearLayout.LayoutParams ulp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ulp.leftMargin = px(14);
+        foot.addView(uninstall, ulp);
         page.addView(foot);
     }
 

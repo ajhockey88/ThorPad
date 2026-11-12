@@ -729,6 +729,64 @@ final class Lang {
                 "Ein kleiner Knopf unten rechts auf dem Trackpad öffnet die Tastatur",
                 "Um pequeno botão no canto inferior direito do trackpad abre o teclado",
                 "Un piccolo pulsante in basso a destra del trackpad apre la tastiera");
+        e("Uninstall",
+                "Desinstalar", "Désinstaller", "Deinstallieren", "Desinstalar", "Disinstalla");
+        e("Undo everything ThorPad changed, then remove it",
+                "Deshace todo lo que ThorPad cambió y luego lo elimina", "Annule tout ce que ThorPad a modifié, puis le supprime", "Macht alles rückgängig, was ThorPad geändert hat, und entfernt es dann", "Desfaz tudo o que o ThorPad mudou e depois o remove", "Annulla tutto ciò che ThorPad ha cambiato, poi lo rimuove");
+        e("Keyboard goes back to %s",
+                "El teclado vuelve a %s", "Le clavier revient à %s", "Tastatur wechselt zurück zu %s", "O teclado volta para %s", "La tastiera torna a %s");
+        e("ThorPad Keyboard turned off",
+                "Teclado ThorPad desactivado", "Clavier ThorPad désactivé", "ThorPad-Tastatur ausgeschaltet", "Teclado ThorPad desativado", "Tastiera ThorPad disattivata");
+        e("ThorPad Keyboard is turned off and removed from your keyboards",
+                "El teclado ThorPad se desactiva y se quita de tus teclados", "Le clavier ThorPad est désactivé et retiré de vos claviers", "Die ThorPad-Tastatur wird ausgeschaltet und aus deinen Tastaturen entfernt", "O teclado ThorPad é desativado e removido dos seus teclados", "La tastiera ThorPad viene disattivata e tolta dalle tue tastiere");
+        e("Accessibility service turned off",
+                "Servicio de accesibilidad desactivado", "Service d'accessibilité désactivé", "Bedienungshilfe ausgeschaltet", "Serviço de acessibilidade desativado", "Servizio di accessibilità disattivato");
+        e("Touch mode's service is switched off in Android settings",
+                "El servicio del modo táctil se desactiva en los ajustes de Android", "Le service du mode tactile est désactivé dans les paramètres Android", "Der Dienst des Touch-Modus wird in den Android-Einstellungen ausgeschaltet", "O serviço do modo toque é desativado nas configurações do Android", "Il servizio della modalità tocco viene disattivato nelle impostazioni di Android");
+        e("Virtual mouse and keyboard removed",
+                "Ratón y teclado virtuales eliminados", "Souris et clavier virtuels supprimés", "Virtuelle Maus und Tastatur entfernt", "Mouse e teclado virtuais removidos", "Mouse e tastiera virtuali rimossi");
+        e("Plus the keyboard layout Android saved for them",
+                "Y la distribución de teclado que Android guardó para ellos", "Ainsi que la disposition de clavier enregistrée par Android", "Und das Tastaturlayout, das Android dafür gespeichert hat", "E o layout de teclado que o Android salvou para eles", "E il layout di tastiera che Android ha salvato per loro");
+        e("Permissions taken back",
+                "Permisos retirados", "Autorisations retirées", "Berechtigungen entzogen", "Permissões retiradas", "Permessi revocati");
+        e("Shizuku access, draw over apps, app usage",
+                "Acceso de Shizuku, mostrar sobre otras apps, uso de apps", "Accès Shizuku, superposition, utilisation des applis", "Shizuku-Zugriff, über anderen Apps einblenden, App-Nutzung", "Acesso do Shizuku, sobrepor a outros apps, uso de apps", "Accesso Shizuku, sovrapposizione ad altre app, utilizzo app");
+        e("Logs and settings deleted",
+                "Registros y ajustes eliminados", "Journaux et paramètres supprimés", "Protokolle und Einstellungen gelöscht", "Registros e configurações apagados", "Log e impostazioni eliminati");
+        e("Diagnostic files in Downloads and all ThorPad settings",
+                "Archivos de diagnóstico en Descargas y todos los ajustes de ThorPad", "Fichiers de diagnostic dans Téléchargements et tous les paramètres de ThorPad", "Diagnosedateien in Downloads und alle ThorPad-Einstellungen", "Arquivos de diagnóstico em Downloads e todas as configurações do ThorPad", "File di diagnostica in Download e tutte le impostazioni di ThorPad");
+        e("Without Shizuku, Android asks you to confirm the uninstall, and switches keyboards and turns the service off by itself.",
+                "Sin Shizuku, Android te pide confirmar la desinstalación y cambia de teclado y desactiva el servicio por sí mismo.", "Sans Shizuku, Android vous demande de confirmer la désinstallation, puis change de clavier et désactive le service tout seul.", "Ohne Shizuku fragt Android nach einer Bestätigung und wechselt die Tastatur und schaltet den Dienst selbst aus.", "Sem Shizuku, o Android pede para confirmar a desinstalação e troca o teclado e desativa o serviço sozinho.", "Senza Shizuku, Android chiede di confermare la disinstallazione e cambia tastiera e disattiva il servizio da solo.");
+        e("Uninstall everything",
+                "Desinstalar todo", "Tout désinstaller", "Alles deinstallieren", "Desinstalar tudo", "Disinstalla tutto");
+        e("Uninstall ThorPad?",
+                "¿Desinstalar ThorPad?", "Désinstaller ThorPad ?", "ThorPad deinstallieren?", "Desinstalar o ThorPad?", "Disinstallare ThorPad?");
+        e("Your keyboard goes back to %s,",
+                "Tu teclado vuelve a %s,", "Votre clavier revient à %s,", "Deine Tastatur wechselt zurück zu %s,", "Seu teclado volta para %s,", "La tastiera torna a %s,");
+        e("everything ThorPad changed is undone, and then ThorPad removes itself. This can't be undone.",
+                "todo lo que ThorPad cambió se deshace y luego ThorPad se elimina. No se puede deshacer.", "tout ce que ThorPad a modifié est annulé, puis ThorPad se supprime. C'est irréversible.", "alles, was ThorPad geändert hat, wird rückgängig gemacht und dann entfernt sich ThorPad. Das lässt sich nicht rückgängig machen.", "tudo o que o ThorPad mudou é desfeito e depois o ThorPad se remove. Isso não pode ser desfeito.", "tutto ciò che ThorPad ha cambiato viene annullato, poi ThorPad si rimuove. Non si può annullare.");
+        e("Also uninstall Shizuku",
+                "Desinstalar también Shizuku", "Désinstaller aussi Shizuku", "Auch Shizuku deinstallieren", "Desinstalar também o Shizuku", "Disinstalla anche Shizuku");
+        e("Leave this off if other apps use Shizuku",
+                "Déjalo desactivado si otras apps usan Shizuku", "Laissez décoché si d'autres applis utilisent Shizuku", "Aus lassen, wenn andere Apps Shizuku nutzen", "Deixe desmarcado se outros apps usam o Shizuku", "Lascia disattivato se altre app usano Shizuku");
+        e("Uninstalling ThorPad…",
+                "Desinstalando ThorPad…", "Désinstallation de ThorPad…", "ThorPad wird deinstalliert…", "Desinstalando o ThorPad…", "Disinstallazione di ThorPad…");
+        e("Keep this screen open, it takes a few seconds",
+                "Mantén esta pantalla abierta, tarda unos segundos", "Gardez cet écran ouvert, cela prend quelques secondes", "Lass diesen Bildschirm offen, es dauert ein paar Sekunden", "Mantenha esta tela aberta, leva alguns segundos", "Tieni aperta questa schermata, ci vuole qualche secondo");
+        e("Keyboard switched back to %s",
+                "Teclado cambiado de nuevo a %s", "Clavier remis sur %s", "Tastatur zurück auf %s gestellt", "Teclado trocado de volta para %s", "Tastiera riportata a %s");
+        e("Taking back permissions",
+                "Retirando permisos", "Retrait des autorisations", "Berechtigungen werden entzogen", "Retirando permissões", "Revoca dei permessi");
+        e("Deleting logs and settings",
+                "Eliminando registros y ajustes", "Suppression des journaux et paramètres", "Protokolle und Einstellungen werden gelöscht", "Apagando registros e configurações", "Eliminazione di log e impostazioni");
+        e("Removing ThorPad",
+                "Eliminando ThorPad", "Suppression de ThorPad", "ThorPad wird entfernt", "Removendo o ThorPad", "Rimozione di ThorPad");
+        e("Removing ThorPad and Shizuku",
+                "Eliminando ThorPad y Shizuku", "Suppression de ThorPad et Shizuku", "ThorPad und Shizuku werden entfernt", "Removendo o ThorPad e o Shizuku", "Rimozione di ThorPad e Shizuku");
+        e("ThorPad wasn't removed",
+                "ThorPad no se eliminó", "ThorPad n'a pas été supprimé", "ThorPad wurde nicht entfernt", "O ThorPad não foi removido", "ThorPad non è stato rimosso");
+        e("Everything else is undone. Tap Uninstall to try again.",
+                "Todo lo demás se deshizo. Toca Desinstalar para reintentar.", "Tout le reste est annulé. Touchez Désinstaller pour réessayer.", "Alles andere ist rückgängig gemacht. Tippe auf Deinstallieren, um es erneut zu versuchen.", "Todo o resto foi desfeito. Toque em Desinstalar para tentar de novo.", "Tutto il resto è stato annullato. Tocca Disinstalla per riprovare.");
         e("Smooth scrolling", "Desplazamiento suave", "Défilement fluide", "Weiches Scrollen", "Rolagem suave", "Scorrimento fluido");
         e("Scrolls in small steps and glides after a flick. Turn off for games that need real wheel clicks",
                 "Desplaza en pasos pequeños y sigue deslizando tras un gesto rápido. Desactívalo en juegos que necesitan clics reales de la rueda",
