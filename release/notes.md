@@ -7,8 +7,8 @@
   - 👆 **Tap** it to bring the trackpad back (the app keeps running)
   - ✋ **Hold** it for a quick menu: Trackpad, Keyboard, Switch app, Close app
   - 🤏 **Drag** it anywhere and it snaps to the nearest edge, and it fades after 3 seconds so it doesn't cover the app
-- ↩️ **Back to your app:** with an app open down there, the trackpad shows a "Back to" card that reopens it with one tap. It goes away as soon as you use the trackpad
-- ⚙️ **Settings > Apps:** button size, fade, snap to edges, a swipe-in-from-the-edge option instead of the button, the "Back to" card, and your pinned apps
+- ↩️ **Back to your app:** with an app open down there, a "Back to" button always sits in the trackpad's bottom-left corner, so one tap takes you back to it, even after using the trackpad
+- ⚙️ **Settings > Apps:** button size, fade, snap to edges, a swipe-in-from-the-edge option instead of the button, the "Back to" button, and your pinned apps
 - ⌨️ Text boxes in the app still get the docked ThorPad keyboard
 
 ---

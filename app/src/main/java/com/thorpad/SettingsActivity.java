@@ -501,7 +501,7 @@ public class SettingsActivity extends Activity {
                 Prefs.KEY_APP_BUTTON_SNAP, prefs.appButtonSnap(), false);
         toggle("Swipe gesture instead", "Hide the button; swipe in from the right edge to bring the trackpad "
                 + "back, or hold the edge for the menu", Prefs.KEY_APP_SWIPE, prefs.appSwipeInstead(), false);
-        toggle("Reopen last app", "Show the \"Back to\" card on the trackpad",
+        toggle("Reopen last app", "A \"Back to\" button in the trackpad's bottom-left corner reopens the app",
                 Prefs.KEY_APP_BACK_CARD, prefs.appBackCard(), false);
         pinnedAppsCard();
     }

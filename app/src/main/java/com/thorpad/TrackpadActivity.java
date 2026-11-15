@@ -211,8 +211,10 @@ public class TrackpadActivity extends Activity
         klp.rightMargin = klp.bottomMargin = (int) (16 * d);
         padArea.addView(keyButton, klp);
         backCard = buildBackCard(d);
-        padArea.addView(backCard, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        FrameLayout.LayoutParams bclp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.START);
+        bclp.leftMargin = bclp.bottomMargin = (int) (16 * d);
+        padArea.addView(backCard, bclp);
         padArea.addView(buildSetupPanel(d), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(padArea, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -312,7 +314,6 @@ public class TrackpadActivity extends Activity
         }
         if (action == MotionEvent.ACTION_DOWN) {
             checkTopApp(false);
-            hideBackCardUnlessOn(ev);
         }
         if (handleMenuTouch(ev)) return true;
         return super.dispatchTouchEvent(ev);
@@ -561,7 +562,6 @@ public class TrackpadActivity extends Activity
 
     private void openPcKeys() {
         hideMenu();
-        backCard.setVisibility(View.GONE);
         if (!mouse.isReady()) {
             android.widget.Toast.makeText(this, Lang.t("PC keys need mouse mode (Shizuku)"),
                     android.widget.Toast.LENGTH_SHORT).show();
@@ -689,7 +689,7 @@ public class TrackpadActivity extends Activity
     private AppPickerView picker;
     /** Open the app picker as soon as the trackpad is up (the floating button's Switch app). */
     private boolean appsRequested;
-    /** "Back to <app>": reopens the app ThorPad put on this screen. Goes at the first touch elsewhere. */
+    /** "Back to <app>": reopens the app ThorPad put on this screen. Always in the trackpad's bottom-left corner. */
     private LinearLayout backCard;
     private android.widget.ImageView backIcon;
     private TextView backLabel;
@@ -698,7 +698,6 @@ public class TrackpadActivity extends Activity
         hideMenu();
         if (keyboard.getVisibility() == View.VISIBLE) onCloseKeyboard();
         if (pcKeys.getVisibility() == View.VISIBLE) onPcKeysClose();
-        backCard.setVisibility(View.GONE);
         picker.show(AppsMode.current(this));
     }
 
@@ -707,15 +706,9 @@ public class TrackpadActivity extends Activity
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER_HORIZONTAL);
         box.setVisibility(View.GONE);
-        TextView over = new TextView(this);
-        over.setText(Lang.t("Back to your app"));
-        over.setTextSize(13);
-        over.setTextColor(Color.rgb(0x77, 0x7d, 0x88));
-        over.setPadding(0, 0, 0, (int) (8 * d));
-        box.addView(over);
         LinearLayout card = new LinearLayout(this);
         card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding((int) (14 * d), (int) (10 * d), (int) (18 * d), (int) (10 * d));
+        card.setPadding((int) (8 * d), (int) (7 * d), (int) (14 * d), (int) (7 * d));
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(Color.rgb(0x11, 0x13, 0x18));
         bg.setStroke(Math.max(1, (int) (0.8f * d)), Color.rgb(0x22, 0x26, 0x2f));
@@ -728,25 +721,24 @@ public class TrackpadActivity extends Activity
             }
         });
         backIcon.setClipToOutline(true);
-        card.addView(backIcon, new LinearLayout.LayoutParams((int) (36 * d), (int) (36 * d)));
+        card.addView(backIcon, new LinearLayout.LayoutParams((int) (28 * d), (int) (28 * d)));
         backLabel = new TextView(this);
-        backLabel.setTextSize(17);
+        backLabel.setTextSize(14);
         backLabel.setTextColor(Color.WHITE);
         backLabel.setSingleLine(true);
-        backLabel.setMaxWidth((int) (220 * d));
+        backLabel.setMaxWidth((int) (180 * d));
         backLabel.setEllipsize(TextUtils.TruncateAt.END);
-        backLabel.setPadding((int) (12 * d), 0, (int) (10 * d), 0);
+        backLabel.setPadding((int) (9 * d), 0, (int) (8 * d), 0);
         card.addView(backLabel);
         TextView arrow = new TextView(this);
         arrow.setText("↩");
-        arrow.setTextSize(18);
+        arrow.setTextSize(15);
         arrow.setTextColor(Color.rgb(0x6d, 0x9c, 0xc4));
         card.addView(arrow);
         card.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 Haptics.play(TrackpadActivity.this, Haptics.BAR);
                 String pkg = AppsMode.current(TrackpadActivity.this);
-                backCard.setVisibility(View.GONE);
                 if (pkg != null) AppsMode.open(TrackpadActivity.this, pkg);
             }
         });
@@ -761,24 +753,13 @@ public class TrackpadActivity extends Activity
             backCard.setVisibility(View.GONE);
             return;
         }
-        backLabel.setText(TopApp.label(this, pkg));
+        backLabel.setText(Lang.f("Back to %s", TopApp.label(this, pkg)));
         try {
             backIcon.setImageDrawable(getPackageManager().getApplicationIcon(pkg));
         } catch (Exception e) {
             backIcon.setImageDrawable(null);
         }
         backCard.setVisibility(View.VISIBLE);
-    }
-
-    /** The card goes the moment the trackpad is used; a touch on the card itself is a tap on it. */
-    private void hideBackCardUnlessOn(MotionEvent ev) {
-        if (backCard.getVisibility() != View.VISIBLE) return;
-        View card = backCard.getChildAt(1);
-        int[] at = new int[2];
-        card.getLocationInWindow(at);
-        float x = ev.getX(), y = ev.getY();
-        if (x >= at[0] && x <= at[0] + card.getWidth() && y >= at[1] && y <= at[1] + card.getHeight()) return;
-        backCard.setVisibility(View.GONE);
     }
 
     @Override
@@ -856,9 +837,8 @@ public class TrackpadActivity extends Activity
         if (appsRequested) {
             appsRequested = false;
             openPicker();
-        } else if (!keyboardRequested) {
-            showBackCard();
         }
+        showBackCard();
         if (keyboardRequested) {
             keyboardRequested = false;
             if (keyboard.getVisibility() != View.VISIBLE) {
@@ -992,7 +972,6 @@ public class TrackpadActivity extends Activity
 
     private void openKeyboard() {
         hideMenu();
-        backCard.setVisibility(View.GONE);
         Prefs prefs = new Prefs(this);
         keyboard.reset();
         keyboard.setTypeOnRelease(prefs.typeOnRelease());

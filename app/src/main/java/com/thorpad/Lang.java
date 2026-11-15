@@ -77,6 +77,7 @@ final class Lang {
         e("Unpinned %s", "%s ya no está fijada", "%s désépinglée", "%s nicht mehr angeheftet", "%s já não está afixada", "%s non più fissata");
         e("Open %s here", "Abrir %s aquí", "Ouvrir %s ici", "%s hier öffnen", "Abrir %s aqui", "Apri %s qui");
         e("Pick an app", "Elige una app", "Choisissez une app", "Wähle eine App", "Escolha uma app", "Scegli un'app");
+        e("Back to %s", "Volver a %s", "Retour à %s", "Zurück zu %s", "Voltar a %s", "Torna a %s");
         e("Back to your app", "Volver a tu app", "Retour à votre app", "Zurück zu deiner App", "Voltar à sua app", "Torna alla tua app");
         e("Couldn't open that app", "No se pudo abrir esa app", "Impossible d'ouvrir cette app", "Die App ließ sich nicht öffnen", "Não foi possível abrir essa app", "Impossibile aprire l'app");
         e("Closed %s", "%s cerrada", "%s fermée", "%s geschlossen", "%s fechada", "%s chiusa");
@@ -93,7 +94,7 @@ final class Lang {
         e("Swipe gesture instead", "Gesto de deslizar en su lugar", "Geste de balayage à la place", "Stattdessen Wischgeste", "Gesto de deslizar em vez disso", "Gesto di scorrimento invece");
         e("Hide the button; swipe in from the right edge to bring the trackpad back, or hold the edge for the menu", "Oculta el botón; desliza desde el borde derecho para volver al trackpad, o mantén el borde para el menú", "Masque le bouton ; balayez depuis le bord droit pour revenir au trackpad, ou maintenez le bord pour le menu", "Blendet die Taste aus; vom rechten Rand hineinwischen holt das Trackpad zurück, Rand halten öffnet das Menü", "Esconde o botão; deslize da margem direita para voltar ao trackpad, ou mantenha a margem para o menu", "Nasconde il pulsante; scorri dal bordo destro per tornare al trackpad, o tieni premuto il bordo per il menu");
         e("Reopen last app", "Reabrir la última app", "Rouvrir la dernière app", "Letzte App wieder öffnen", "Reabrir a última app", "Riapri l'ultima app");
-        e("Show the \"Back to\" card on the trackpad", "Muestra la tarjeta \"Volver a\" en el trackpad", "Affiche la carte « Retour à » sur le trackpad", "Zeigt die Karte „Zurück zu\" auf dem Trackpad", "Mostra o cartão \"Voltar a\" no trackpad", "Mostra la scheda \"Torna a\" sul trackpad");
+        e("A \"Back to\" button in the trackpad's bottom-left corner reopens the app", "Un botón \"Volver a\" en la esquina inferior izquierda del trackpad reabre la app", "Un bouton « Retour à » en bas à gauche du trackpad rouvre l'app", "Eine „Zurück zu\"-Taste unten links auf dem Trackpad öffnet die App wieder", "Um botão \"Voltar a\" no canto inferior esquerdo do trackpad reabre a app", "Un pulsante \"Torna a\" in basso a sinistra sul trackpad riapre l'app");
         e("Pinned apps", "Apps fijadas", "Apps épinglées", "Angeheftete Apps", "Apps afixadas", "App fissate");
         e("None yet. Hold an app in the app picker to pin it.", "Ninguna aún. Mantén pulsada una app en el selector para fijarla.", "Aucune pour l'instant. Maintenez une app dans le sélecteur pour l'épingler.", "Noch keine. Halte im App-Auswahl eine App gedrückt, um sie anzuheften.", "Nenhuma ainda. Mantenha uma app premida no seletor para a afixar.", "Nessuna per ora. Tieni premuta un'app nel selettore per fissarla.");
         e("Edit", "Editar", "Modifier", "Bearbeiten", "Editar", "Modifica");
