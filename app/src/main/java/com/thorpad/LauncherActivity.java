@@ -18,9 +18,15 @@ public class LauncherActivity extends Activity {
 
     /** Opens the trackpad on the bottom screen, with its keyboard showing if asked. */
     static void openTrackpad(Context context, boolean withKeyboard) {
+        openTrackpad(context, withKeyboard, false);
+    }
+
+    /** Also: with the app picker showing (the floating button's Switch app). */
+    static void openTrackpad(Context context, boolean withKeyboard, boolean withApps) {
         Intent intent = new Intent(context, TrackpadActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (withKeyboard) intent.putExtra(TrackpadActivity.EXTRA_OPEN_KEYBOARD, true);
+        if (withApps) intent.putExtra(AppsMode.EXTRA_OPEN_APPS, true);
         Display target = Displays.trackpadDisplay(context);
         try {
             if (target != null) {

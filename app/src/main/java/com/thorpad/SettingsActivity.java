@@ -41,8 +41,8 @@ public class SettingsActivity extends Activity {
     private float d;
 
     // Tabs down the left; the chosen section's settings on the right, as cards.
-    private static final String[] TABS = {"🖱️ Trackpad", "⌨️ Keyboard", "📳 Haptics", "👆 Gestures", "🔄 Updates", "🗑️ Uninstall"};
-    private static final int UNINSTALL_TAB = 5;
+    private static final String[] TABS = {"🖱️ Trackpad", "⌨️ Keyboard", "📱 Apps", "📳 Haptics", "👆 Gestures", "🔄 Updates", "🗑️ Uninstall"};
+    private static final int UNINSTALL_TAB = 6;
     private static final int BG = Color.BLACK, SIDE = Color.rgb(0x0c, 0x0d, 0x11), CARD = Color.rgb(0x11, 0x13, 0x18),
             ACCENT = Color.rgb(0x78, 0xc8, 0xff), SUB = Color.rgb(0x8a, 0x90, 0x9b);
     /** The tab on show, kept when Settings rebuilds itself after a language change. */
@@ -207,14 +207,18 @@ public class SettingsActivity extends Activity {
                 refreshKeyboardLabel();
                 break;
             case 2:
+                header("Apps", "Running other apps on this screen");
+                appsSection();
+                break;
+            case 3:
                 header("Haptics", "Pick a feel and strength for each action.");
                 hapticsSection();
                 break;
-            case 3:
+            case 4:
                 header("Gestures", "What each touch does on the trackpad");
                 gesturesSection();
                 break;
-            case 4:
+            case 5:
                 header("Updates", "Get the newest ThorPad from GitHub");
                 updateSection();
                 break;
@@ -346,7 +350,7 @@ public class SettingsActivity extends Activity {
                     if (gestureTab == which) return;
                     Haptics.play(SettingsActivity.this, Haptics.BAR);
                     gestureTab = which;
-                    showTab(3);
+                    showTab(tab);
                 }
             });
             seg.addView(t);
@@ -447,6 +451,114 @@ public class SettingsActivity extends Activity {
         a.setSingleLine();
         row.addView(a);
         card.addView(row);
+    }
+
+    // ---- Apps on the bottom screen ----------------------------------------------------------------
+
+    private static final String[] BUTTON_SIZES = {"Small", "Medium", "Large"};
+
+    private void appsSection() {
+        LinearLayout c = card();
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(plain(Lang.t("Button size"), 16, Color.WHITE));
+        words.addView(plain(Lang.t("How big the floating ThorPad button is"), 12, SUB));
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final TextView size = chip(Lang.t(BUTTON_SIZES[prefs.appButtonSize()]) + "  ▾");
+        size.setTextSize(15);
+        size.setPadding((int) (12 * d), (int) (7 * d), (int) (12 * d), (int) (7 * d));
+        View.OnClickListener pickSize = new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                String[] names = new String[BUTTON_SIZES.length];
+                for (int i = 0; i < names.length; i++) names[i] = Lang.t(BUTTON_SIZES[i]);
+                new AlertDialog.Builder(SettingsActivity.this)
+                        .setTitle(Lang.t("Button size"))
+                        .setSingleChoiceItems(names, prefs.appButtonSize(), new DialogInterface.OnClickListener() {
+                            @Override public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                prefs.setAppButtonSize(which);
+                                size.setText(Lang.t(BUTTON_SIZES[which]) + "  ▾");
+                                AppsMode.rebuildButton(SettingsActivity.this);
+                            }
+                        })
+                        .setNegativeButton(Lang.t("Cancel"), null)
+                        .show();
+            }
+        };
+        size.setOnClickListener(pickSize);
+        c.setOnClickListener(pickSize);
+        LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        plp.leftMargin = (int) (12 * d);
+        row.addView(size, plp);
+        c.addView(row);
+
+        toggle("Fade when idle", "The button turns see-through after 3 seconds untouched",
+                Prefs.KEY_APP_BUTTON_FADE, prefs.appButtonFade(), false);
+        toggle("Snap to edges", "Off: the button stays exactly where you drop it",
+                Prefs.KEY_APP_BUTTON_SNAP, prefs.appButtonSnap(), false);
+        toggle("Swipe gesture instead", "Hide the button; swipe in from the right edge to bring the trackpad "
+                + "back, or hold the edge for the menu", Prefs.KEY_APP_SWIPE, prefs.appSwipeInstead(), false);
+        toggle("Reopen last app", "Show the \"Back to\" card on the trackpad",
+                Prefs.KEY_APP_BACK_CARD, prefs.appBackCard(), false);
+        pinnedAppsCard();
+    }
+
+    private void pinnedAppsCard() {
+        LinearLayout c = card();
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.addView(plain(Lang.t("Pinned apps"), 16, Color.WHITE));
+        final java.util.List<String> pinned = prefs.pinnedApps();
+        StringBuilder names = new StringBuilder();
+        for (String p : pinned) {
+            if (names.length() > 0) names.append(", ");
+            names.append(TopApp.label(this, p));
+        }
+        words.addView(plain(pinned.isEmpty() ? Lang.t("None yet. Hold an app in the app picker to pin it.")
+                : names.toString(), 12, SUB));
+        row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        if (!pinned.isEmpty()) {
+            TextView edit = chip(Lang.t("Edit"));
+            edit.setTextSize(15);
+            edit.setPadding((int) (14 * d), (int) (7 * d), (int) (14 * d), (int) (7 * d));
+            edit.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    final String[] labels = new String[pinned.size()];
+                    final boolean[] keep = new boolean[pinned.size()];
+                    for (int i = 0; i < labels.length; i++) {
+                        labels[i] = TopApp.label(SettingsActivity.this, pinned.get(i));
+                        keep[i] = true;
+                    }
+                    new AlertDialog.Builder(SettingsActivity.this)
+                            .setTitle(Lang.t("Pinned apps"))
+                            .setMultiChoiceItems(labels, keep, new DialogInterface.OnMultiChoiceClickListener() {
+                                @Override public void onClick(DialogInterface dialog, int which, boolean checked) {
+                                    keep[which] = checked;
+                                }
+                            })
+                            .setPositiveButton(Lang.t("Save"), new DialogInterface.OnClickListener() {
+                                @Override public void onClick(DialogInterface dialog, int which) {
+                                    java.util.List<String> left = new java.util.ArrayList<>();
+                                    for (int i = 0; i < keep.length; i++) if (keep[i]) left.add(pinned.get(i));
+                                    prefs.setPinnedApps(left);
+                                    showTab(tab);
+                                }
+                            })
+                            .setNegativeButton(Lang.t("Cancel"), null)
+                            .show();
+                }
+            });
+            LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            elp.leftMargin = (int) (12 * d);
+            row.addView(edit, elp);
+        }
+        c.addView(row);
     }
 
     private void languagePicker() {

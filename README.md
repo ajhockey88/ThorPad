@@ -8,13 +8,15 @@
 
 🖱️ Turns the AYN Thor's bottom screen into a laptop-style trackpad for a mouse pointer on the top screen, plus a full-screen smart keyboard ⌨️ for typing.
 
+📱 New in 2.0: put any app on the bottom screen, with a floating button that brings the trackpad back.
+
 ## 📸 Screens
 
 Everything happens on the Thor's bottom screen (1240 × 1080).
 
 | 🖱️ Trackpad, with the menu hint | 👇 Swipe down for the menu |
 |---|---|
-| <img src="docs/screenshots/trackpad.png?v=1.9.5" width="400" alt="Trackpad screen with the swipe-down hint"> | <img src="docs/screenshots/menu.png?v=1.9.5" width="400" alt="Floating menu bar at the top of the trackpad"> |
+| <img src="docs/screenshots/trackpad.png?v=1.9.5" width="400" alt="Trackpad screen with the swipe-down hint"> | <img src="docs/screenshots/menu.png?v=2.0" width="400" alt="Floating menu bar at the top of the trackpad"> |
 | ⌨️ Keyboard with autocorrect | 🌐 Keyboard in Spanish, hold a letter for accents |
 | <img src="docs/screenshots/keyboard.png?v=1.9" width="400" alt="Keyboard with an autocorrect suggestion"> | <img src="docs/screenshots/keyboard-spanish.png?v=1.9" width="400" alt="Spanish keyboard with the accent popup open"> |
 | 🔣 Numbers and symbols | 🧹 Hold ⌫ for Clear all |
@@ -29,6 +31,10 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | <img src="docs/screenshots/gestures.png?v=1.9.4" width="400" alt="Gestures page in Settings, Android tab"> | <img src="docs/screenshots/gestures-pc.png?v=1.9.4" width="400" alt="Gestures page in Settings, PC tab"> |
 | 🎉 Update available, with what's new | 🚀 First-run setup |
 | <img src="docs/screenshots/update-available.png?v=1.9" width="400" alt="Update available screen with the release notes"> | <img src="docs/screenshots/setup.png?v=1.9.2" width="400" alt="Setup checklist with four steps"> |
+| 📱 Pick an app for the bottom screen | 🖱️ The app, with the floating ThorPad button |
+| <img src="docs/screenshots/apps-picker.png?v=2.0" width="400" alt="App picker with pinned apps and all apps"> | <img src="docs/screenshots/apps-button.png?v=2.0" width="400" alt="An app on the bottom screen with the round ThorPad button on the right edge"> |
+| ✋ Hold the button for its menu | ⚙️ Apps settings |
+| <img src="docs/screenshots/apps-menu.png?v=2.0" width="400" alt="Menu next to the button: Trackpad, Keyboard, Switch app, Close app"> | <img src="docs/screenshots/apps-settings.png?v=2.0" width="400" alt="Apps settings: button size, fade, snap to edges, swipe gesture, reopen last app, pinned apps"> |
 | ↕️ Half-screen keyboard, trackpad above it | 📥 Keyboard for a bottom-screen app |
 | <img src="docs/screenshots/keyboard-half.png?v=1.9.1" width="400" alt="Keyboard on the bottom half with the trackpad above it"> | <img src="docs/screenshots/keyboard-bottom-app.png?v=1.9.2" width="400" alt="Keyboard docked under a search box in an app on the bottom screen"> |
 
@@ -48,11 +54,30 @@ Everything happens on the Thor's bottom screen (1240 × 1080).
 | 🤞 Two-finger tap, or press and hold | Right click in mouse mode; Back / long press in touch mode |
 
 The whole bottom screen is trackpad. **Swipe down from the top edge** (where the small handle is) to
-show the menu buttons: ⌨️ Keyboard, ✨ the mode menu, 🖥️ PC keys, ⚙️ Settings and ✖️ Close. They hide
+show the menu buttons: ⌨️ Keyboard, ✨ the mode menu, 📱 Apps, 🖥️ PC keys, ⚙️ Settings and ✖️ Close. They hide
 again when you touch the trackpad or after 5 seconds. The swipe never moves the pointer. For the first 10 seconds after ThorPad opens, a small
 hint at the top says where the menu is.
 
 Turn on **Show gesture hints** in Settings to list these gestures along the bottom of the trackpad.
+
+## 📱 Apps on the bottom screen
+
+Want a guide, a chat or a video next to your game? Tap **📱 Apps** in the menu and pick any app: it opens on
+the bottom screen while the top screen keeps running.
+
+- 🗂️ **App picker:** pinned apps first, then every app. Search with ThorPad's own keyboard. Tap an app to
+  select it and again to open it (or tap **Open here**). Hold an app to pin or unpin it.
+- 🖱️ **Floating ThorPad button:** a small round button sits on the edge of the app.
+  **Tap** it and the trackpad comes back (the app keeps running). **Hold** it for a menu: Trackpad,
+  Keyboard, Switch app and Close app. **Drag** it anywhere; it snaps to the nearest edge and fades after
+  3 seconds untouched.
+- ↩️ **Back to your app:** the trackpad shows a "Back to" card for the app; tap it to go back. It goes as soon
+  as you use the trackpad.
+- ⌨️ Text boxes in the app get the ThorPad keyboard docked under them.
+- ✖️ **Close** in ThorPad's menu also puts the button away.
+
+**Close app** needs Shizuku; without it, the app stays open behind the trackpad. Some apps that are
+already open on the top screen may open there instead; close them first.
 
 ## 🖥️ PC mode (Moonlight and other PC streaming)
 
@@ -152,6 +177,7 @@ only a hairline between them, so the whole screen can be tapped. **✕ Close** r
 - ✋ **Type when the finger lifts** (off by default, so keys type the instant you touch them)
 - 📌 **Keep ThorPad as the keyboard** (on by default, needs Shizuku): if Android falls back to another keyboard, for example after an update, ThorPad switches it back
 - ⌨️ **Use ThorPad keyboard:** makes ThorPad Android's keyboard in one tap, so it opens by itself for top-screen text boxes (**Other keyboard** switches back)
+- 📱 **Apps:** the floating button's size, **fade when idle**, **snap to edges**, **swipe gesture instead** (no button: swipe in from the right edge for the trackpad, hold the edge for the menu), **reopen last app** (the "Back to" card), and your pinned apps
 - 📳 **Haptics:** a feel and strength for each action, with a preview as you change them
 - 🔄 **Check for updates** (at the bottom): finds a newer ThorPad release on GitHub and shows what's
   new in every version since yours, newest first. Tap **Update** to download and install it, or **Not now**. With Shizuku it installs on its own; without it, Android shows its install prompt

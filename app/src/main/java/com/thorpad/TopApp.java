@@ -116,6 +116,22 @@ final class TopApp {
         }, "ThorPad close app").start();
     }
 
+    /** Closes pkg (an app ThorPad put on the given screen) and takes it out of recent apps. Needs Shizuku. */
+    static void closeApp(final Context context, final String pkg, final int displayId) {
+        if (pkg == null || pkg.equals(context.getPackageName()) || pkg.equals(homePackage(context))
+                || pkg.equals("com.android.systemui")) return;
+        new Thread(new Runnable() {
+            @Override public void run() {
+                Matcher m = resumedOn(output("dumpsys activity activities"), displayId);
+                String cmd = "am force-stop " + pkg;
+                if (m != null && m.group(1).equals(pkg)) {
+                    cmd = "am stack remove " + m.group(2) + " ; cmd activity remove-task " + m.group(2) + " ; " + cmd;
+                }
+                ShizukuClient.runShell(cmd);
+            }
+        }, "ThorPad close bottom app").start();
+    }
+
     private static final Pattern RECENT = Pattern.compile("#(\\d+) type=(\\w+) [AI]=\\d+:([\\w.]+)");
 
     /**

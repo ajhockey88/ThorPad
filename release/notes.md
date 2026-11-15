@@ -1,14 +1,15 @@
-🗑️ ThorPad 1.9.4: one button to remove ThorPad and everything it changed.
+📱 ThorPad 2.0: put any app on the bottom screen, with a floating button to get the trackpad back.
 
-## ✨ What's new in 1.9.4
-- 🗑️ **Uninstall everything:** a new 🗑️ Uninstall tab in Settings, and an Uninstall button on the setup screen, undo everything ThorPad changed on your Thor and then remove ThorPad:
-  - ⌨️ Android's keyboard goes back to the one you used before ThorPad (or your other keyboard, like Gboard), and ThorPad Keyboard is turned off
-  - ♿ ThorPad's accessibility service (touch mode) is switched off
-  - 🖱️ The virtual mouse and keyboard are unplugged, and Android forgets the keyboard layout it saved for them
-  - 🔐 The permissions Shizuku gave ThorPad (draw over apps, usage access) go back to Android's defaults
-  - 🧹 ThorPad's diagnostic files in Downloads and all its settings are deleted
-- 🧩 **Shizuku is your call:** the confirm screen has an **Also uninstall Shizuku** checkbox, off by default, in case other apps use it
-- ⚡ **One tap with Shizuku:** ThorPad removes itself without any prompts. Without Shizuku, Android shows its usual uninstall prompt
+## ✨ What's new in 2.0
+- 📱 **Any app on the bottom screen:** a new 📱 **Apps** button in the top menu opens an app picker. Pick an app and it opens on the bottom screen, while your game keeps running on top
+- 🗂️ **App picker:** your pinned apps first, then every app, with search on ThorPad's own keyboard. Tap an app to select it and again to open it, or use the big **Open here** button. Hold an app to pin or unpin it
+- 🖱️ **Floating ThorPad button:** a small round button floats over the app:
+  - 👆 **Tap** it to bring the trackpad back (the app keeps running)
+  - ✋ **Hold** it for a quick menu: Trackpad, Keyboard, Switch app, Close app
+  - 🤏 **Drag** it anywhere and it snaps to the nearest edge, and it fades after 3 seconds so it doesn't cover the app
+- ↩️ **Back to your app:** with an app open down there, the trackpad shows a "Back to" card that reopens it with one tap. It goes away as soon as you use the trackpad
+- ⚙️ **Settings > Apps:** button size, fade, snap to edges, a swipe-in-from-the-edge option instead of the button, the "Back to" card, and your pinned apps
+- ⌨️ Text boxes in the app still get the docked ThorPad keyboard
 
 ---
 
@@ -26,8 +27,10 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 🔋 **Easy on the battery:** dims the trackpad when idle and runs nothing in the background
 - 🔄 **Updates:** check, see what's new since your version, and install from Settings, or reinstall the current release
 - 🗑️ **Clean uninstall:** one button undoes every change ThorPad made and removes it
+- 📱 **Apps mode:** run any app on the bottom screen, with a floating button that brings the trackpad back
 
 ## 📜 Release history
+- **2.0:** any app on the bottom screen, with a floating button that brings the trackpad and keyboard back
 - **1.9.4:** an Uninstall button that removes ThorPad and undoes everything it changed
 - **1.9.3:** touches on the top screen no longer reach the bottom screen
 - **1.9.2:** the keyboard works for text boxes on the bottom screen too

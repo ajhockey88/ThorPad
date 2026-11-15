@@ -94,4 +94,47 @@ final class Prefs {
         if (pc) apps.add(pkg); else apps.remove(pkg);
         sp.edit().putStringSet(KEY_PC_APPS, apps).apply();
     }
+
+    // ---- Apps on the bottom screen ----------------------------------------------------------
+    static final String KEY_APP_BUTTON_SIZE = "app_button_size";
+    static final String KEY_APP_BUTTON_FADE = "app_button_fade";
+    static final String KEY_APP_BUTTON_SNAP = "app_button_snap";
+    static final String KEY_APP_SWIPE = "app_swipe_instead";
+    static final String KEY_APP_BACK_CARD = "app_back_card";
+    private static final String KEY_APP_PINNED = "app_pinned";
+    private static final String KEY_APP_CURRENT = "app_current";
+    private static final String KEY_APP_BUTTON_X = "app_button_x", KEY_APP_BUTTON_Y = "app_button_y";
+
+    /** Floating button size: 0 small, 1 medium, 2 large. */
+    int appButtonSize() { return sp.getInt(KEY_APP_BUTTON_SIZE, 1); }
+    void setAppButtonSize(int size) { sp.edit().putInt(KEY_APP_BUTTON_SIZE, size).apply(); }
+    boolean appButtonFade() { return sp.getBoolean(KEY_APP_BUTTON_FADE, true); }
+    boolean appButtonSnap() { return sp.getBoolean(KEY_APP_BUTTON_SNAP, true); }
+    /** No button: a swipe in from the right edge brings the trackpad back. */
+    boolean appSwipeInstead() { return sp.getBoolean(KEY_APP_SWIPE, false); }
+    /** The "Back to" card on the trackpad. */
+    boolean appBackCard() { return sp.getBoolean(KEY_APP_BACK_CARD, true); }
+    /** The app put on the bottom screen and not closed since, or null. */
+    String appCurrent() { return sp.getString(KEY_APP_CURRENT, null); }
+    void setAppCurrent(String pkg) { sp.edit().putString(KEY_APP_CURRENT, pkg).apply(); }
+    /** Where the floating button was left, in pixels; -1 = not moved yet. */
+    int appButtonX() { return sp.getInt(KEY_APP_BUTTON_X, -1); }
+    int appButtonY() { return sp.getInt(KEY_APP_BUTTON_Y, -1); }
+    void setAppButtonAt(int x, int y) { sp.edit().putInt(KEY_APP_BUTTON_X, x).putInt(KEY_APP_BUTTON_Y, y).apply(); }
+    /** Pinned apps, in the order they were pinned. */
+    java.util.List<String> pinnedApps() {
+        String s = sp.getString(KEY_APP_PINNED, "");
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (String p : s.split(",")) if (p.length() > 0) out.add(p);
+        return out;
+    }
+    void setPinnedApps(java.util.List<String> apps) {
+        sp.edit().putString(KEY_APP_PINNED, android.text.TextUtils.join(",", apps)).apply();
+    }
+    void setPinned(String pkg, boolean pinned) {
+        java.util.List<String> apps = pinnedApps();
+        apps.remove(pkg);
+        if (pinned) apps.add(pkg);
+        setPinnedApps(apps);
+    }
 }

@@ -62,6 +62,42 @@ final class Lang {
 
     static {
         // ---- Menu buttons and trackpad screen ----
+        // ---- Apps on the bottom screen ----
+        e("Apps", "Apps", "Apps", "Apps", "Apps", "App");
+        e("Switch app", "Cambiar app", "Changer d'app", "App wechseln", "Mudar de app", "Cambia app");
+        e("Put an app on this screen", "Pon una app en esta pantalla", "Mettre une app sur cet écran", "Eine App auf diesen Bildschirm", "Pôr uma app neste ecrã", "Metti un'app su questo schermo");
+        e("Search apps", "Buscar apps", "Chercher des apps", "Apps suchen", "Procurar apps", "Cerca app");
+        e("PINNED", "FIJADAS", "ÉPINGLÉES", "ANGEHEFTET", "AFIXADAS", "FISSATE");
+        e("ALL APPS", "TODAS LAS APPS", "TOUTES LES APPS", "ALLE APPS", "TODAS AS APPS", "TUTTE LE APP");
+        e("RESULTS", "RESULTADOS", "RÉSULTATS", "ERGEBNISSE", "RESULTADOS", "RISULTATI");
+        e("No apps match", "Ninguna app coincide", "Aucune app ne correspond", "Keine passende App", "Nenhuma app corresponde", "Nessuna app corrisponde");
+        e("Pin app", "Fijar app", "Épingler", "App anheften", "Afixar app", "Fissa app");
+        e("Hold any app to pin it here", "Mantén pulsada una app para fijarla aquí", "Maintenez une app pour l'épingler ici", "Halte eine App gedrückt, um sie hier anzuheften", "Mantenha uma app premida para a afixar aqui", "Tieni premuta un'app per fissarla qui");
+        e("Pinned %s", "%s fijada", "%s épinglée", "%s angeheftet", "%s afixada", "%s fissata");
+        e("Unpinned %s", "%s ya no está fijada", "%s désépinglée", "%s nicht mehr angeheftet", "%s já não está afixada", "%s non più fissata");
+        e("Open %s here", "Abrir %s aquí", "Ouvrir %s ici", "%s hier öffnen", "Abrir %s aqui", "Apri %s qui");
+        e("Pick an app", "Elige una app", "Choisissez une app", "Wähle eine App", "Escolha uma app", "Scegli un'app");
+        e("Back to your app", "Volver a tu app", "Retour à votre app", "Zurück zu deiner App", "Voltar à sua app", "Torna alla tua app");
+        e("Couldn't open that app", "No se pudo abrir esa app", "Impossible d'ouvrir cette app", "Die App ließ sich nicht öffnen", "Não foi possível abrir essa app", "Impossibile aprire l'app");
+        e("Closed %s", "%s cerrada", "%s fermée", "%s geschlossen", "%s fechada", "%s chiusa");
+        e("Running other apps on this screen", "Usar otras apps en esta pantalla", "Utiliser d'autres apps sur cet écran", "Andere Apps auf diesem Bildschirm", "Usar outras apps neste ecrã", "Usare altre app su questo schermo");
+        e("Button size", "Tamaño del botón", "Taille du bouton", "Tastengröße", "Tamanho do botão", "Dimensione del pulsante");
+        e("How big the floating ThorPad button is", "Tamaño del botón flotante de ThorPad", "Taille du bouton flottant ThorPad", "Wie groß die schwebende ThorPad-Taste ist", "Tamanho do botão flutuante do ThorPad", "Quanto è grande il pulsante mobile di ThorPad");
+        e("Small", "Pequeño", "Petit", "Klein", "Pequeno", "Piccolo");
+        e("Medium", "Mediano", "Moyen", "Mittel", "Médio", "Medio");
+        e("Large", "Grande", "Grand", "Groß", "Grande", "Grande");
+        e("Fade when idle", "Atenuar en reposo", "Estomper au repos", "Bei Nichtnutzung ausblenden", "Esbater em repouso", "Sfuma quando inattivo");
+        e("The button turns see-through after 3 seconds untouched", "El botón se vuelve transparente tras 3 segundos sin tocarlo", "Le bouton devient transparent après 3 secondes sans contact", "Die Taste wird nach 3 Sekunden ohne Berührung durchsichtig", "O botão fica transparente após 3 segundos sem toque", "Il pulsante diventa trasparente dopo 3 secondi senza tocchi");
+        e("Snap to edges", "Pegar a los bordes", "Coller aux bords", "An Rändern einrasten", "Encostar às margens", "Aggancia ai bordi");
+        e("Off: the button stays exactly where you drop it", "Desactivado: el botón se queda justo donde lo sueltas", "Désactivé : le bouton reste là où vous le lâchez", "Aus: Die Taste bleibt genau dort, wo du sie loslässt", "Desligado: o botão fica onde o largar", "Disattivato: il pulsante resta dove lo lasci");
+        e("Swipe gesture instead", "Gesto de deslizar en su lugar", "Geste de balayage à la place", "Stattdessen Wischgeste", "Gesto de deslizar em vez disso", "Gesto di scorrimento invece");
+        e("Hide the button; swipe in from the right edge to bring the trackpad back, or hold the edge for the menu", "Oculta el botón; desliza desde el borde derecho para volver al trackpad, o mantén el borde para el menú", "Masque le bouton ; balayez depuis le bord droit pour revenir au trackpad, ou maintenez le bord pour le menu", "Blendet die Taste aus; vom rechten Rand hineinwischen holt das Trackpad zurück, Rand halten öffnet das Menü", "Esconde o botão; deslize da margem direita para voltar ao trackpad, ou mantenha a margem para o menu", "Nasconde il pulsante; scorri dal bordo destro per tornare al trackpad, o tieni premuto il bordo per il menu");
+        e("Reopen last app", "Reabrir la última app", "Rouvrir la dernière app", "Letzte App wieder öffnen", "Reabrir a última app", "Riapri l'ultima app");
+        e("Show the \"Back to\" card on the trackpad", "Muestra la tarjeta \"Volver a\" en el trackpad", "Affiche la carte « Retour à » sur le trackpad", "Zeigt die Karte „Zurück zu\" auf dem Trackpad", "Mostra o cartão \"Voltar a\" no trackpad", "Mostra la scheda \"Torna a\" sul trackpad");
+        e("Pinned apps", "Apps fijadas", "Apps épinglées", "Angeheftete Apps", "Apps afixadas", "App fissate");
+        e("None yet. Hold an app in the app picker to pin it.", "Ninguna aún. Mantén pulsada una app en el selector para fijarla.", "Aucune pour l'instant. Maintenez une app dans le sélecteur pour l'épingler.", "Noch keine. Halte im App-Auswahl eine App gedrückt, um sie anzuheften.", "Nenhuma ainda. Mantenha uma app premida no seletor para a afixar.", "Nessuna per ora. Tieni premuta un'app nel selettore per fissarla.");
+        e("Edit", "Editar", "Modifier", "Bearbeiten", "Editar", "Modifica");
+        e("Save", "Guardar", "Enregistrer", "Speichern", "Guardar", "Salva");
         e("Keyboard", "Teclado", "Clavier", "Tastatur", "Teclado", "Tastiera");
         e("PC keys", "Teclas PC", "Touches PC", "PC-Tasten", "Teclas PC", "Tasti PC");
         e("Settings", "Ajustes", "Réglages", "Einstellungen", "Definições", "Impostazioni");
