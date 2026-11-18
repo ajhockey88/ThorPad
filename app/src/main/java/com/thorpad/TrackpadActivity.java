@@ -161,7 +161,7 @@ public class TrackpadActivity extends Activity
         bar.addView(separator(d));
         Button close = barButton("✕", "Close", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                AppsMode.end(TrackpadActivity.this);
+                AppsMode.closeWithThorPad(TrackpadActivity.this);
                 finishAndRemoveTask();
             }
         });
@@ -764,6 +764,9 @@ public class TrackpadActivity extends Activity
 
     @Override
     protected void onDestroy() {
+        // Swiped out of recent apps: the app ThorPad put on the bottom screen goes too. (The
+        // Close button already did this; current() is null by then.)
+        if (isFinishing() && !isChangingConfigurations()) AppsMode.closeWithThorPad(this);
         if (topThread != null) topThread.quitSafely();
         ShizukuClient.removeListener(this);
         mouse.quit();

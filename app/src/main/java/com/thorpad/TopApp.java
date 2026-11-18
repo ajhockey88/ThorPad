@@ -116,18 +116,38 @@ final class TopApp {
         }, "ThorPad close app").start();
     }
 
-    /** Closes pkg (an app ThorPad put on the given screen) and takes it out of recent apps. Needs Shizuku. */
+    /**
+     * Closes pkg (an app ThorPad put on the given screen) and takes it out of recent apps. Needs
+     * Shizuku. Only its tasks on that screen go: if the same app is also open on the other
+     * screen, that one is left alone and the app isn't force-stopped.
+     */
     static void closeApp(final Context context, final String pkg, final int displayId) {
         if (pkg == null || pkg.equals(context.getPackageName()) || pkg.equals(homePackage(context))
                 || pkg.equals("com.android.systemui")) return;
         new Thread(new Runnable() {
             @Override public void run() {
-                Matcher m = resumedOn(output("dumpsys activity activities"), displayId);
-                String cmd = "am force-stop " + pkg;
-                if (m != null && m.group(1).equals(pkg)) {
-                    cmd = "am stack remove " + m.group(2) + " ; cmd activity remove-task " + m.group(2) + " ; " + cmd;
+                java.util.Set<String> tasks = new java.util.LinkedHashSet<>();
+                boolean elsewhere = false;
+                int display = -1;
+                for (String line : output("dumpsys activity activities").split("\n")) {
+                    String t = line.trim();
+                    if (t.startsWith("Display #")) {
+                        display = parseInt(t.substring(9));
+                        continue;
+                    }
+                    Matcher m = RECORD.matcher(t);
+                    if (display < 0 || !m.find() || !m.group(1).equals(pkg)) continue;
+                    if (display == displayId) tasks.add(m.group(2));
+                    else elsewhere = true;
                 }
-                ShizukuClient.runShell(cmd);
+                StringBuilder cmd = new StringBuilder();
+                for (String task : tasks) {
+                    cmd.append("am stack remove ").append(task).append(" ; cmd activity remove-task ")
+                            .append(task).append(" ; ");
+                }
+                if (!elsewhere) cmd.append("am force-stop ").append(pkg);
+                KeyboardLog.add("apps: closing " + pkg + " (tasks " + tasks + (elsewhere ? ", also on the other screen)" : ")"));
+                if (cmd.length() > 0) ShizukuClient.runShell(cmd.toString());
             }
         }, "ThorPad close bottom app").start();
     }

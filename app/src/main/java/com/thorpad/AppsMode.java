@@ -79,6 +79,19 @@ final class AppsMode {
         hideButton();
     }
 
+    /**
+     * ThorPad is closing (its Close button, or swiped out of recent apps): the app it put on
+     * the bottom screen closes with it. Apps on the top screen are left alone.
+     */
+    static void closeWithThorPad(Context context) {
+        String pkg = current(context);
+        Display bottom = shownOn != null ? shownOn : Displays.trackpadDisplay(context);
+        if (pkg != null && bottom != null && ShizukuClient.hasPermission()) {
+            TopApp.closeApp(context.getApplicationContext(), pkg, bottom.getDisplayId());
+        }
+        end(context);
+    }
+
     /** Shows the button if an app was put on the bottom screen (the trackpad just stepped aside). */
     static void showButtonIfActive(Context context) {
         if (current(context) != null) showButton(context.getApplicationContext());

@@ -1,15 +1,12 @@
-📱 ThorPad 2.0: put any app on the bottom screen, with a floating button to get the trackpad back.
+📱 ThorPad 2.0.1: closing ThorPad now closes the app it put on the bottom screen too.
+
+## 🔧 Fixed in 2.0.1
+- 📱 **Bottom app closes with ThorPad:** if you opened an app on the bottom screen with 📱 **Apps**, closing ThorPad (its ✕ **Close** button, or swiping it out of recent apps) now closes that app too, instead of leaving it running down there
+- 🎮 **Your game is safe:** only the app on the bottom screen is closed. Apps on the top screen are never touched, and if the same app is also open on top, that copy stays open
+- 🗂️ **Close app** in the floating button's menu uses the same safer close
 
 ## ✨ What's new in 2.0
-- 📱 **Any app on the bottom screen:** a new 📱 **Apps** button in the top menu opens an app picker. Pick an app and it opens on the bottom screen, while your game keeps running on top
-- 🗂️ **App picker:** your pinned apps first, then every app, with search on ThorPad's own keyboard. Tap an app to select it and again to open it, or use the big **Open here** button. Hold an app to pin or unpin it
-- 🖱️ **Floating ThorPad button:** a small round button floats over the app:
-  - 👆 **Tap** it to bring the trackpad back (the app keeps running)
-  - ✋ **Hold** it for a quick menu: Trackpad, Keyboard, Switch app, Close app
-  - 🤏 **Drag** it anywhere and it snaps to the nearest edge, and it fades after 3 seconds so it doesn't cover the app
-- ↩️ **Back to your app:** with an app open down there, a "Back to" button always sits in the trackpad's bottom-left corner, so one tap takes you back to it, even after using the trackpad
-- ⚙️ **Settings > Apps:** button size, fade, snap to edges, a swipe-in-from-the-edge option instead of the button, the "Back to" button, and your pinned apps
-- ⌨️ Text boxes in the app still get the docked ThorPad keyboard
+- 📱 **Any app on the bottom screen:** pick any app from the new 📱 **Apps** button and it opens on the bottom screen while your game keeps running on top, with a floating ThorPad button to get the trackpad back
 
 ---
 
@@ -30,6 +27,7 @@ ThorPad turns the AYN Thor's bottom screen into a trackpad and full keyboard for
 - 📱 **Apps mode:** run any app on the bottom screen, with a floating button that brings the trackpad back
 
 ## 📜 Release history
+- **2.0.1:** closing ThorPad closes the app it put on the bottom screen too
 - **2.0:** any app on the bottom screen, with a floating button that brings the trackpad and keyboard back
 - **1.9.4:** an Uninstall button that removes ThorPad and undoes everything it changed
 - **1.9.3:** touches on the top screen no longer reach the bottom screen
